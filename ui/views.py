@@ -3,7 +3,7 @@ Views for application
 """
 import json
 
-from sso_auth.social_auth_backends import PWABackend
+from sso_auth.social_auth_backends import NpoedBackend
 
 from django.conf import settings
 from django.contrib import messages
@@ -34,7 +34,7 @@ class Index(View):
         user_has_access = request.user and request.user.is_authenticated() \
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
-            'sso_pwa-oauth2',)) if settings.SSO_ENABLED else reverse('login')
+            'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
         return render(
             request,
             self.template_name,
@@ -42,7 +42,7 @@ class Index(View):
                 'user_has_access': user_has_access,
                 'sso_enabled': settings.SSO_ENABLED,
                 'login_url': login_url,
-                'profile_url': PWABackend.PROFILE_URL,
+                'profile_url': NpoedBackend.PROFILE_URL,
                 'spa_config': json.dumps(settings.SPA_CONFIG)
             },
         )
@@ -98,7 +98,7 @@ def logout(request, next_page=None,
 
     lgt(request)
 
-    response = redirect('%s?%s=%s' % (settings.SSO_PWA_URL + "/logout",
+    response = redirect('%s?%s=%s' % (settings.SSO_NPOED_URL + "/logout",
                                       redirect_field_name, next_page))
     response.set_cookie('authenticated', False, domain=domain)
     response.set_cookie('authenticated_user', 'Anonymous', domain=domain)

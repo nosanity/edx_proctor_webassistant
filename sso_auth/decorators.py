@@ -30,6 +30,7 @@ def set_token_cookie(view):
                                 domain=settings.AUTH_SESSION_COOKIE_DOMAIN,
                                 secure=settings.SESSION_COOKIE_SECURE or None,
                                 max_age=settings.SESSION_COOKIE_AGE)
+        access_token = None
 
         if is_auth:
             try:

@@ -3,9 +3,9 @@ General social auth settings
 Automatically includes on `SSO_AUTH = True`
 """
 
-LOGIN_URL = '/login/sso_pwa-oauth2'
+LOGIN_URL = '/login/sso_npoed-oauth2'
 AUTHENTICATION_BACKENDS = (
-    'sso_auth.social_auth_backends.PWABackend',
+    'sso_auth.social_auth_backends.NpoedBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 SOCIAL_AUTH_PIPELINE = (

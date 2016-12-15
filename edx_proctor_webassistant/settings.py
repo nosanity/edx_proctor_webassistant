@@ -111,8 +111,8 @@ USE_TZ = True
 LOGIN_URL = LOGIN_REDIRECT_URL = LOGOUT_REDIRECT_URL = "/"
 
 # Auth settings with/without sso
-AUTH_BACKEND_NAME = 'sso_pwa-oauth2'
-SSO_ENABLED = False
+AUTH_BACKEND_NAME = 'sso_npoed-oauth2'
+SSO_ENABLED = True
 
 if SSO_ENABLED:
     TEMPLATES[0]['OPTIONS']['context_processors'] += [
@@ -237,3 +237,7 @@ try:
 except ImportError:
     print "CRITICAL: You must specify settings_local.py"
     exit()
+
+INSTALLED_APPS = INSTALLED_APPS + (
+    'raven.contrib.django.raven_compat',
+)

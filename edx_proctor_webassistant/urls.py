@@ -24,6 +24,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.admin import site as admin_site
+from django.contrib.auth.decorators import login_required
 
 from journaling.api_views import JournalingViewSet
 from person.api_views import PermissionViewSet
@@ -44,7 +45,7 @@ router.register(r'exam_register', api_edx_views.ExamViewSet,
 router.register(r'event_session', api_ui_views.EventSessionViewSet,
                 base_name="event-session")
 router.register(r'archived_event_session',
-                api_ui_views.ArchivedEventSessionViewSet,
+                login_required(api_ui_views.ArchivedEventSessionViewSet),
                 base_name="archived-event-session")
 router.register(r'journaling', JournalingViewSet,
                 base_name="journaling"),

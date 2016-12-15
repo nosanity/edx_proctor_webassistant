@@ -550,7 +550,7 @@ class GetExamsProctored(APIView):
         permissions = request.user.permission_set.all()
         results = []
         for row in content.get('results', []):
-            if row['proctored_exams']:
+            if 'proctored_exams' in row and row['proctored_exams']:
                 row['has_access'] = models.has_permission_to_course(
                     request.user, row.get('id'), permissions)
                 results.append(row)

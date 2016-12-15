@@ -1,4 +1,5 @@
 from django.conf.urls import url, patterns
+from django.contrib.auth.decorators import login_required
 
 from proctoring import api_ui_views
 
@@ -18,6 +19,6 @@ urlpatterns = patterns(
         name='poll_status'),
     url(r'review/$', api_ui_views.Review.as_view(),
         name='review'),
-    url(r'proctored_exams/$', api_ui_views.GetExamsProctored.as_view(),
+    url(r'proctored_exams/$', login_required(api_ui_views.GetExamsProctored.as_view()),
         name='proctor_exams'),
 )
