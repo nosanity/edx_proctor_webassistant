@@ -11,7 +11,8 @@
             params.headers !== undefined?
                 params.headers.Authorization = "Token " + Auth.get_token():
                 params.headers = {Authorization: "Token " + Auth.get_token()};
-            return $http(params);
+
+            return $http(params)
         };
 
         this.accept_exam_attempt = function(code){
@@ -95,15 +96,17 @@
             return generic_api_call({
                 'url': get_url('archived_event_session'),
                 'method': 'GET'
-            });
+            })
         };
 
         this.get_archived_sessions = function(event_hash){
-            return generic_api_call({
+            var promise = generic_api_call({
                 'url': get_url('archived_exam'),
                 'method': 'GET',
                 'params': {event_hash: event_hash}
             });
+            
+            return promise;
         };
 
         this.save_comment = function(code, comment){
