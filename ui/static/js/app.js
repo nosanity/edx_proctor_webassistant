@@ -140,7 +140,7 @@
                                 $location.path('/archive');
                             }
                         }, function(err) {
-                            $location.path('/error');
+                            $location.path('/index');
                             return { resolveError : err }
                         });
                     },
@@ -188,7 +188,7 @@
                             return response;
                         }, function(err) {
                             console.error(err);
-                            $location.path('/error');
+                            $location.path('/index');
                             return { resolveError : err }
                         });
                     },
@@ -197,7 +197,7 @@
                             return response
                         }, function(err) {
                             console.error(err);
-                            $location.path('/error');
+                            $location.path('/index');
                             return { resolveError : err }
                         });
                     }
@@ -236,7 +236,7 @@
                     }
                 }
             })
-            .when('/error', {
+            .when('/index', {
                 template: '<div>Error</div>',
                 controller : 'errControler'
             })
