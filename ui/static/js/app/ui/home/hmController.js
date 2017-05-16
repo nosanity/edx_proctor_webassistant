@@ -148,9 +148,10 @@
                         {
                             "comments": data.comment,
                             "duration": 1,
-                            "eventFinish": data.timestamp,
-                            "eventStart": data.timestamp,
-                            "eventStatus": data.status
+                            // seconds
+                            "event_finish": data.timestamp / 1000,
+                            "event_start": data.timestamp / 1000,
+                            "event_status": data.status
                         }
                     );
                 };
@@ -290,8 +291,9 @@
                                             {
                                                 "comments": data.comment,
                                                 "duration": 1,
-                                                "eventFinish": data.timestamp,
-                                                "eventStart": data.timestamp,
+                                                // seconds
+                                                "eventFinish": data.timestamp / 1000,
+                                                "eventStart": data.timestamp / 1000,
                                                 "eventStatus": data.status
                                             }
                                         );
