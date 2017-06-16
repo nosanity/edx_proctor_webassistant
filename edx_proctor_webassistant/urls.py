@@ -45,7 +45,8 @@ router.register(r'exam_register', api_edx_views.ExamViewSet,
 router.register(r'event_session', api_ui_views.EventSessionViewSet,
                 base_name="event-session")
 router.register(r'archived_event_session',
-                login_required(api_ui_views.ArchivedEventSessionViewSet),
+                #login_required(api_ui_views.ArchivedEventSessionViewSet),
+                api_ui_views.ArchivedEventSessionViewSet,
                 base_name="archived-event-session")
 router.register(r'journaling', JournalingViewSet,
                 base_name="journaling"),
