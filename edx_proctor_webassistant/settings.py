@@ -97,7 +97,8 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -227,9 +228,10 @@ WS4REDIS_HEARTBEAT = '--heartbeat--'
 # Config for Single Page Application
 SPA_CONFIG = {
     "sso_enabled": SSO_ENABLED,
+    # "language": "en",
     "language": "en",
     "allow_language_change": False,
-    "supported_languages": ['en', 'ru']
+    "supported_languages": ['en']
 }
 
 try:
