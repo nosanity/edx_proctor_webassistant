@@ -209,6 +209,7 @@ class Exam(models.Model):
     email = models.EmailField(max_length=60, blank=True, null=True)
     user_id = models.IntegerField(blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
+    last_poll = models.DateTimeField(blank=True, null=True)
     # own fields
     course = models.ForeignKey(Course)
     student = models.ForeignKey(Student)

@@ -27,7 +27,7 @@
         this.start = function(){
             timer = $interval(function(){
                 get_status();
-            }, 3000);
+            }, 5000);
         };
 
         this.add_item = function(key){

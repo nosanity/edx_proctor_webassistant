@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.shortcuts import redirect
+from django.utils import timezone
 
 from edx_proctor_webassistant.web_soket_methods import send_ws_msg
 from edx_proctor_webassistant.auth import (CsrfExemptSessionAuthentication,
@@ -210,7 +211,25 @@ class PollStatus(APIView):
         """
         data = request.data
         if u'list' in data:
-            response = poll_status_request(data['list'])
+            for_update = []
+            update_list = []
+            list_of_ids = []
+            for code in data['list']:
+                exam = get_object_or_404(
+                    models.Exam.objects.by_user_perms(request.user),
+                    exam_code=code
+                )
+                if exam:
+                    if exam.last_poll:
+                        if exam.last_poll + timedelta(1.0/1440) < timezone.now():
+                            list_of_ids.append(code)
+                    else:
+                        for_update.append(code)
+                else:
+                    for_update.append(code)
+            update_list = models.Exam.objects.filter(exam_code__in=list_of_ids).exclude(attempt_status="error").order_by('last_poll')[:10].values_list('exam_code', flat=True)
+            update_list = for_update + list(update_list)
+            response = poll_status_request(update_list[:10])
             for val in response:
                 exam = get_object_or_404(
                     models.Exam.objects.by_user_perms(request.user),
@@ -226,6 +245,7 @@ class PollStatus(APIView):
                         and new_status == 'submitted'):
                     exam.actual_end_date = datetime.now()
                 exam.attempt_status = new_status
+                exam.last_poll = timezone.now()
                 exam.save()
                 data = {
                     'hash': exam.generate_key(),

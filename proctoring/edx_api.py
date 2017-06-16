@@ -90,6 +90,7 @@ def get_proctored_exams_request():
     return _journaling_request(
         'get',
         "api/extended/courses/proctored",
+        (("proctoring_system", "WEB_ASSISTANT"),),
         headers={'X-Edx-Api-Key': settings.EDX_API_KEY}
     )
 
@@ -126,10 +127,17 @@ def _journaling_request(request_type, url, data=None, headers=None):
             headers=headers
         )
     elif request_type == "get":
-        response = requests.get(
-            settings.EDX_URL + url,
-            headers=headers
-        )
+        if data:
+            response = requests.get(
+                settings.EDX_URL + url,
+                params=data,
+                headers=headers
+            )
+        else:
+            response = requests.get(
+                settings.EDX_URL + url,
+                headers=headers
+            )
     elif request_type == "put":
         response = requests.put(
             settings.EDX_URL + url,
