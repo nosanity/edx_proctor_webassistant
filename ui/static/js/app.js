@@ -95,8 +95,7 @@
                                 ], function(){
                                     deferred.resolve();
                                 });
-                            }
-                            else {
+                            } else {
                                 $location.path('/archive');
                                 deferred.resolve();
                             }
@@ -113,8 +112,7 @@
                         if (!session) {
                             $location.path('/session');
                             return true;
-                        }
-                        else {
+                        } else {
                             var ret = Api.restore_session();
                             if (ret == undefined) {
                                 $location.path('/session');
@@ -138,10 +136,12 @@
                         return Auth.is_proctor().then(function (is) {
                             if (is) {
                                 return ret;
-                            }
-                            else {
+                            } else {
                                 $location.path('/archive');
                             }
+                        }, function(err) {
+                            $location.path('/index');
+                            return { resolveError : err }
                         });
                     },
                     data: function (Api) {
@@ -183,11 +183,23 @@
                             app.path + 'common/modules/date.js'
                         ]);
                     },
-                    events: function (Api) {
-                        return Api.get_archived_events();
+                    events: function (Api, $location) {
+                        return Api.get_archived_events().then(function(response) {
+                            return response;
+                        }, function(err) {
+                            console.error(err);
+                            $location.path('/index');
+                            return { resolveError : err }
+                        });
                     },
-                    courses_data: function (Api) {
-                        return Api.get_session_data();
+                    courses_data: function (Api, $location) {
+                        return Api.get_session_data().then(function(response) {
+                            return response
+                        }, function(err) {
+                            console.error(err);
+                            $location.path('/index');
+                            return { resolveError : err }
+                        });
                     }
                 }
             })
@@ -201,7 +213,12 @@
                         ]);
                     },
                     sessions: function ($route, Api) {
-                        return Api.get_archived_sessions($route.current.params.hash);
+                        return Api.get_archived_sessions($route.current.params.hash).then(function(response) {
+                            return response
+                        }, function(err) {
+                            console.error(err);
+                            return { resolveError: err }
+                        });
                     }
                 }
             })
@@ -218,6 +235,10 @@
                         return true;
                     }
                 }
+            })
+            .when('/index', {
+                template: '<div>Error</div>',
+                controller : 'errControler'
             })
             .otherwise({
                 redirectTo: '/'
@@ -267,8 +288,7 @@
                         });
                     });
                     return deferred.promise;
-                }
-                else {
+                } else {
                     $location.path('/');
                 }
             }
