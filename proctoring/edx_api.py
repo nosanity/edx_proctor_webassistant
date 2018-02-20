@@ -61,9 +61,29 @@ def poll_status_request(codes):
         return []
 
 
+def poll_statuses_attempts_request(codes):
+    """
+    Get list of exam statuses from edX
+    :param codes: list
+    :return: List of Responses
+    """
+    if isinstance(codes, list):
+        ret = poll_statuses_attempts(codes)
+        if ret.status_code == 200:
+            return ret.json()
+    return []
+
+
 def poll_status(code):
     return requests.get(
         settings.EDX_URL + "api/edx_proctoring/proctoring_poll_status/" + code,
+    )
+
+
+def poll_statuses_attempts(codes_list):
+    return requests.post(
+        settings.EDX_URL + "api/extended/edx_proctoring/proctoring_poll_statuses_attempts/",
+        json={"attempts": codes_list}
     )
 
 
