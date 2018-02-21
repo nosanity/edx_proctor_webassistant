@@ -243,3 +243,5 @@ except ImportError:
 INSTALLED_APPS = INSTALLED_APPS + (
     'raven.contrib.django.raven_compat',
 )
+
+FINAL_EXAM_STATUSES = ['error', 'verified', 'rejected', 'deleted_in_edx']

@@ -12,8 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.conf import settings
 from django.shortcuts import redirect
-from django.utils import timezone
 
 from edx_proctor_webassistant.web_soket_methods import send_ws_msg
 from edx_proctor_webassistant.auth import (CsrfExemptSessionAuthentication,
@@ -210,11 +210,10 @@ class PollStatus(APIView):
         ```
         """
         data = request.data
-        exclude_statuses = ['error', 'verified', 'rejected', 'deleted_in_edx']
         if 'list' in data and isinstance(data['list'], list) and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
-                .exclude(attempt_status__in=exclude_statuses)\
+                .exclude(attempt_status__in=settings.FINAL_EXAM_STATUSES)\
                 .select_related('event')
             codes_dict = {exam.exam_code: exam for exam in exams}
             response = poll_statuses_attempts_request(codes_dict.keys())
@@ -229,7 +228,7 @@ class PollStatus(APIView):
                             and new_status == 'submitted'):
                         exam.actual_end_date = datetime.now()
                     exam.attempt_status = new_status
-                    exam.last_poll = timezone.now()
+                    exam.last_poll = datetime.now()
                     exam.save()
                     data = {
                         'hash': exam.generate_key(),
