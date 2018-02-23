@@ -67,7 +67,7 @@ class StartExam(APIView):
         if response.status_code == 200:
             exam.exam_status = exam.STARTED
             exam.proctor = request.user
-            exam.attempt_status = "OK"
+            exam.attempt_status = "ready_to_start"
             exam.save()
             Journaling.objects.create(
                 journaling_type=Journaling.EXAM_STATUS_CHANGE,
@@ -79,7 +79,7 @@ class StartExam(APIView):
             data = {
                 'hash': exam.generate_key(),
                 'proctor': exam.proctor.username,
-                'status': "OK"
+                'status': exam.attempt_status
             }
             send_ws_msg(data, channel=exam.event.hash_key)
         else:
@@ -593,7 +593,7 @@ class BulkStartExams(APIView):
             data = {
                 'hash': exam.generate_key(),
                 'proctor': exam.proctor.username,
-                'status': "OK"
+                'status': "ready_to_start"
             }
             send_ws_msg(data, channel=exam.event.hash_key)
         Journaling.objects.create(

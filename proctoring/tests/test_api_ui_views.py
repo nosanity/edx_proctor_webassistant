@@ -857,7 +857,7 @@ class CommentViewSetTestCase(TestCase):
 
 
 class MockResponse(object):
-    def __init__(self, status_code=200, content={"status": "OK"}):
+    def __init__(self, status_code=200, content={"status": "ready_to_start"}):
         self.status_code = status_code
         self.content = content
 

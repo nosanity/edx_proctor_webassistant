@@ -92,7 +92,7 @@
                     if (exam.accepted) {
                         Api.accept_exam_attempt(exam.examCode)
                             .success(function (data) {
-                                if (data['status'] == 'OK') {
+                                if (data['status'] == 'ready_to_start') {
                                     Polling.add_item(exam.examCode);
                                 }
                             });

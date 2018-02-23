@@ -75,17 +75,17 @@ class RequestsTestCase(TestCase):
 
     @patch('proctoring.edx_api._journaling_request')
     def test_start_exam_request(self, request):
-        request.return_value = MockResponse(content={"status": "OK"})
+        request.return_value = MockResponse(content={"status": "ready_to_start"})
         response = edx_api.start_exam_request('exam_code')
         self.assertTrue(request.called)
-        self.assertEqual(response.content, {"status": "OK"})
+        self.assertEqual(response.content, {"status": "ready_to_start"})
 
     @patch('proctoring.edx_api._journaling_request')
     def test_stop_exam_request(self, request):
-        request.return_value = MockResponse(content={"status": "OK"})
+        request.return_value = MockResponse(content={"status": "ready_to_start"})
         response = edx_api.stop_exam_request('id', 'action', 1)
         self.assertTrue(request.called)
-        self.assertEqual(response.content, {"status": "OK"})
+        self.assertEqual(response.content, {"status": "ready_to_start"})
 
     @patch('proctoring.edx_api.poll_status')
     def test_poll_status(self, request):
@@ -101,21 +101,21 @@ class RequestsTestCase(TestCase):
 
     @patch('proctoring.edx_api._journaling_request')
     def test_send_review_request(self, request):
-        request.return_value = MockResponse(content={"status": "OK"})
+        request.return_value = MockResponse(content={"status": "ready_to_start"})
         response = edx_api.send_review_request({'key': 'value'})
         self.assertTrue(request.called)
-        self.assertEqual(response.content, {"status": "OK"})
+        self.assertEqual(response.content, {"status": "ready_to_start"})
 
     @patch('proctoring.edx_api._journaling_request')
     def test_get_proctored_exams_request(self, request):
-        request.return_value = MockResponse(content={"status": "OK"})
+        request.return_value = MockResponse(content={"status": "ready_to_start"})
         response = edx_api.get_proctored_exams_request()
         self.assertTrue(request.called)
-        self.assertEqual(response.content, {"status": "OK"})
+        self.assertEqual(response.content, {"status": "ready_to_start"})
 
     @patch('proctoring.edx_api._journaling_request')
     def test_bulk_start_exams_request(self, request):
-        request.return_value = MockResponse(content={"status": "OK"})
+        request.return_value = MockResponse(content={"status": "ready_to_start"})
         result = edx_api.bulk_start_exams_request(self.exams)
         self.assertTrue(request.called)
         self.assertEqual(len(result), 2)
@@ -123,10 +123,10 @@ class RequestsTestCase(TestCase):
 class JournalingRequestTestCase(TestCase):
     def test_post(self):
         with patch('proctoring.edx_api.requests.post') as requests:
-            requests.return_value = MockResponse(content='{"status": "OK"}')
+            requests.return_value = MockResponse(content='{"status": "ready_to_start"}')
             journaling_count = Journaling.objects.count()
             response = edx_api._journaling_request('post', 'test')
-            self.assertEqual(response.content, '{"status": "OK"}')
+            self.assertEqual(response.content, '{"status": "ready_to_start"}')
             self.assertEqual(journaling_count + 1, Journaling.objects.count())
 
     def test_get(self):
@@ -152,7 +152,7 @@ class JournalingRequestTestCase(TestCase):
 
 
 class MockResponse(object):
-    def __init__(self, status_code=200, content={"status": "OK"}):
+    def __init__(self, status_code=200, content={"status": "ready_to_start"}):
         self.status_code = status_code
         self.content = content
 
