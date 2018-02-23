@@ -224,7 +224,7 @@
                 var there_are_not_reviewed_attempts = function () {
                     var list = [];
                     angular.forEach($scope.ws_data, function (val) {
-                        if (!['verified', 'rejected', 'error', 'timed_out'].in_array(val.status)) {
+                        if (!['verified', 'rejected', 'error', 'deleted_in_edx', 'timed_out'].in_array(val.status)) {
                             var not_started_attempts = get_not_started_attempts();
                             if (!not_started_attempts.in_array(val.examCode))
                                 list.push(val.hash);
@@ -267,7 +267,7 @@
                     angular.forEach($scope.exams.checked, function (val, key) {
                         var item = $scope.ws_data.filterBy({examCode: val});
                         if (item.length) {
-                            if (!['verified', 'rejected', 'submitted'].in_array(item[0].status)) {
+                            if (!['verified', 'rejected', 'submitted', 'deleted_in_edx'].in_array(item[0].status)) {
                                 list.push({user_id: item[0].orgExtra.userID, attempt_code: val});
                             }
                         }

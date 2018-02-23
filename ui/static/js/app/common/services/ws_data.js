@@ -40,8 +40,8 @@
                     item.started_at = DateTimeService.get_now_time();
                 }
                 updateStatus(msg['hash'], msg['status']);
-                if (['verified', 'error', 'rejected'].in_array(msg['status'])) {
-                    Polling.stop(hash);
+                if (['verified', 'error', 'rejected', 'deleted_in_edx'].in_array(msg['status'])) {
+                    Polling.stop(msg['hash']);
                 }
             };
 

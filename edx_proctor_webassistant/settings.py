@@ -147,17 +147,17 @@ STATICFILES_DIRS = (
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 BOWER_INSTALLED_APPS = (
-    'angular',
-    'angular-route',
-    'angular-animate',
-    'angular-sanitize',
-    'jquery',
-    'bootstrap',
-    'ng-table',
-    'angular-bootstrap',
-    'angular-translate',
-    'angular-translate-storage-local',
-    'angular-translate-loader-static-files',
+    'angular#1.5.8',
+    'angular-route#1.5.8',
+    'angular-animate#1.5.8',
+    'angular-sanitize#1.5.8',
+    'jquery#3.1.1',
+    'bootstrap#3.3.7',
+    'ng-table#0.8.3',
+    'angular-bootstrap#2.1.4',
+    'angular-translate#2.12.1',
+    'angular-translate-storage-local#2.12.1',
+    'angular-translate-loader-static-files#2.12.1',
 )
 
 # Pipeline
