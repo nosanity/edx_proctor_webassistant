@@ -71,7 +71,7 @@ def poll_statuses_attempts_request(codes):
         ret = poll_statuses_attempts(codes)
         if ret.status_code == 200:
             return ret.json()
-    return []
+    return {}
 
 
 def poll_status(code):

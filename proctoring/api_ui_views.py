@@ -216,25 +216,26 @@ class PollStatus(APIView):
                 .exclude(attempt_status__in=settings.FINAL_EXAM_STATUSES)\
                 .select_related('event')
             codes_dict = {exam.exam_code: exam for exam in exams}
-            response = poll_statuses_attempts_request(codes_dict.keys())
-            for attempt_code, new_status in response.iteritems():
-                exam = codes_dict.get(attempt_code, None)
-                if exam and new_status and exam.attempt_status != new_status:
-                    if exam.attempt_status == 'ready_to_start' and new_status == 'started':
-                        exam.actual_start_date = datetime.now()
-                    if (exam.attempt_status == 'started'
-                        and new_status == 'submitted') \
-                        or (exam.attempt_status == 'ready_to_submit'
-                            and new_status == 'submitted'):
-                        exam.actual_end_date = datetime.now()
-                    exam.attempt_status = new_status
-                    exam.last_poll = datetime.now()
-                    exam.save()
-                    data = {
-                        'hash': exam.generate_key(),
-                        'status': exam.attempt_status
-                    }
-                    send_ws_msg(data, channel=exam.event.hash_key)
+            if codes_dict:
+                response = poll_statuses_attempts_request(codes_dict.keys())
+                for attempt_code, new_status in response.iteritems():
+                    exam = codes_dict.get(attempt_code, None)
+                    if exam and new_status and exam.attempt_status != new_status:
+                        if exam.attempt_status == 'ready_to_start' and new_status == 'started':
+                            exam.actual_start_date = datetime.now()
+                        if (exam.attempt_status == 'started'
+                            and new_status == 'submitted') \
+                            or (exam.attempt_status == 'ready_to_submit'
+                                and new_status == 'submitted'):
+                            exam.actual_end_date = datetime.now()
+                        exam.attempt_status = new_status
+                        exam.last_poll = datetime.now()
+                        exam.save()
+                        data = {
+                            'hash': exam.generate_key(),
+                            'status': exam.attempt_status
+                        }
+                        send_ws_msg(data, channel=exam.event.hash_key)
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
