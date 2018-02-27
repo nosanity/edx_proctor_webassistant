@@ -522,8 +522,8 @@ class Review(APIView):
                 models.Comment.objects.get_or_create(
                     comment=comment.get('comments'),
                     event_status=comment.get('eventStatus'),
-                    event_start=comment.get('eventStart'),
-                    event_finish=comment.get('eventFinish'),
+                    event_start=int(comment.get('eventStart')/1000),
+                    event_finish=int(comment.get('eventFinish')/1000),
                     duration=comment.get('duration'),
                     exam=exam
                 )
@@ -784,8 +784,8 @@ class CommentViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                 %s
             """ % (
                 serializer.data.get('duration'),
-                serializer.data.get('event_start'),
-                serializer.data.get('event_finish'),
+                int(serializer.data.get('event_start')/1000) if serializer.data.get('event_start') else None,
+                int(serializer.data.get('event_finish')/1000) if serializer.data.get('event_finish') else None,
                 serializer.data.get('event_status'),
                 serializer.data.get('comment'),
             ),
