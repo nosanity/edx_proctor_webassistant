@@ -131,7 +131,8 @@
                 resolve: {
                     deps: function ($location, resolver, Auth) {
                         var ret = resolver.load_deps([
-                            app.path + 'ui/sessions/rsController.js'
+                            app.path + 'ui/sessions/rsController.js',
+                            app.path + 'ui/sessions/rsDirectives.js'
                         ]);
                         return Auth.is_proctor().then(function (is) {
                             if (is) {

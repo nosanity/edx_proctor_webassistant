@@ -28,7 +28,6 @@ class APIRoot(APIView):
                                    args=('-attempt_code-',)),
             "stop_exam": reverse('stop_exam', request=request,
                                    args=('-attempt_code-',)),
-            "bulk_start_exams": reverse('bulk_start_exams', request=request),
             "stop_exams": reverse('stop_exams', request=request),
             "poll_status": reverse('poll_status', request=request),
             "review": reverse('review', request=request),

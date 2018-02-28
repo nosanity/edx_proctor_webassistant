@@ -213,7 +213,7 @@ class PollStatus(APIView):
         if 'list' in data and isinstance(data['list'], list) and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
-                .exclude(attempt_status__in=settings.FINAL_EXAM_STATUSES)\
+                .exclude(attempt_status__in=settings.FINAL_ATTEMPT_STATUSES)\
                 .select_related('event')
             codes_dict = {exam.exam_code: exam for exam in exams}
             if codes_dict:
@@ -308,8 +308,7 @@ class EventSessionViewSet(mixins.ListModelMixin,
         data['status'] = models.EventSession.IN_PROGRESS
         sessions = models.InProgressEventSession.objects.filter(
             course_event_id=data.get('course_event_id'),
-            course=course.pk,
-            testing_center=data.get('testing_center')
+            course=course.pk
         ).order_by('-start_date')
         if sessions:
             session = sessions[0]

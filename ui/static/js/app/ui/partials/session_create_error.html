@@ -1,0 +1,18 @@
+<div>
+    <script type="text/ng-template" id="sessionCreateError.html">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                {[ i18n('WARNING') ]}
+            </h3>
+        </div>
+        <div class="modal-body">
+            <div>{[ i18n('SESSION_ALREADY_EXISTS') ]}</div><br />
+            <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{{ exam.testing_center }}</strong></div><br />
+            <div><a href="{{ examLink }}">{{ examLink }}</a></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">{[ i18n('JOIN') ]}</button>
+            <button class="btn btn-primary" type="button" ng-click="cancel()">{[ i18n('CANCEL') ]}</button>
+        </div>
+    </script>
+</div>

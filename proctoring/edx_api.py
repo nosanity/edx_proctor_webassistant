@@ -42,6 +42,19 @@ def stop_exam_request(_id, action, user_id):
     )
 
 
+def bulk_update_exams_statuses(attempts):
+    """
+    Call edX endpoint to bulk update exams statuses
+    :return: Response
+    """
+    return _journaling_request(
+        'post',
+        'api/extended/edx_proctoring/attempts_bulk_update/',
+        json.dumps({'attempts': attempts}),
+        {'Content-Type': 'application/json', 'X-Edx-Api-Key': settings.EDX_API_KEY}
+    )
+
+
 def poll_status_request(codes):
     """
     Get list of exam statuses from edX

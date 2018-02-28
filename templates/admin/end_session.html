@@ -1,0 +1,29 @@
+{% extends "admin/delete_confirmation.html" %}
+
+{% load i18n admin_urls admin_static %}
+
+{% block breadcrumbs %}
+<ul class="grp-horizontal-list">
+<li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+<li><a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a></li>
+<li><a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst|escape }}</a></li>
+<li><a href="{% url opts|admin_urlname:'change' event_session.pk|admin_urlquote %}">{{ event_session|truncatewords:"18" }}</a></li>
+<li>{% trans 'Close session ?' %}</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<p>
+{% trans "Are you sure you want to close the session:" %}
+<br />
+<br />
+<strong>{{ event_session.exam_name }}</strong>
+<br />
+<br />
+<form action="{% url 'admin:end-session' event_session.pk|admin_urlquote %}" method="post">{% csrf_token %}
+<div>
+<input type="submit" value="{% trans "Yes, I'm sure" %}" onClick="this.disabled=true; this.style.color='black'; this.value='{% trans "Please wait..." %}'; this.form.submit();" />
+<a href="#" onclick="window.history.back(); return false;" class="button cancel-link">{% trans "No, take me back" %}</a>
+</div>
+</form>
+{% endblock %}

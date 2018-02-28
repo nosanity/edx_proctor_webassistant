@@ -16,12 +16,17 @@
                         exam_name: exam_name
                     })
                 }).then(function(data){
-                    Session = data.data;
-                    if (course_name !== undefined && exam_name !== undefined) {
-                        Session.course_name = course_name;
-                        Session.exam_name = exam_name;
+                    if (data.status === 201) {
+                        Session = data.data;
+                        if (course_name !== undefined && exam_name !== undefined) {
+                            Session.course_name = course_name;
+                            Session.exam_name = exam_name;
+                        }
+                        window.sessionStorage['proctoring'] = JSON.stringify(Session);
+                        return {created: true}
+                    } else if (data.status === 200) {
+                        return {created: false, exam: data.data}
                     }
-                    window.sessionStorage['proctoring'] = JSON.stringify(Session);
                 }, function(data){
                     alert(i18n.translate('SESSION_ERROR_1'));
                 });
