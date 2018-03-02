@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 
 from edx_proctor_webassistant.utils import date_handler
+from proctoring.models import EventSession
 from journaling.models import Journaling
 
 
@@ -142,6 +143,35 @@ def bulk_start_exams_request(exam_list):
         )
         result.append(exam) if response.status_code == 200 else None
     return result
+
+
+def start_exam_room_request(exam_id, testing_center):
+    """
+    Call edX callback on start new room
+    :param exam_id: int
+    :param testing_center: str
+    :return: Response
+    """
+    return _journaling_request(
+        'post',
+        'api/extended/edx_proctoring/exam/' + str(exam_id) + '/room',
+        json.dumps({'testing_center': testing_center, 'status': EventSession.IN_PROGRESS}),
+        {'Content-Type': 'application/json', 'X-Edx-Api-Key': settings.EDX_API_KEY}
+    )
+
+
+def close_exam_room_request(exam_id):
+    """
+    Call edX callback on close room
+    :param exam_id: int
+    :return: Response
+    """
+    return _journaling_request(
+        'post',
+        'api/extended/edx_proctoring/exam/' + str(exam_id) + '/room',
+        json.dumps({'status': EventSession.ARCHIVED}),
+        {'Content-Type': 'application/json', 'X-Edx-Api-Key': settings.EDX_API_KEY}
+    )
 
 
 def _journaling_request(request_type, url, data=None, headers=None):

@@ -29,7 +29,9 @@ from proctoring.edx_api import (start_exam_request, stop_exam_request,
                                 poll_statuses_attempts_request, poll_status,
                                 send_review_request,
                                 get_proctored_exams_request,
-                                bulk_start_exams_request)
+                                bulk_start_exams_request,
+                                start_exam_room_request,
+                                close_exam_room_request)
 
 
 def _get_status(code):
@@ -316,7 +318,13 @@ class EventSessionViewSet(mixins.ListModelMixin,
             return Response(serializer.data,
                             status=status.HTTP_200_OK,
                             headers=self.get_success_headers(serializer.data))
+
         # else create session
+        # send request to edx to start exam in the new room
+        res = start_exam_room_request(data.get('course_event_id'), data.get('testing_center'))
+        if res.status_code != status.HTTP_200_OK:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         data['proctor'] = request.user.pk
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -353,6 +361,13 @@ class EventSessionViewSet(mixins.ListModelMixin,
             )
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
+
+        # send request to edx to close exam room
+        # check for HTTP_404_NOT_FOUND is only for backward compatibility
+        res = close_exam_room_request(instance.course_event_id)
+        if res.status_code not in [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND]:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         self.perform_update(serializer)
         if change_end_date:
             event_session = models.ArchivedEventSession.objects.get(
