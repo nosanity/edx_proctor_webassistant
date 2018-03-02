@@ -121,7 +121,10 @@ class ExamViewSet(mixins.ListModelMixin,
             return _send_journaling_response(
                 request=request,
                 data=data,
-                result={'error': _("No event was found. Forbidden")},
+                result={
+                    'error': _("No event was found. Forbidden"),
+                    'message': _("There is no active room for the chosen exam")
+                },
                 status_code=status.HTTP_403_FORBIDDEN
             )
         event = event[0]

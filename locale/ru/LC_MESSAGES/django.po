@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-11 13:19+0000\n"
+"POT-Creation-Date: 2018-03-02 22:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,9 +87,33 @@ msgstr ""
 msgid "Instructor"
 msgstr ""
 
+#: proctoring/admin.py:90
+msgid "Close"
+msgstr "Закрыть"
+
+#: proctoring/admin.py:94
+msgid "Actions"
+msgstr "Действия"
+
+#: proctoring/admin.py:123 templates/admin/end_session.html:11
+msgid "Close session ?"
+msgstr "Закрыть сессию ?"
+
+#: proctoring/admin.py:139
+msgid "Closed forcibly from the admin panel"
+msgstr "Закрыть принудительно из панели администратора"
+
+#: proctoring/admin.py:170
+msgid "Session was closed"
+msgstr "Сессия была закрыта"
+
 #: proctoring/api_edx_views.py:125
 msgid "No event was found. Forbidden"
 msgstr ""
+
+#: proctoring/api_edx_views.py:126
+msgid "There is no active room for the chosen exam"
+msgstr "Для выбранного экзамена нет ни одной открытой комнаты"
 
 #: proctoring/models.py:184
 msgid "Not started"
@@ -107,11 +131,11 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
-#: proctoring/models.py:270
+#: proctoring/models.py:271
 msgid "In progress"
 msgstr ""
 
-#: proctoring/models.py:271
+#: proctoring/models.py:272
 msgid "Archived"
 msgstr ""
 
@@ -123,3 +147,23 @@ msgstr ""
 #: proctoring/serializers.py:54
 msgid "orgExtra field value error. Must be json"
 msgstr ""
+
+#: templates/admin/end_session.html:7
+msgid "Home"
+msgstr "Домой"
+
+#: templates/admin/end_session.html:17
+msgid "Are you sure you want to close the session:"
+msgstr "Вы уверены, что хотите закрыть экзаменационную сессию:"
+
+#: templates/admin/end_session.html:25
+msgid "Yes, I'm sure"
+msgstr "Да, я уверен"
+
+#: templates/admin/end_session.html:25
+msgid "Please wait..."
+msgstr "Пожалуйста, подождите"
+
+#: templates/admin/end_session.html:26
+msgid "No, take me back"
+msgstr "Нет"
