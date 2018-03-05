@@ -52,14 +52,6 @@
         this.is_instructor = function(){
             return this.is_role('instructor');
         };
-
-        this.get_profile = function(){
-            if (token){
-                $http({
-                    url: "https://sso.test.npoed.ru/api/me"
-                });
-            }
-        };
     }]);
 
     module.factory('permissions', function($rootScope, $http){
