@@ -13,6 +13,7 @@ from django.test import TestCase
 from journaling import api_views
 from journaling.models import Journaling
 from person.models import Permission
+from proctoring.models import Course, InProgressEventSession
 from proctoring.tests.test_models import _create_exam
 
 
@@ -29,10 +30,18 @@ class JournalingTestCase(TestCase):
             object_id="*",
             role=Permission.ROLE_PROCTOR
         )
+
+        event = InProgressEventSession()
+        event.testing_center = "test center"
+        event.course = Course.create_by_course_run('org1/course1/run1')
+        event.course_event_id = 'id'
+        event.proctor = self.user
+        event.save()
+
         exam = _create_exam('test', 'org1/course1/run1')
         Journaling.objects.create(
             journaling_type=Journaling.EVENT_SESSION_START,
-            event_id=1,
+            event=event,
             exam=exam,
             proctor=self.user,
             note='test note',

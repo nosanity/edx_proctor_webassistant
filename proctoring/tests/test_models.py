@@ -4,7 +4,7 @@ Tests for methods in model.py
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from person.models import Permission
+from person.models import Permission, Student
 from proctoring.models import (Exam, Course, has_permission_to_course,
                                EventSession, InProgressEventSession)
 
@@ -227,6 +227,13 @@ class EventSessionTestCase(TestCase):
 
 
 def _create_exam(id, course_id):
+    student = Student.objects.create(
+        sso_id=1,
+        email='test@test.com',
+        first_name='Test',
+        last_name='Test'
+    )
+
     exam = Exam()
     exam.exam_code = 'examCode_%s' % id
     exam.duration = 1
@@ -241,6 +248,6 @@ def _create_exam(id, course_id):
     exam.course = Course.create_by_course_run(course_id)
     exam.exam_id = '1'
     exam.email = 'test@test.com'
-    exam.student_id = '1'
+    exam.student = student
     exam.save()
     return exam

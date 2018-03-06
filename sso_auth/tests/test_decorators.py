@@ -1,9 +1,11 @@
 """
 Tests for SSO Auth decorators
 """
+import unittest
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 
 class SetTokenCookieDecoratorTestCase(TestCase):
@@ -16,6 +18,7 @@ class SetTokenCookieDecoratorTestCase(TestCase):
         user.is_active = True
         user.save()
 
+    @unittest.skipIf(settings.SSO_ENABLED, 'Skipping in case if SSO_ENABLED == True')
     def test_set_token_cookie_without_sso(self):
         client = Client()
         response = client.post(reverse('login'), {

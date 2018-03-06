@@ -198,9 +198,8 @@ class ViewsUITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # change status on started
         with patch(
-            'proctoring.api_ui_views.poll_status_request') as edx_request:
-            edx_request.return_value = [
-                {"attempt_code": self.exam.exam_code, "status": "started"}]
+            'proctoring.api_ui_views.poll_statuses_attempts_request') as edx_request:
+            edx_request.return_value = {"attempt_code": self.exam.exam_code, "status": "started"}
             request = factory.post(
                 '/api/poll_status', data)
             force_authenticate(request, user=self.user)
@@ -208,13 +207,13 @@ class ViewsUITestCase(TestCase):
             response.render()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             exam = Exam.objects.get(pk=self.exam.pk)
-            self.assertNotEqual(actual_start_date, exam.actual_start_date)
+            self.assertNotEqual(exam.attempt_status, "started")
 
         data = {'list': [self.exam.exam_code]}
 
         # change status on submitted
         with patch(
-            'proctoring.api_ui_views.poll_status_request') as edx_request:
+            'proctoring.api_ui_views.poll_statuses_attempts_request') as edx_request:
             edx_request.return_value = [
                 {"attempt_code": self.exam.exam_code, "status": "submitted"}]
             request = factory.post(
@@ -224,7 +223,7 @@ class ViewsUITestCase(TestCase):
             response.render()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             exam = Exam.objects.get(pk=self.exam.pk)
-            self.assertNotEqual(actual_end_date, exam.actual_end_date)
+            self.assertNotEqual(exam.attempt_status, "submitted")
 
     def test_send_review(self):
         factory = APIRequestFactory()

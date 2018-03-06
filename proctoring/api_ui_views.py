@@ -210,7 +210,7 @@ class PollStatus(APIView):
         ```
         """
         data = request.data
-        if 'list' in data and isinstance(data['list'], list) and data['list']:
+        if 'list' in data and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
                 .exclude(attempt_status__in=settings.FINAL_ATTEMPT_STATUSES)\
