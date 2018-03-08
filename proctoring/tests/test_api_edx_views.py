@@ -3,7 +3,7 @@ Tests for API endpoints called by Open EdX
 """
 import json
 
-from mock import patch
+from unittest.mock import patch
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -24,7 +24,7 @@ class APIRootTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
 
 
@@ -59,7 +59,7 @@ class ExamViewSetTestCase(TestCase):
         exam.exam_code = 'examCode'
         exam.organization = 'organization'
         exam.duration = 1
-        exam.reviewed_exam = 'reviewedExam'
+        exam.reviewed = True
         exam.reviewer_notes = 'reviewerNotes'
         exam.exam_password = 'examPassword'
         exam.exam_sponsor = 'examSponsor'
@@ -87,7 +87,7 @@ class ExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), list)
         self.assertTrue(len(data) > 0)
 
@@ -101,7 +101,7 @@ class ExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), list)
         self.assertEqual(len(data), 0)
 
@@ -115,7 +115,7 @@ class ExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), list)
         self.assertEqual(len(data), 0)
 
@@ -126,7 +126,7 @@ class ExamViewSetTestCase(TestCase):
             "examCode": "newEamCode",
             "duration ": 2,
             "organization ": "newOrganization",
-            "reviewedExam ": "newReviewedExam",
+            "reviewedExam ": True,
             "reviewerNotes ": "newReviewerNotes",
             "examPassword ": "newExamPassword",
             "examSponsor ": "newExamSponsor",
@@ -196,14 +196,14 @@ class ExamViewSetTestCase(TestCase):
         view = ExamViewSet.as_view({'post': 'create'})
         response = view(request)
         response.render()
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         exam = Exam.objects.get(exam_code=exam_data['examCode'])
         self.assertDictContainsSubset({
             "examCode": exam.exam_code,
             "duration ": exam.duration,
             "organization ": exam.organization,
-            "reviewedExam ": exam.reviewed_exam,
+            "reviewedExam ": exam.reviewed,
             "reviewerNotes ": exam.reviewer_notes,
             "examPassword ": exam.exam_password,
             "examSponsor ": exam.exam_sponsor,

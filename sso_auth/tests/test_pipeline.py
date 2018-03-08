@@ -1,14 +1,14 @@
 """
 Tests for SSO Auth Pypelines
 """
-from mock import patch
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.contrib.auth.models import User
 
 from person.models import Permission
 from sso_auth.pipeline import (set_roles_for_edx_users,
-                               create_or_update_permissions, update_user_name)
+                               _create_or_update_permissions, _update_user_name)
 
 
 class PipelineTestCase(TestCase):
@@ -18,17 +18,17 @@ class PipelineTestCase(TestCase):
         )
         self.permissions = [
             {
-                'obj_perm': [u'Proctoring'],
+                'obj_perm': ['Proctoring'],
                 'obj_type': Permission.TYPE_ORG,
                 'obj_id': "*",
             },
             {
-                'obj_perm': [u'*'],
+                'obj_perm': ['*'],
                 'obj_type': Permission.TYPE_COURSE,
                 'obj_id': 'org2/course1',
             },
             {
-                'obj_perm': [u'Wrong'],
+                'obj_perm': ['Wrong'],
                 'obj_type': Permission.TYPE_ORG,
                 'obj_id': 'org1',
             }
@@ -40,7 +40,7 @@ class PipelineTestCase(TestCase):
         self.assertEqual(perms_count + 2, self.user.permission_set.count())
         new_permissions = [
             {
-                'obj_perm': [u'Proctoring'],
+                'obj_perm': ['Proctoring'],
                 'obj_type': Permission.TYPE_ORG,
                 'obj_id': "*",
             }
@@ -53,13 +53,13 @@ class PipelineTestCase(TestCase):
         perms_count = self.user.permission_set.count()
         response = {
             'permissions': [{
-                'obj_perm': [u'Proctoring'],
+                'obj_perm': ['Proctoring'],
                 'obj_type': Permission.TYPE_COURSERUN,
                 'obj_id': "org1/course2/run1",
             }]
         }
-        result = create_or_update_permissions('', self.user, response,
-                                              self.user, response)
+        result = _create_or_update_permissions('', self.user, response,
+                                               self.user)
         self.assertEqual(type(result), dict)
         self.assertEqual(perms_count + 1, self.user.permission_set.count())
 
@@ -67,8 +67,8 @@ class PipelineTestCase(TestCase):
         response = {
             'permissions': [{}]
         }
-        create_or_update_permissions('', self.user, response,
-                                     self.user, response)
+        _create_or_update_permissions('', self.user, response,
+                                      self.user)
         self.assertTrue(mock_logging.error.called)
 
     def test_update_username(self):
@@ -77,8 +77,8 @@ class PipelineTestCase(TestCase):
             'firstname': 'FirstName',
             'lastname': 'LastName'
         }
-        update_user_name(backend='', user=self.user, response=response,
-                         strategy='', pipeline_index='')
+        _update_user_name(backend='', user=self.user, response=response,
+                          strategy='', pipeline_index='')
         user = User.objects.get(pk=self.user.pk)
         self.assertEqual(user.first_name, 'FirstName')
         self.assertEqual(user.last_name, 'LastName')
@@ -86,7 +86,7 @@ class PipelineTestCase(TestCase):
         response = {
             'email': 'non@exist.com'
         }
-        result = update_user_name(backend='', user=self.user,
-                                  response=response,
-                                  strategy='', pipeline_index='')
-        self.assertEqual(result, {})
+        result = _update_user_name(backend='', user=self.user,
+                                   response=response,
+                                   strategy='', pipeline_index='')
+        self.assertEqual(result, None)

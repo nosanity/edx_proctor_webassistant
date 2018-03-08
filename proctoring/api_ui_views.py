@@ -19,6 +19,7 @@ from edx_proctor_webassistant.web_soket_methods import send_ws_msg
 from edx_proctor_webassistant.auth import (CsrfExemptSessionAuthentication,
                                            SsoTokenAuthentication,
                                            IsProctor, IsProctorOrInstructor)
+from edx_proctor_webassistant.rest_framework import PaginationBy25, PaginationBy50
 from person.models import Permission
 from journaling.models import Journaling
 from proctoring import models
@@ -158,7 +159,7 @@ class StopExams(APIView):
         Endpoint for exams stop
         """
         attempts = request.data.get('attempts')
-        if isinstance(attempts, basestring):
+        if isinstance(attempts, str):
             attempts = json.loads(attempts)
         if attempts:
             status_list = []
@@ -209,7 +210,7 @@ class PollStatus(APIView):
         {"list":["code1","code2"]}
         ```
         """
-        data = request.data
+        data = request.data.copy()
         if 'list' in data and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
@@ -217,8 +218,8 @@ class PollStatus(APIView):
                 .select_related('event')
             codes_dict = {exam.exam_code: exam for exam in exams}
             if codes_dict:
-                response = poll_statuses_attempts_request(codes_dict.keys())
-                for attempt_code, new_status in response.iteritems():
+                response = poll_statuses_attempts_request(list(codes_dict.keys()))
+                for attempt_code, new_status in response.items():
                     exam = codes_dict.get(attempt_code, None)
                     if exam and new_status and exam.attempt_status != new_status:
                         if exam.attempt_status == 'ready_to_start' and new_status == 'started':
@@ -380,7 +381,7 @@ class ArchivedEventSessionViewSet(mixins.ListModelMixin,
     """
     serializer_class = ArchivedEventSessionSerializer
     queryset = models.ArchivedEventSession.objects.order_by('-pk')
-    paginate_by = 25
+    pagination_class = PaginationBy25
     authentication_classes = (SsoTokenAuthentication,
                               CsrfExemptSessionAuthentication,
                               BasicAuthentication)
@@ -471,16 +472,16 @@ class Review(APIView):
         Passing review statuses:  `Clean`, `Rules Violation`
         Failing review status: `Not Reviewed`, `Suspicious`
         """
-        payload = request.data
+        payload = request.data.copy()
         required_fields = ['examMetaData', 'reviewStatus', 'videoReviewLink',
                            'desktopComments']
         for field in required_fields:
             if field not in payload:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if isinstance(payload['examMetaData'], basestring):
+        if isinstance(payload['examMetaData'], str):
             payload['examMetaData'] = json.loads(payload['examMetaData'])
-        if isinstance(payload['desktopComments'], basestring):
+        if isinstance(payload['desktopComments'], str):
             payload['desktopComments'] = json.loads(payload['desktopComments'])
         exam = get_object_or_404(
             models.Exam.objects.by_user_perms(request.user),
@@ -549,7 +550,10 @@ class GetExamsProctored(APIView):
 
     def get(self, request):
         response = get_proctored_exams_request()
-        content = json.loads(response.content)
+        try:
+            content = response.json()
+        except ValueError:
+            content = {}
         permissions = request.user.permission_set.all()
         results = []
         for row in content.get('results', []):
@@ -623,7 +627,7 @@ class ArchivedExamViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     `?examStartDate=2015-12-04&email=test@test.com`
     """
     serializer_class = ArchivedExamSerializer
-    paginate_by = 50
+    pagination_class = PaginationBy50
     queryset = models.Exam.objects.filter(
         event__status=models.EventSession.ARCHIVED
     ).order_by('-pk')
@@ -714,7 +718,7 @@ class CommentViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     """
     serializer_class = CommentSerializer
-    paginate_by = 25
+    pagination_class = PaginationBy25
     queryset = models.Comment.objects.order_by('-pk')
     authentication_classes = (SsoTokenAuthentication,
                               CsrfExemptSessionAuthentication,
@@ -745,9 +749,13 @@ class CommentViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             exam_code=request.data.get('examCode')
         )
         comment = request.data.get('comment')
-        if isinstance(comment, basestring):
+        if isinstance(comment, str):
             comment = json.loads(comment)
         comment['exam'] = exam.pk
+        if 'event_start' in comment:
+            comment['event_start'] = int(int(comment['event_start']) / 1000)
+        if 'event_finish' in comment:
+            comment['event_finish'] = int(int(comment['event_finish']) / 1000)
         serializer = self.get_serializer(data=comment)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -767,8 +775,8 @@ class CommentViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                 %s
             """ % (
                 serializer.data.get('duration'),
-                int(serializer.data.get('event_start')/1000) if serializer.data.get('event_start') else None,
-                int(serializer.data.get('event_finish')/1000) if serializer.data.get('event_finish') else None,
+                int(serializer.data.get('event_start')) if serializer.data.get('event_start') else None,
+                int(serializer.data.get('event_finish')) if serializer.data.get('event_finish') else None,
                 serializer.data.get('event_status'),
                 serializer.data.get('comment'),
             ),

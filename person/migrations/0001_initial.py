@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('object_id', models.CharField(max_length=64)),
                 ('object_type', models.CharField(max_length=64, choices=[(b'edxorg', 'Organization'), (b'edxcourse', 'Course'), (b'*', b'*'), (b'edxcourserun', 'Courserun')])),
                 ('role', models.CharField(default=b'proctor', max_length=10, choices=[(b'proctor', 'Proctor'), (b'instructor', 'Instructor')])),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(

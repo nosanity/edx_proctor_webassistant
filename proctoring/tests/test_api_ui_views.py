@@ -3,7 +3,7 @@ Tests for API endpoints called by UI
 """
 import json
 from datetime import datetime
-from mock import patch
+from unittest.mock import patch
 
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
@@ -37,7 +37,7 @@ class ViewsUITestCase(TestCase):
         exam.exam_code = 'examCode'
         exam.organization = 'organization'
         exam.duration = 1
-        exam.reviewed_exam = 'reviewedExam'
+        exam.reviewed = True
         exam.reviewer_notes = 'reviewerNotes'
         exam.exam_password = 'examPassword'
         exam.exam_sponsor = 'examSponsor'
@@ -81,7 +81,7 @@ class ViewsUITestCase(TestCase):
             )
             response.render()
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            data = json.loads(response.content)
+            data = json.loads(str(response.content, 'utf-8'))
             self.assertIn('hash', data)
             self.assertIn('status', data)
 
@@ -101,7 +101,7 @@ class ViewsUITestCase(TestCase):
             )
             response.render()
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            data = json.loads(response.content)
+            data = json.loads(str(response.content, 'utf-8'))
             self.assertIn('error', data)
 
     @patch('proctoring.api_ui_views.send_ws_msg')
@@ -132,7 +132,7 @@ class ViewsUITestCase(TestCase):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             response.render()
-            data = json.loads(response.content)
+            data = json.loads(str(response.content, 'utf-8'))
             self.assertDictContainsSubset({
                 'hash': self.exam.generate_key(),
             },
@@ -297,7 +297,7 @@ class GetExamsProctoredTestCase(TestCase):
             view = api_ui_views.GetExamsProctored.as_view()
             response = view(request)
             response.render()
-            data = json.loads(response.content)
+            data = json.loads(str(response.content, 'utf-8'))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(type(data), dict)
             self.assertDictContainsSubset({
@@ -327,7 +327,7 @@ class BulkStartExamTestCase(TestCase):
         exam1.exam_code = 'examCode'
         exam1.organization = 'organization'
         exam1.duration = 1
-        exam1.reviewed_exam = 'reviewedExam'
+        exam1.reviewed = True
         exam1.reviewer_notes = 'reviewerNotes'
         exam1.exam_password = 'examPassword'
         exam1.exam_sponsor = 'examSponsor'
@@ -353,7 +353,7 @@ class BulkStartExamTestCase(TestCase):
         exam2.exam_code = 'examCode2'
         exam2.organization = 'organization'
         exam2.duration = 1
-        exam2.reviewed_exam = 'reviewedExam'
+        exam2.reviewed = True
         exam2.reviewer_notes = 'reviewerNotes'
         exam2.exam_password = 'examPassword'
         exam2.exam_sponsor = 'examSponsor'
@@ -423,7 +423,7 @@ class EventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         event = EventSession.objects.get(pk=data['id'])
         self.assertDictContainsSubset({
@@ -443,7 +443,7 @@ class EventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         event = EventSession.objects.get(pk=data['id'])
         self.assertDictContainsSubset({
@@ -477,7 +477,7 @@ class EventSessionViewSetTestCase(TestCase):
         response = view(request, pk=event.pk)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         event = ArchivedEventSession.objects.get(pk=data['id'])
         self.assertDictContainsSubset({
@@ -504,7 +504,7 @@ class EventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), list)
         self.assertEqual(len(data), InProgressEventSession.objects.count())
 
@@ -517,7 +517,7 @@ class EventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), list)
         self.assertEqual(len(data), InProgressEventSession.objects.filter(
             hash_key=event.hash_key).count())
@@ -555,7 +555,7 @@ class ArchivedEventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')),
                          ArchivedEventSession.objects.count())
@@ -585,7 +585,7 @@ class ArchivedEventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')),
                          ArchivedEventSession.objects.count())
@@ -609,7 +609,7 @@ class ArchivedEventSessionViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(len(data.get('results')), 0)
 
 
@@ -637,7 +637,7 @@ class ArchivedExamViewSetTestCase(TestCase):
         exam.exam_code = 'examCode'
         exam.organization = 'organization'
         exam.duration = 1
-        exam.reviewed_exam = 'reviewedExam'
+        exam.reviewed = True
         exam.reviewer_notes = 'reviewerNotes'
         exam.exam_password = 'examPassword'
         exam.exam_sponsor = 'examSponsor'
@@ -671,7 +671,7 @@ class ArchivedExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Exam.objects.filter(
             event__status=EventSession.ARCHIVED
@@ -697,7 +697,7 @@ class ArchivedExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Exam.objects.filter(
             event__status=EventSession.ARCHIVED
@@ -720,7 +720,7 @@ class ArchivedExamViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Exam.objects.filter(
             event__status=EventSession.ARCHIVED,
@@ -751,7 +751,7 @@ class CommentViewSetTestCase(TestCase):
         exam.exam_code = 'examCode'
         exam.organization = 'organization'
         exam.duration = 1
-        exam.reviewed_exam = 'reviewedExam'
+        exam.reviewed = True
         exam.reviewer_notes = 'reviewerNotes'
         exam.exam_password = 'examPassword'
         exam.exam_sponsor = 'examSponsor'
@@ -792,7 +792,7 @@ class CommentViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Comment.objects.count())
 
@@ -809,7 +809,7 @@ class CommentViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Comment.objects.count())
 
@@ -832,7 +832,7 @@ class CommentViewSetTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         comment = Comment.objects.get(pk=data['id'])
         self.assertDictContainsSubset(
@@ -855,13 +855,19 @@ class CommentViewSetTestCase(TestCase):
         )
 
 
-class MockResponse(object):
+class MockResponse:
     def __init__(self, status_code=200, content={"status": "ready_to_start"}):
         self.status_code = status_code
         self.content = content
 
+    def json(self):
+        if isinstance(self.content, str):
+            return json.loads(self.content)
+        else:
+            return self.content
 
-class EdxResponse(object):
+
+class EdxResponse:
     def __init__(self, json_string):
         self.json_string = json_string
 

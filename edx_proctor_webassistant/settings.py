@@ -13,8 +13,15 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+TESTING = False
+try:
+    TESTING = sys.argv[1] == 'test'
+except IndexError:
+    pass
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -24,7 +31,7 @@ SECRET_KEY = '<ADD_YOUR_SECRET_KEY_IN_LOCAL_SETTINGS>'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -46,20 +53,19 @@ INSTALLED_APPS = (
     'proctoring',
     'ui',
     'journaling',
-    'social.apps.django_app.default',
+    'social_django',
     'sso_auth',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'edx_proctor_webassistant.urls'
 
@@ -75,7 +81,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'ws4redis.context_processors.default',
-                "django.core.context_processors.request",
             ],
         },
     },
@@ -97,8 +102,9 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-#LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'ru'
+if TESTING:
+    LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
@@ -120,14 +126,13 @@ SSO_ENABLED = True
 
 if SSO_ENABLED:
     TEMPLATES[0]['OPTIONS']['context_processors'] += [
-        'social.apps.django_app.context_processors.backends',
-        'social.apps.django_app.context_processors.login_redirect',
+        'social_django.context_processors.backends',
+        'social_django.context_processors.login_redirect',
     ]
     try:
         from sso_auth.social_auth_settings import *
     except ImportError:
-        print "CRITICAL: Social auth enabled."
-        "But  social_auth_settings.py didn't specified"
+        print("CRITICAL: Social auth enabled. But  social_auth_settings.py didn't specified")
         exit()
 
 # Static files (CSS, JavaScript, Images)
@@ -223,9 +228,6 @@ WS4REDIS_CONNECTION = {
 WS4REDIS_EXPIRE = 5
 WS4REDIS_PREFIX = 'ws'
 WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-WS4REDIS_ALLOWED_CHANNELS = (
-    'attempts'
-)
 WS4REDIS_HEARTBEAT = '--heartbeat--'
 
 # Config for Single Page Application
@@ -238,9 +240,9 @@ SPA_CONFIG = {
 }
 
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError:
-    print "CRITICAL: You must specify settings_local.py"
+    print("CRITICAL: You must specify settings_local.py")
     exit()
 
 INSTALLED_APPS = INSTALLED_APPS + (

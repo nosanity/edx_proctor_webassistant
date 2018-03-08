@@ -3,7 +3,7 @@ Tests for Open EdX API calls
 """
 import json
 
-from mock import patch
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -29,7 +29,7 @@ class RequestsTestCase(TestCase):
         exam1.exam_code = 'examCode'
         exam1.organization = 'organization'
         exam1.duration = 1
-        exam1.reviewed_exam = 'reviewedExam'
+        exam1.reviewed = True
         exam1.reviewer_notes = 'reviewerNotes'
         exam1.exam_password = 'examPassword'
         exam1.exam_sponsor = 'examSponsor'
@@ -55,7 +55,7 @@ class RequestsTestCase(TestCase):
         exam2.exam_code = 'examCode2'
         exam2.organization = 'organization'
         exam2.duration = 1
-        exam2.reviewed_exam = 'reviewedExam'
+        exam2.reviewed = True
         exam2.reviewer_notes = 'reviewerNotes'
         exam2.exam_password = 'examPassword'
         exam2.exam_sponsor = 'examSponsor'
@@ -151,7 +151,7 @@ class JournalingRequestTestCase(TestCase):
             self.assertEqual('Just a text', response.content)
 
 
-class MockResponse(object):
+class MockResponse:
     def __init__(self, status_code=200, content={"status": "ready_to_start"}):
         self.status_code = status_code
         self.content = content

@@ -4,8 +4,8 @@ Tests for SSO Auth decorators
 import unittest
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.urls import reverse
 
 
 class SetTokenCookieDecoratorTestCase(TestCase):

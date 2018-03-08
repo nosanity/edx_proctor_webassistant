@@ -35,7 +35,7 @@ class Permission(models.Model):
         (ROLE_PROCTOR, _("Proctor")),
         (ROLE_INSTRUCTOR, _("Instructor")),
     }
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     object_id = models.CharField(max_length=64)
     object_type = models.CharField(max_length=64,
                                    choices=OBJECT_TYPE_CHOICES)

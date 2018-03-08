@@ -56,7 +56,7 @@ class JournalingTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Journaling.objects.count())
 
@@ -75,7 +75,7 @@ class JournalingTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(type(data), dict)
         self.assertEqual(len(data.get('results')), Journaling.objects.count())
 
@@ -90,5 +90,5 @@ class JournalingTestCase(TestCase):
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(response.content)
+        data = json.loads(str(response.content, 'utf-8'))
         self.assertEqual(len(data.get('results')), 0)

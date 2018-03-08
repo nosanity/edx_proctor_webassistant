@@ -3,7 +3,7 @@ Decorators for sso_auth authentication
 """
 import hashlib
 
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,7 +18,7 @@ def set_token_cookie(view):
     def wrapper(request, *args, **kwargs):
         response = view(request, *args, **kwargs)
         user = request.user
-        is_auth = user.is_authenticated()
+        is_auth = user.is_authenticated
 
         if not settings.SSO_ENABLED:
             response.set_cookie('authenticated', str(int(is_auth)),

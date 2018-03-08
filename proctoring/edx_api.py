@@ -140,7 +140,8 @@ def bulk_start_exams_request(exam_list):
         response = _journaling_request(
             'get', url % str(exam.exam_code),
         )
-        result.append(exam) if response.status_code == 200 else None
+        if response.status_code == 200:
+            result.append(exam)
     return result
 
 
@@ -177,10 +178,12 @@ def _journaling_request(request_type, url, data=None, headers=None):
             data=data,
             headers=headers
         )
+    else:
+        raise Exception('Invalid request_type', request_type)
     try:
-        result = json.loads(response.content)
+        result = response.json()
     except ValueError:
-        soup = BeautifulSoup(response.content)
+        soup = BeautifulSoup(str(response.content))
         h1 = soup.find('h1')
         res_list = []
         if h1:
@@ -191,7 +194,7 @@ def _journaling_request(request_type, url, data=None, headers=None):
         if res_list:
             result = "\n ".join(res_list)
         else:
-            result = response.content
+            result = str(response.content)
     try:
         Journaling.objects.create(
             journaling_type=Journaling.EDX_API_CALL,
@@ -202,7 +205,7 @@ Response status: %s
 Response content: %s
             """ % (
                 url,
-                unicode(data).encode('utf-8'),
+                str(data).encode('utf-8'),
                 str(response.status_code),
                 str(result)
             )

@@ -39,7 +39,7 @@ class JSONSerializerField(serializers.Field):
         :return: dict
         """
         json_data = {}
-        if isinstance(data, basestring):
+        if isinstance(data, str):
             data = json.loads(data)
         try:
             for field_name in self.FIELD_LIST:
@@ -92,7 +92,7 @@ class ExamSerializer(serializers.ModelSerializer):
                   'hash', 'actual_start_date', 'actual_end_date')
 
     examCode = serializers.CharField(source='exam_code', max_length=60)
-    reviewedExam = serializers.CharField(source='reviewed_exam', max_length=60)
+    reviewedExam = serializers.BooleanField(source='reviewed')
     reviewerNotes = serializers.CharField(source='reviewer_notes',
                                           max_length=60, allow_blank=True)
     examPassword = serializers.CharField(source='exam_password', max_length=60)
@@ -181,6 +181,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
 
 
 class ArchivedExamSerializer(ExamSerializer):
@@ -189,15 +190,16 @@ class ArchivedExamSerializer(ExamSerializer):
     """
     course_id = serializers.CharField(source='course.display_name')
     comments = CommentSerializer(source='comment_set', many=True)
+    actual_start_date = None
+    actual_end_date = None
 
     class Meta:
         model = Exam
         exclude = (
-            'exam_code', 'reviewed_exam', 'reviewer_notes', 'exam_password',
+            'exam_code', 'reviewed', 'reviewer_notes', 'exam_password',
             'exam_sponsor', 'exam_name', 'ssi_product',
-            'course_id', 'email', 'exam_end_date', 'exam_id',
-            'exam_start_date', 'actual_start_date', 'actual_end_date',
-            'first_name', 'last_name', 'no_of_students', 'user_id', 'username')
+            'email', 'exam_end_date', 'exam_id',
+            'exam_start_date', 'first_name', 'last_name', 'no_of_students', 'user_id', 'username')
 
 
 class EventSessionSerializer(serializers.ModelSerializer):
@@ -222,6 +224,7 @@ class EventSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InProgressEventSession
+        fields = '__all__'
 
     def validate(self, data):
         """
@@ -261,3 +264,4 @@ class ArchivedEventSessionSerializer(serializers.ModelSerializer):
             'status', 'hash_key', 'notify', 'start_date', 'end_date', 'comment'
         )
         model = ArchivedEventSession
+        fields = '__all__'

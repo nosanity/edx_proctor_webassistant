@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User, AnonymousUser
 from django.db.models import Q
+from functools import reduce
 
 from person.models import Student, Permission
 
@@ -69,8 +70,7 @@ class Course(models.Model):
         sp = course_id.split(':')
         if len(sp) == 2:
             return sp[-1].split('+')
-        else:
-            return course_id.split('/')
+        return course_id.split('/')
 
     @classmethod
     def filter_courses_by_permission(cls, q_objects, permission):
@@ -103,7 +103,7 @@ class Course(models.Model):
 
         return q_objects
 
-    def __unicode__(self):
+    def __str__(self):
         return self.display_name
 
 
@@ -190,7 +190,7 @@ class Exam(models.Model):
     exam_code = models.CharField(max_length=60, unique=True)
     organization = models.CharField(max_length=60)
     duration = models.IntegerField()
-    reviewed_exam = models.CharField(max_length=60)
+    reviewed = models.NullBooleanField()
     reviewer_notes = models.CharField(max_length=60, blank=True, null=True)
     exam_password = models.CharField(max_length=60)
     exam_sponsor = models.CharField(max_length=60)
@@ -211,9 +211,9 @@ class Exam(models.Model):
     username = models.CharField(max_length=50, blank=True, null=True)
     last_poll = models.DateTimeField(blank=True, null=True)
     # own fields
-    course = models.ForeignKey(Course)
-    student = models.ForeignKey(Student)
-    proctor = models.ForeignKey(User, blank=True, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    proctor = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     exam_status = models.CharField(
         max_length=8,
         choices=EXAM_STATUS_CHOICES,
@@ -221,7 +221,7 @@ class Exam(models.Model):
 
     attempt_status = models.CharField(max_length=20, blank=True, null=True)
 
-    event = models.ForeignKey('EventSession', blank=True, null=True)
+    event = models.ForeignKey('EventSession', blank=True, null=True, on_delete=models.CASCADE)
 
     objects = ExamsByUserPermsManager()
 
@@ -232,9 +232,9 @@ class Exam(models.Model):
         """
         str_to_hash = str(self.exam_code) + str(self.user_id) + str(
             self.exam_id) + str(self.email)
-        return hashlib.md5(str_to_hash).hexdigest()
+        return hashlib.md5(str_to_hash.encode('utf-8')).hexdigest()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.exam_id
 
 
@@ -272,9 +272,9 @@ class EventSession(models.Model):
         (ARCHIVED, _("Archived")),
     }
     testing_center = models.CharField(max_length=128)
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     course_event_id = models.CharField(max_length=128, blank=True, null=True)
-    proctor = models.ForeignKey(User)
+    proctor = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(
         max_length=11,
         choices=SESSION_STATUS_CHOICES,
@@ -337,14 +337,15 @@ class EventSession(models.Model):
         """
         if created and not instance.hash_key:
             instance.hash_key = hashlib.md5(
-                unicode(instance.testing_center).encode('utf-8') + str(
-                    instance.course.course_run) + str(
-                    instance.course_event_id) + str(instance.proctor.pk) + str(
-                    instance.start_date)).hexdigest()
+                str(instance.testing_center).encode('utf-8')
+                + str(instance.course.course_run).encode('utf-8')
+                + str(instance.course_event_id).encode('utf-8')
+                + str(instance.proctor.pk).encode('utf-8')
+                + str(instance.start_date).encode('utf-8')).hexdigest()
             instance.save()
 
-    def __unicode__(self):
-        return u" | ".join((self.testing_center,
+    def __str__(self):
+        return " | ".join((self.testing_center,
                             self.course.course_run,
                             self.course_event_id))
 
@@ -383,5 +384,5 @@ class Comment(models.Model):
     event_status = models.CharField(max_length=60)
     event_start = models.IntegerField()
     event_finish = models.IntegerField()
-    exam = models.ForeignKey(Exam)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     duration = models.IntegerField(blank=True, null=True)

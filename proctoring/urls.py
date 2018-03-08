@@ -1,10 +1,9 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
 from proctoring import api_ui_views
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'start_exam/(?P<attempt_code>[-\w]+)$',
         api_ui_views.StartExam.as_view(),
         name='start_exam'),
@@ -21,4 +20,4 @@ urlpatterns = patterns(
         name='review'),
     url(r'proctored_exams/$', login_required(api_ui_views.GetExamsProctored.as_view()),
         name='proctor_exams'),
-)
+]

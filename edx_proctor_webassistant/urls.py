@@ -15,16 +15,15 @@ Including another URLconf
 """
 from functools import update_wrapper
 from rest_framework.routers import DefaultRouter
-from social.apps.django_app.views import complete
-from social.utils import setting_name
+from social_django.views import complete
+from social_core.utils import setting_name
 
 from django.conf import settings
-from django.conf.urls import include, url, patterns
+from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.admin import site as admin_site
-from django.contrib.auth.decorators import login_required
 
 from journaling.api_views import JournalingViewSet
 from person.api_views import PermissionViewSet
@@ -45,20 +44,18 @@ router.register(r'exam_register', api_edx_views.ExamViewSet,
 router.register(r'event_session', api_ui_views.EventSessionViewSet,
                 base_name="event-session")
 router.register(r'archived_event_session',
-                #login_required(api_ui_views.ArchivedEventSessionViewSet),
                 api_ui_views.ArchivedEventSessionViewSet,
                 base_name="archived-event-session")
 router.register(r'journaling', JournalingViewSet,
-                base_name="journaling"),
+                base_name="journaling")
 router.register(r'archived_exam', api_ui_views.ArchivedExamViewSet,
-                base_name="archived-exam"),
+                base_name="archived-exam")
 router.register(r'comment', api_ui_views.CommentViewSet,
                 base_name="comment")
 router.register(r'permission', PermissionViewSet,
                 base_name="permission")
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', Index.as_view(), name="index"),
     url(r'^grappelli/', include('grappelli.urls')),
 
@@ -67,15 +64,15 @@ urlpatterns = patterns(
         name='admin:login'),
     url(r'^admin/logout/$', set_token_cookie(wrap_admin(admin_site.logout)),
         name='logout'),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
     url(r'^api/$', api_edx_views.APIRoot.as_view()),
-    (r'^api/', include('proctoring.urls')),
-    (r'^api/', include(router.urls)),
+    url(r'^api/', include('proctoring.urls')),
+    url(r'^api/', include(router.urls)),
     # few angular views
     url(r'^session/', api_ui_views.redirect_ui),
     url(r'^archive/', api_ui_views.redirect_ui),
-) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if not settings.SSO_ENABLED:
     urlpatterns += [
@@ -89,6 +86,6 @@ else:
     urlpatterns += [
         url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra),
             set_token_cookie(complete), name='complete'),
-        url('', include('social.apps.django_app.urls', namespace='social')),
+        url('', include('social_django.urls', namespace='social')),
         url(r'^logout/$', logout, name='logout'),
     ]

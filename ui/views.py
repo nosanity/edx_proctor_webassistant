@@ -3,22 +3,22 @@ Views for application
 """
 import json
 
-from sso_auth.social_auth_backends import NpoedBackend
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as lgt, login as auth_login, \
     REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render, resolve_url
 from django.utils.http import is_safe_url
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View
+
+from sso_auth.social_auth_backends import NpoedBackend
 
 
 class Index(View):
@@ -31,7 +31,7 @@ class Index(View):
         """
         Main view
         """
-        user_has_access = request.user and request.user.is_authenticated() \
+        user_has_access = request.user and request.user.is_authenticated \
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
             'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
@@ -84,8 +84,7 @@ def logout(request, next_page=None,
     """
     This view needed for correct redirect to sso-logout page
     """
-    if (redirect_field_name in request.POST or
-                redirect_field_name in request.GET):
+    if redirect_field_name in request.POST or redirect_field_name in request.GET:
         next_page = request.POST.get(redirect_field_name,
                                      request.GET.get(redirect_field_name))
 

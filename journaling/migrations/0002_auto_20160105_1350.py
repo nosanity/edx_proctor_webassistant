@@ -17,16 +17,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='journaling',
             name='event',
-            field=models.ForeignKey(blank=True, to='proctoring.EventSession', null=True),
+            field=models.ForeignKey(blank=True, to='proctoring.EventSession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='journaling',
             name='exam',
-            field=models.ForeignKey(blank=True, to='proctoring.Exam', null=True),
+            field=models.ForeignKey(blank=True, to='proctoring.Exam', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='journaling',
             name='proctor',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
         ),
     ]

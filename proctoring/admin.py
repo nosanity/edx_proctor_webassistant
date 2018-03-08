@@ -2,14 +2,14 @@ from datetime import datetime
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin, messages
-from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
-from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse
 from rest_framework import status
 from journaling.models import Journaling
 from proctoring import models
@@ -49,7 +49,7 @@ class ExamAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                'exam_code', 'organization', 'duration', 'reviewed_exam',
+                'exam_code', 'organization', 'duration', 'reviewed',
                 'reviewer_notes', 'exam_password', 'exam_sponsor', 'exam_name',
                 'ssi_product')
         }),
@@ -89,8 +89,7 @@ class EventSessionAdmin(admin.ModelAdmin):
                 reverse('admin:end-session-confirm', args=[obj.pk]),
                 _('Close')
             )
-        else:
-            return ''
+        return ''
     custom_actions.short_description = _('Actions')
     custom_actions.allow_tags = True
 
@@ -158,7 +157,7 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
                     done = response.status_code == status.HTTP_200_OK
                     if done:
                         new_statuses = response.json()
-                        for attempt_code, data_to_update in new_statuses.iteritems():
+                        for attempt_code, data_to_update in new_statuses.items():
                             exam_attempt = code_to_exam[attempt_code]
                             if exam_attempt.attempt_status != data_to_update['status']:
                                 exam_attempt.attempt_status = data_to_update['status']

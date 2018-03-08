@@ -3,8 +3,8 @@ Backend for python social auth authentication
 """
 import logging
 
-from social.utils import handle_http_errors
-from social.backends.oauth import BaseOAuth2
+from social_core.utils import handle_http_errors
+from social_core.backends.oauth import BaseOAuth2
 
 from django.conf import settings
 

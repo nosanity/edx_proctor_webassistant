@@ -184,7 +184,7 @@ class EventSessionTestCase(TestCase):
         event.proctor = self.user
         event.save()
         event = EventSession.objects.get(pk=event.pk)
-        self.assertEqual(type(event.hash_key), unicode)
+        self.assertEqual(type(event.hash_key), str)
         self.assertRegexpMatches(event.hash_key, r"([a-fA-F\d]{32})")
 
     def test_update_queryset_with_permissions(self):
@@ -237,7 +237,7 @@ def _create_exam(id, course_id):
     exam = Exam()
     exam.exam_code = 'examCode_%s' % id
     exam.duration = 1
-    exam.reviewed_exam = 'reviewedExam_%s' % id
+    exam.reviewed = True
     exam.reviewer_notes = 'reviewerNotes_%s' % id
     exam.exam_password = 'examPassword_%s' % id
     exam.exam_sponsor = 'examSponsor_%s' % id

@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from edx_proctor_webassistant.auth import SsoTokenAuthentication, \
     CsrfExemptSessionAuthentication, IsProctor
+from edx_proctor_webassistant.rest_framework import PaginationBy25
 from journaling.models import Journaling
 from journaling.serializers import JournalingSerializer
 
@@ -28,7 +29,7 @@ class JournalingViewSet(mixins.ListModelMixin,
     """
     serializer_class = JournalingSerializer
     queryset = Journaling.objects.order_by('-pk')
-    paginate_by = 25
+    pagination_class = PaginationBy25
     authentication_classes = (
         SsoTokenAuthentication, CsrfExemptSessionAuthentication,
         BasicAuthentication)

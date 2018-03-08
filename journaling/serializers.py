@@ -35,5 +35,3 @@ class JournalingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Journaling
         exclude = ("exam",)
-
-

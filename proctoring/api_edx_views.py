@@ -13,8 +13,8 @@ from rest_framework.views import APIView
 from edx_proctor_webassistant.auth import CsrfExemptSessionAuthentication
 from edx_proctor_webassistant.web_soket_methods import send_ws_msg
 from journaling.models import Journaling
-from models import Exam, InProgressEventSession, Course
-from serializers import ExamSerializer
+from proctoring.models import Exam, InProgressEventSession
+from proctoring.serializers import ExamSerializer
 
 
 class APIRoot(APIView):
@@ -25,9 +25,9 @@ class APIRoot(APIView):
             "exam_register": reverse('exam-register-list', request=request),
             "bulk_start_exams": reverse('bulk_start_exams', request=request),
             "start_exam": reverse('start_exam', request=request,
-                                   args=('-attempt_code-',)),
+                                  args=('-attempt_code-',)),
             "stop_exam": reverse('stop_exam', request=request,
-                                   args=('-attempt_code-',)),
+                                 args=('-attempt_code-',)),
             "stop_exams": reverse('stop_exams', request=request),
             "poll_status": reverse('poll_status', request=request),
             "review": reverse('review', request=request),
@@ -35,7 +35,7 @@ class APIRoot(APIView):
             "journaling": reverse('journaling-list', request=request),
             "event_session": reverse('event-session-list', request=request),
             "archived_event_session": reverse('archived-event-session-list',
-                                               request=request),
+                                              request=request),
             "archived_exam": reverse('archived-exam-list', request=request),
             "permission": reverse('permission-list', request=request),
             "comment": reverse('comment-list', request=request),
@@ -110,7 +110,7 @@ class ExamViewSet(mixins.ListModelMixin,
         Create new exam, on exam attempt.
         Find Event Session for this exam.
         """
-        data = request.data
+        data = request.data.copy()
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         event = InProgressEventSession.objects.filter(

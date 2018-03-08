@@ -3,7 +3,7 @@ Python social auth pypelines
 """
 import logging
 
-from social.pipeline import partial
+from social_core.pipeline import partial
 
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -19,11 +19,11 @@ def set_roles_for_edx_users(user, permissions):
     This function create roles for proctors from sso permissions.
     """
     proctor_perm = {
-        u'Proctoring', u'*'
+        'Proctoring', '*'
     }
     global_perm = {
-        u'Read', u'Update', u'Delete', u'Publication', u'Enroll',
-        u'Manage(permissions)'
+        'Read', 'Update', 'Delete', 'Publication', 'Enroll',
+        'Manage(permissions)'
     }
     permission_list = []
     for permission in permissions:
@@ -44,21 +44,33 @@ def set_roles_for_edx_users(user, permissions):
     Permission.objects.bulk_create(permission_list)
 
 
+def _create_or_update_permissions(backend, user, response, *args, **kwargs):
+    permissions = response.get('permissions')
+    if permissions is not None:
+        try:
+            set_roles_for_edx_users(user, permissions)
+        except Exception as e:
+            log.error('set_roles_for_edx_users error: {}'.format(e))
+    return response
+
+
 @partial.partial
 def create_or_update_permissions(backend, user, response, *args, **kwargs):
     """
     Create or update permissions from SSO on every auth
     :return: Response
     """
-    permissions = response.get('permissions')
-    if permissions is not None:
-        try:
-            set_roles_for_edx_users(user, permissions)
-        except Exception as e:
-            print e
-            log.error(u'set_roles_for_edx_users error: {}'.format(e))
+    return _create_or_update_permissions(backend, user, response, *args, **kwargs)
 
-    return response
+
+def _update_user_name(backend, user, response, *args, **kwargs):
+    try:
+        user = User.objects.get(email=response['email'])
+        user.first_name = response.get('firstname')
+        user.last_name = response.get('lastname')
+        user.save()
+    except User.DoesNotExist:
+        pass
 
 
 @partial.partial
@@ -67,11 +79,4 @@ def update_user_name(backend, user, response, *args, **kwargs):
     Ensure that we have the necessary information about a user (either an
     existing account or registration data) to proceed with the pipeline.
     """
-    try:
-            user = User.objects.get(email=response['email'])
-            user.first_name = response.get('firstname')
-            user.last_name = response.get('lastname')
-            user.save()
-    except User.DoesNotExist:
-        pass
-
+    _update_user_name(backend, user, response, *args, **kwargs)

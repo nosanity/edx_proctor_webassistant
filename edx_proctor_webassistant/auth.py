@@ -2,7 +2,7 @@
 Authentication classes for Django REST framework
 """
 import json
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 from rest_framework.authentication import SessionAuthentication, \
     TokenAuthentication
 from rest_framework import exceptions
@@ -30,7 +30,7 @@ class SsoTokenAuthentication(TokenAuthentication):
     def authenticate_credentials(self, key):
         try:
             token = self.model.objects.select_related('user').get(
-                extra_data={"access_token": key})
+                extra_data__contains=key)
         except self.model.DoesNotExist:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
@@ -41,7 +41,7 @@ class SsoTokenAuthentication(TokenAuthentication):
         return (token.user, token)
 
 
-class PermissionMixin(object):
+class PermissionMixin:
     """
     Mixin for permissions wich checks is user proctor or instructor or student
     """

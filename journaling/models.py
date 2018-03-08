@@ -37,9 +37,9 @@ class Journaling(models.Model):
     ]
     journaling_type = models.IntegerField(choices=TYPE_CHOICES, db_index=True)
     event = models.ForeignKey("proctoring.EventSession", blank=True, null=True,
-                              db_index=True)
-    exam = models.ForeignKey("proctoring.Exam", blank=True, null=True, db_index=True)
-    proctor = models.ForeignKey(User, blank=True, null=True, db_index=True)
+                              db_index=True, on_delete=models.CASCADE)
+    exam = models.ForeignKey("proctoring.Exam", blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    proctor = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
     note = models.TextField(blank=True, null=True)
     proctor_ip = models.GenericIPAddressField(blank=True, null=True)
     datetime = models.DateTimeField(auto_now=True)

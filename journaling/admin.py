@@ -13,8 +13,7 @@ class JournalingAdmin(admin.ModelAdmin):
     )
     list_filter = ('journaling_type', 'event', 'proctor', 'datetime')
     search_fields = ('note', 'proctor_ip')
-    readonly_fields = (
-    'journaling_type', 'event', 'exam', 'proctor', 'datetime', 'proctor_ip')
+    readonly_fields = ('journaling_type', 'event', 'exam', 'proctor', 'datetime', 'proctor_ip')
 
     def has_add_permission(self, request):
         return False
