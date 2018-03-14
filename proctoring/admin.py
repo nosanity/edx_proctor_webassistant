@@ -125,6 +125,7 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
     @csrf_protect_m
     @transaction.atomic
     def end_session(self, request, event_session_id):
+        redirect_url = reverse('admin:proctoring_inprogresseventsession_changelist')
         event_session = self.get_object(request, event_session_id)
         if str(event_session.status) != models.EventSession.ARCHIVED:
             Journaling.objects.create(
@@ -133,10 +134,6 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
                 proctor=request.user,
                 note="%s -> %s" % (event_session.status, models.EventSession.ARCHIVED)
             )
-            event_session.status = models.EventSession.ARCHIVED
-            event_session.end_date = datetime.now()
-            event_session.comment = _('Closed forcibly from the admin panel')
-            event_session.save()
 
             exams = models.Exam.objects.filter(event=event_session)\
                 .exclude(attempt_status__in=settings.FINAL_ATTEMPT_STATUSES)
@@ -148,26 +145,26 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
             } for exam in exams]
 
             if codes:
-                max_retries = 3
-                attempt = 0
-                done = False
+                response = bulk_update_exams_statuses(codes)
+                if response.status_code == status.HTTP_200_OK:
+                    new_statuses = response.json()
+                    for attempt_code, data_to_update in new_statuses.items():
+                        exam_attempt = code_to_exam[attempt_code]
+                        if exam_attempt.attempt_status != data_to_update['status']:
+                            exam_attempt.attempt_status = data_to_update['status']
+                            exam_attempt.exam_status = models.Exam.FINISHED
+                            exam_attempt.save()
+                else:
+                    messages.error(request, _('Error during request to API edX. Please try again later'))
+                    return HttpResponseRedirect(redirect_url)
 
-                while attempt < max_retries and not done:
-                    response = bulk_update_exams_statuses(codes)
-                    done = response.status_code == status.HTTP_200_OK
-                    if done:
-                        new_statuses = response.json()
-                        for attempt_code, data_to_update in new_statuses.items():
-                            exam_attempt = code_to_exam[attempt_code]
-                            if exam_attempt.attempt_status != data_to_update['status']:
-                                exam_attempt.attempt_status = data_to_update['status']
-                                exam_attempt.exam_status = models.Exam.FINISHED
-                                exam_attempt.save()
-                    attempt += 1
-
+            event_session.status = models.EventSession.ARCHIVED
+            event_session.end_date = datetime.now()
+            event_session.comment = _('Closed forcibly from the admin panel')
+            event_session.save()
             send_ws_msg({'end_session': True}, channel=event_session.hash_key)
             messages.add_message(request, messages.INFO, event_session.exam_name + ': ' + str(_('Session was closed')))
-        return HttpResponseRedirect(reverse('admin:proctoring_inprogresseventsession_changelist'))
+        return HttpResponseRedirect(redirect_url)
 
 
 admin.site.register(models.Course, CourseAdmin)

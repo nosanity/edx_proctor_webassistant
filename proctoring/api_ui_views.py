@@ -224,10 +224,8 @@ class PollStatus(APIView):
                     if exam and new_status and exam.attempt_status != new_status:
                         if exam.attempt_status == 'ready_to_start' and new_status == 'started':
                             exam.actual_start_date = datetime.now()
-                        if (exam.attempt_status == 'started'
-                            and new_status == 'submitted') \
-                            or (exam.attempt_status == 'ready_to_submit'
-                                and new_status == 'submitted'):
+                        if (exam.attempt_status == 'started' and new_status == 'submitted') \
+                          or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
                             exam.actual_end_date = datetime.now()
                         exam.attempt_status = new_status
                         exam.last_poll = datetime.now()

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-02 22:27+0000\n"
+"POT-Creation-Date: 2018-03-14 16:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,19 +91,23 @@ msgstr ""
 msgid "Close"
 msgstr "Закрыть"
 
-#: proctoring/admin.py:94
+#: proctoring/admin.py:93
 msgid "Actions"
 msgstr "Действия"
 
-#: proctoring/admin.py:123 templates/admin/end_session.html:11
+#: proctoring/admin.py:122 templates/admin/end_session.html:11
 msgid "Close session ?"
 msgstr "Закрыть сессию ?"
 
-#: proctoring/admin.py:139
+#: proctoring/admin.py:159
+msgid "Error during request to API edX. Please try again later"
+msgstr "Ошибка при обращении к edX. Пожалуйста, попробуйте ещё раз через одну минуту. При повторной ошибке, пожалуйста, обратитесь в службу поддержки"
+
+#: proctoring/admin.py:164
 msgid "Closed forcibly from the admin panel"
 msgstr "Закрыть принудительно из панели администратора"
 
-#: proctoring/admin.py:170
+#: proctoring/admin.py:167
 msgid "Session was closed"
 msgstr "Сессия была закрыта"
 
