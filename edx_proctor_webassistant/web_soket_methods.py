@@ -1,19 +1,13 @@
 """
-Working with websockets
+Working with notifications
 """
-import json
-from ws4redis.redis_store import RedisMessage
-from ws4redis.publisher import RedisPublisher
-
-from django.conf import settings
+from notifications.client import ProctorNotificator
 
 
-def send_ws_msg(data, channel=settings.WEBSOCKET_EXAM_CHANNEL):
+def send_notification(data, channel):
     """
-    Send message to websocket service through Redis
+    Send message to subscribers
     """
-    ws_msg = RedisMessage(json.dumps(data))
-    RedisPublisher(
-        facility=channel,
-        broadcast=True
-    ).publish_message(ws_msg)
+    res = data.copy()
+    res['course_event_id'] = int(channel)
+    ProctorNotificator.notify(res)

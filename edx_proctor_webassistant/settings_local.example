@@ -6,6 +6,7 @@ SECRET_KEY = '<SECRET_KEY>'
 BOWER_PATH = '/usr/local/bin/bower'
 
 # Credatials for authorization using SSO
+SSO_NPOED_URL = "http://sso.example.com"
 SSO_PWA_URL = "http://sso.example.com"
 SOCIAL_AUTH_SSO_PWA_OAUTH2_KEY = '<OAUTH_KEY>'
 SOCIAL_AUTH_SSO_PWA_OAUTH2_SECRET = '<OAUTH_SECRET>'
@@ -21,3 +22,23 @@ AUTH_SESSION_COOKIE_DOMAIN = ".example.com"
 
 # Title in Grapelli admin panel
 GRAPPELLI_ADMIN_TITLE = "<PROJECT_TITLE>"
+
+COURSE_ID_SLASH_SEPARATED = False
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "HOST": "127.0.0.1",
+        "NAME": "db_name",
+        "USER": "db_user"
+        "PASSWORD": "db_pass",
+        "PORT": "3306"
+     }
+}
+
+NOTIFICATIONS = {
+    "SERVER_PORT": 9090,
+    "BROKER_URL": "amqp://user:pass@127.0.0.1:5672/",
+    "DAEMON_ID": "1",
+    "WEB_URL": "/notifications"
+}

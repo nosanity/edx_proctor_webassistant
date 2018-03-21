@@ -2,54 +2,52 @@
 
 ## Requirements
 
-Api extension must be installed for you OpenEDX
-See https://github.com/raccoongang/open_edx_api_extension
+Api extension must be installed for you OpenEDX.
+See https://github.com/miptliot/open_edx_api_extension
 
 ## Proctor web assistant installation
 
-Create venv and activate it
+Create venv and activate it:
 ```
 virtualenv --no-site-packages assistant_env
 source assistant_env/bin/activate
 ```
 
-Install bower using npm
+Install bower using npm:
 ```
 npm install -g bower
 ```
 
-Get source from GitHub
+Get source from GitHub:
 ```
-git clone https://github.com/raccoongang/edx_proctor_webassistant
-```
-
-Install few tools
-```
-sudo apt-get install redis-server
-sudo apt-get install libffi-dev
-pip install cython git+git://github.com/gevent/gevent.git#egg=gevent
+git clone https://github.com/miptliot/edx_proctor_webassistant
 ```
 
-Check redis server is running
+Be sure that edX RabbitMQ is available for the webassistant application:
 ```
-redis-cli ping
->>> PONG
+import pika
+from pika import adapters
+adapters.TornadoConnection(pika.URLParameters('amqp://user:pass@127.0.0.1:5673/'))
 ```
 
-Setup the project
+If you are using edX through Vagrant image you may add the settings below to your `Vagrantfile`:
+```
+if not ENV['VAGRANT_NO_PORTS']
+  ...
+  config.vm.network :forwarded_port, guest: 15672, host: 15673    # rabbitmq web panel
+  config.vm.network :forwarded_port, guest: 5672, host: 5673      # rabbitmq server
+end
+```
+
+Setup the project:
 ```
 cd edx_proctor_webassistant
 pip install -r requirements.txt 
 ```
 
-Create file `settings_local.py` in one level with settings.py and specify BOWER_PATH there. For example:
-```
-BOWER_PATH = '/usr/local/bin/bower'
-```
+Create file `settings_local.py` in one level with `settings.py` and specify all custom settings there (see example in the `settings_local.example`)
 
-Also set `EDX_URL` in settings
-
-Then run commands
+Then run commands:
 ```
 python manage.py bower install
 python manage.py migrate
@@ -71,19 +69,16 @@ python manage.py collectstatic
 ```
 - Set up an `AUTH_SESSION_COOKIE_DOMAIN`. It must be proctor domain address without subdomain. For example `.yourdomain.com` for `proctor.yourdomain.com`
 
-
 ## Setup uWSGI
 
 **NOTE:** if you run application locally and `DEBUG=True`, no uwsgi configuration is needed
 
-Install uwsgi globally
+Install uwsgi globally:
 ```
 sudo pip install uwsgi
 ```
 
 All actions below will be considered from the point when your cloned code lives in `/edxapps`.
-
-We will be using uwsgi in emperror mode. One process for django application and another one for websocket server.
 
 Create somewhere the file named `uwsgi.ini` with the following content (assuming you want to run django server on `:8080` port)
 ```
@@ -93,19 +88,17 @@ uid = www-data
 gid = www-data
 die-on-term = true
 offload-threads = 1
-route = ^/ws uwsgi:/tmp/web.sock,0,0
 route = ^/ uwsgi:/127.0.0.1:8080,0,0
 ```
 
-Create `vassals` dir with 2 configs (change path to the directory where uwsgi.ini was created)
+Create `vassals` dir with config (change path to the directory where uwsgi.ini was created)
 ```
 # mkdir /edxapp/edx_proctor_webassistant/vassals
 # cd /edxapp/edx_proctor_webassistant/vassals
 # touch runserver.ini
-# touch websocket.ini
 ```
 
-runserver.ini content for django application (change params to your according to your needs): 
+`runserver.ini` content for django application (change params to your according to your needs): 
 ```
 [uwsgi]
 umask = 002
@@ -123,28 +116,23 @@ buffer-size = 32768
 processes = 2
 ```
 
-websocket.ini content for websocket server:
-```
-[uwsgi]
-umask = 002
-virtualenv = /edxapps/assistant_env
-chdir = /edxapps/edx_proctor_webassistant
-module = edx_proctor_webassistant.wsgi_socket
-no-orphans = true
-die-on-term = true
-memory-report = true
-http-socket = /tmp/web.sock
-http-websockets = true
-gevent = 1000
-processes = 1
-master = true
-```
-
 check the config is correct
 ```
 # cd /edxapp/edx_proctor_webassistant
 # uwsgi --ini uwsgi.ini
 ```
+
+## Tornado notifications server
+
+Just run server with the command:
+
+```
+source assistant_env/bin/activate
+python notificator.py
+
+```
+
+In production you should use something like `systemd` or `supervisor` to manage daemon and check it availability  
 
 ## NGINX
 
@@ -156,10 +144,6 @@ Create `proctor` config (or place a symlink) in nginx sites-available dir
 ```
 upstream django {
     server 127.0.0.1:8080;
-}
-
-upstream websocket {
-    server unix:/tmp/web.sock;
 }
 
 server {
@@ -183,13 +167,14 @@ server {
         alias /edxapps/edx_proctor_webassistant/static;
     }
 
-    location /ws/ {
+    location /notifications {
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_pass http://unix:/tmp/web.sock;
+        proxy_pass http://127.0.0.1:9090;
         proxy_buffers 8 32k;
         proxy_buffer_size 64k;
-   }
+    }
+
 }
 ```

@@ -88,7 +88,7 @@ class ExamSerializer(serializers.ModelSerializer):
         model = Exam
         fields = ('examCode', 'organization', 'duration', 'reviewedExam',
                   'reviewerNotes', 'examPassword', 'examSponsor',
-                  'examName', 'ssiProduct', 'orgExtra', 'attempt_status',
+                  'examName', 'ssiProduct', 'orgExtra', 'attempt_status', 'attempt_status_updated',
                   'hash', 'actual_start_date', 'actual_end_date')
 
     examCode = serializers.CharField(source='exam_code', max_length=60)
@@ -102,6 +102,7 @@ class ExamSerializer(serializers.ModelSerializer):
     actual_start_date = serializers.DateTimeField(read_only=True)
     actual_end_date = serializers.DateTimeField(read_only=True)
     attempt_status = serializers.CharField(read_only=True)
+    attempt_status_updated = serializers.SerializerMethodField()
     hash = serializers.SerializerMethodField()
 
     orgExtra = JSONSerializerField(
@@ -115,6 +116,9 @@ class ExamSerializer(serializers.ModelSerializer):
         :return: str
         """
         return obj.generate_key()
+
+    def get_attempt_status_updated(self, obj):
+        return obj.attempt_status_updated.timestamp() if obj.attempt_status_updated else None
 
     def to_representation(self, instance):
         """
@@ -209,6 +213,7 @@ class EventSessionSerializer(serializers.ModelSerializer):
     hash_key = serializers.CharField(read_only=True)
     start_date = serializers.DateTimeField(read_only=True)
     end_date = serializers.DateTimeField(read_only=True)
+    course_event_id = serializers.CharField()
     course_id = serializers.SerializerMethodField()
     course_name = serializers.SerializerMethodField()
     owner_username = serializers.SerializerMethodField()

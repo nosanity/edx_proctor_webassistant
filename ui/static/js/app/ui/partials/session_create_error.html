@@ -8,7 +8,7 @@
         <div class="modal-body">
             <div>{[ i18n('SESSION_ALREADY_EXISTS') ]}</div><br />
             <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{{ exam.testing_center }}</strong></div><br />
-            <div><a href="{{ examLink }}">{{ examLink }}</a></div>
+            <div><a href="#" ng-click="ok()">{{ examLink }}</a></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" type="button" ng-click="ok()">{[ i18n('JOIN') ]}</button>

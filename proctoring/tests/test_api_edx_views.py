@@ -119,8 +119,8 @@ class ExamViewSetTestCase(TestCase):
         self.assertEqual(type(data), list)
         self.assertEqual(len(data), 0)
 
-    @patch('proctoring.api_edx_views.send_ws_msg')
-    def test_register_exam(self, send_ws_msg):
+    @patch('proctoring.api_edx_views.send_notification')
+    def test_register_exam(self, send_notification):
         factory = APIRequestFactory()
         exam_data = {
             "examCode": "newEamCode",

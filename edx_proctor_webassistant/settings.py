@@ -46,7 +46,6 @@ INSTALLED_APPS = (
 
     'djangobower',
     'pipeline',
-    'ws4redis',
     'rest_framework',
 
     'person',
@@ -80,7 +79,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'ws4redis.context_processors.default',
             ],
         },
     },
@@ -166,6 +164,7 @@ BOWER_INSTALLED_APPS = (
     'angular-translate#2.12.1',
     'angular-translate-storage-local#2.12.1',
     'angular-translate-loader-static-files#2.12.1',
+    'sockjs-client#1.1.4'
 )
 
 # Pipeline
@@ -200,6 +199,7 @@ PIPELINE_JS = {
             'angular-translate-storage-local/angular-translate-storage-local.min.js',
             'angular-translate-storage-cookie/angular-translate-storage-cookie.min.js',
             'angular-translate-loader-static-files/angular-translate-loader-static-files.min.js',
+            'sockjs-client/dist/sockjs.min.js',
             'js/app/app.js',
             'js/lib/checklist-model.js',
             'js/app/common/modules/websocket.js',
@@ -214,22 +214,6 @@ PIPELINE_JS = {
     }
 }
 
-# Websocket settings
-# http://django-websocket-redis.readthedocs.org/en/latest/installation.html
-#
-WEBSOCKET_EXAM_CHANNEL = 'attempts'
-WEBSOCKET_URL = '/ws/'
-WS4REDIS_CONNECTION = {
-    'host': 'localhost',
-    'port': 6379,
-    # 'db': 0,
-    # 'password': 'verysecret',
-}
-WS4REDIS_EXPIRE = 5
-WS4REDIS_PREFIX = 'ws'
-WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-WS4REDIS_HEARTBEAT = '--heartbeat--'
-
 # Config for Single Page Application
 SPA_CONFIG = {
     "sso_enabled": SSO_ENABLED,
@@ -237,6 +221,52 @@ SPA_CONFIG = {
     "language": "en",
     "allow_language_change": False,
     "supported_languages": ['en']
+}
+
+FINAL_ATTEMPT_STATUSES = ['error', 'verified', 'rejected', 'deleted_in_edx', 'declined', 'timed_out']
+
+NOTIFICATIONS = {
+    'DAEMON_ID': '1',
+    'WEB_URL': '/notifications'
+}
+
+RAVEN_CONFIG = {}
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(levelname)s %(process)d '
+                      '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
+        },
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'server.log',
+            'mode': 'w',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True
+        },
+        'notifications': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    },
 }
 
 try:
@@ -248,5 +278,3 @@ except ImportError:
 INSTALLED_APPS = INSTALLED_APPS + (
     'raven.contrib.django.raven_compat',
 )
-
-FINAL_ATTEMPT_STATUSES = ['error', 'verified', 'rejected', 'deleted_in_edx', 'declined', 'timed_out']

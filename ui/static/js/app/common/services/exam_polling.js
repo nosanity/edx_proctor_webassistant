@@ -8,9 +8,8 @@
         var attempts = [];
         var timer = null;
 
-        var get_status = function(){
-            // statuses will be updated through websocket channel
-            return Api.get_exams_status(attempts);
+        var get_status = function(needResult){
+            return Api.get_exams_status(attempts, needResult);
         };
 
         this.stop = function(key){
@@ -32,8 +31,15 @@
 
         this.add_item = function(key){
             attempts.push(key);
+        };
+
+        this.run = function(key){
             self.stop_all();
             self.start();
+        };
+
+        this.fetch_statuses = function (needResult) {
+            return Api.get_exams_status(attempts, needResult);
         };
     }
 

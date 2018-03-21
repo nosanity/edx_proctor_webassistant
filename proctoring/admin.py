@@ -14,7 +14,7 @@ from rest_framework import status
 from journaling.models import Journaling
 from proctoring import models
 from proctoring.edx_api import bulk_update_exams_statuses
-from edx_proctor_webassistant.web_soket_methods import send_ws_msg
+from edx_proctor_webassistant.web_soket_methods import send_notification
 
 
 csrf_protect_m = method_decorator(csrf_protect)
@@ -152,6 +152,7 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
                         exam_attempt = code_to_exam[attempt_code]
                         if exam_attempt.attempt_status != data_to_update['status']:
                             exam_attempt.attempt_status = data_to_update['status']
+                            exam_attempt.attempt_status_updated = datetime.now()
                             exam_attempt.exam_status = models.Exam.FINISHED
                             exam_attempt.save()
                 else:
@@ -162,7 +163,7 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
             event_session.end_date = datetime.now()
             event_session.comment = _('Closed forcibly from the admin panel')
             event_session.save()
-            send_ws_msg({'end_session': True}, channel=event_session.hash_key)
+            send_notification({'end_session': True}, channel=event_session.course_event_id)
             messages.add_message(request, messages.INFO, event_session.exam_name + ': ' + str(_('Session was closed')))
         return HttpResponseRedirect(redirect_url)
 

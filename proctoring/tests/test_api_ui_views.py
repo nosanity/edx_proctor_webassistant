@@ -66,8 +66,8 @@ class ViewsUITestCase(TestCase):
             poll_status.return_value = EdxResponse({"status": "bar"})
             self.assertEqual(api_ui_views._get_status("foo"), 'bar')
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_start_exam(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_start_exam(self, send_notification):
         factory = APIRequestFactory()
         with patch(
             'proctoring.api_ui_views.start_exam_request') as edx_request:
@@ -104,8 +104,8 @@ class ViewsUITestCase(TestCase):
             data = json.loads(str(response.content, 'utf-8'))
             self.assertIn('error', data)
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_stop_exam(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_stop_exam(self, send_notification):
         factory = APIRequestFactory()
         with patch('proctoring.api_ui_views.stop_exam_request') as edx_request:
             edx_request.return_value = MockResponse(
@@ -139,8 +139,8 @@ class ViewsUITestCase(TestCase):
                 data
             )
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_stop_exams(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_stop_exams(self, send_notification):
         factory = APIRequestFactory()
         wrong_data = {
             "attempts":
@@ -182,8 +182,8 @@ class ViewsUITestCase(TestCase):
             response = api_ui_views.StopExams.as_view()(request)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_poll_status(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_poll_status(self, send_notification):
         factory = APIRequestFactory()
         data = {'list': [self.exam.exam_code]}
         self.exam.attempt_status = 'ready_to_start'
@@ -371,8 +371,8 @@ class BulkStartExamTestCase(TestCase):
         exam2.save()
         self.exams = [exam1, exam2]
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_create_event(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_create_event(self, send_notification):
         factory = APIRequestFactory()
         data = {
             'list': ['examCode', 'examCode2']
@@ -454,8 +454,8 @@ class EventSessionViewSetTestCase(TestCase):
             event_data
         )
 
-    @patch('proctoring.api_ui_views.send_ws_msg')
-    def test_update_event(self, send_ws_msg):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_update_event(self, send_notification):
         event = EventSession()
         event.testing_center = "new center"
         event.course = Course.create_by_course_run("new/course/id")
@@ -820,8 +820,8 @@ class CommentViewSetTestCase(TestCase):
             "comment": """{
                 "comment": "comment text",
                 "event_status": "Suspicious",
-                "event_start": 123,
-                "event_finish": 321,
+                "event_start": 1521843813866,
+                "event_finish": 1521843913866,
                 "duration": 198
             }"""
         }
@@ -837,20 +837,20 @@ class CommentViewSetTestCase(TestCase):
         comment = Comment.objects.get(pk=data['id'])
         self.assertDictContainsSubset(
             {
+                "comment": "comment text",
+                "event_status": "Suspicious",
+                "event_start": 1521843813,
+                "event_finish": 1521843913,
+                "exam_code": "examCode",
+                "duration": 198,
+            },
+            {
                 "comment": comment.comment,
                 "event_status": comment.event_status,
                 "event_start": comment.event_start,
                 "event_finish": comment.event_finish,
                 "exam_code": comment.exam.exam_code,
                 "duration": comment.duration,
-            },
-            {
-                "comment": "comment text",
-                "event_status": "Suspicious",
-                "event_start": 123,
-                "event_finish": 321,
-                "exam_code": "examCode",
-                "duration": 198,
             }
         )
 

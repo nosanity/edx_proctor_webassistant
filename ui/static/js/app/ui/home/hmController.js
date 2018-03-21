@@ -32,12 +32,29 @@
                     true
                 );
 
+                // helper function
+                function _addNewAttempt(attempt) {
+                    var started_at = '';
+                    if (attempt.actual_start_date) {
+                        started_at = DateTimeService.get_localized_time_from_string(attempt.actual_start_date);
+                    }
+
+                    attempt.started_at = started_at;
+                    attempt.status_updated = attempt.attempt_status_updated;
+                    attempt.status = attempt.attempt_status;
+                    if (!attempt.code) {
+                        attempt.code = attempt.examCode;
+                    }
+
+                    return attempt;
+                }
+
                 // get student exams from session
                 if (students !== undefined) {
                     angular.forEach(students.data, function (attempt) {
                         // restore attempt comments
                         Api.get_comments(attempt.examCode).then(function (data) {
-                            var started_at = '', comments = data.data.results;
+                            var comments = data.data.results;
                             attempt.comments = [];
                             angular.forEach(comments, function (comment) {
                                 var item = {
@@ -48,14 +65,7 @@
                                 attempt.comments.push(item);
                             });
 
-                            if (attempt.actual_start_date) {
-                                started_at = DateTimeService.get_localized_time_from_string(attempt.actual_start_date);
-                            };
-
-                            attempt.started_at = started_at;
-                            attempt.status = attempt.attempt_status;
-                            wsData.attempts.push(attempt);
-                            Polling.add_item(attempt.examCode); // first item starts cyclic update
+                            wsData.addNewAttempt(_addNewAttempt(attempt));
                         });
                     });
                 }
@@ -81,21 +91,36 @@
                     return TestSession.is_owner();
                 };
 
-                var attempt_end = function (hash) {
-                    Polling.stop(hash);
-                };
+                var attempt_end = function (hash) {};
 
-                // Start websocket connection
-                WS.init(session.hash_key, wsData.websocket_callback, true);
+                // Start SockJS (websocket) connection
+                WS.init(session.course_event_id, wsData.websocket_callback, true, function(wsCallback) {
+                    // fallback function in case if SockJS connection is failed
+                    Api.restore_session().then(function(response) {
+                        angular.forEach(response.data, function (attempt) {
+                            var item = wsData.findAttempt(attempt.examCode);
+                            item = item.length ? item[0] : null;
+                            if (!item) {
+                                wsData.addNewAttempt(_addNewAttempt(attempt));
+                            }
+                        });
+                        Polling.fetch_statuses(true).then(function(response) {
+                            angular.forEach(response.data, function (attempt) {
+                                wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                            });
+                            wsCallback();
+                        }, function() {
+                            wsCallback();
+                        });
+                    }, function() {
+                        wsCallback();
+                    });
+                });
 
                 $scope.accept_exam_attempt = function (exam) {
                     if (exam.accepted) {
                         Api.accept_exam_attempt(exam.examCode)
-                            .success(function (data) {
-                                if (data['status'] == 'ready_to_start') {
-                                    Polling.add_item(exam.examCode);
-                                }
-                            });
+                            .success(function (data) {});
                     }
                 };
 
@@ -183,9 +208,9 @@
                             while ($scope.ws_data[idx].examCode !== exam.examCode) {
                                 idx++;
                             }
-                            if (status == 'Clean')
+                            if (status === 'Clean')
                                 wsData.attempts[idx].status = 'verified';
-                            else if (status == 'Suspicious')
+                            else if (status === 'Suspicious')
                                 wsData.attempts[idx].status = 'rejected';
                             exam.review_sent = true;
                             attempt_end(exam.hash);
@@ -238,7 +263,7 @@
                         $scope.add_review({}, 'session').then(function (data) {
                             TestSession.endSession(data.comment).then(function () {
                                 delete window.sessionStorage['proctoring'];
-                                Polling.stop_all();
+                                WS.disconnect();
                                 wsData.clear();
                                 $location.path('/session');
                             }, function () {
@@ -254,11 +279,7 @@
 
                 $scope.start_all_attempts = function () {
                     if (confirm(i18n.translate('APPROVE_ALL_STUDENTS')) === true) {
-                        Api.start_all_exams($scope.exams.checked).then(function () {
-                            angular.forEach($scope.exams.checked, function (val, key) {
-                                Polling.add_item(val);
-                            });
-                        });
+                        Api.start_all_exams($scope.exams.checked).then(function () {});
                     }
                 };
 

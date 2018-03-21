@@ -42,6 +42,7 @@ class Index(View):
                 'user_has_access': user_has_access,
                 'sso_enabled': settings.SSO_ENABLED,
                 'login_url': login_url,
+                'notifications_url': settings.NOTIFICATIONS['WEB_URL'],
                 'profile_url': NpoedBackend.PROFILE_URL,
                 'spa_config': json.dumps(settings.SPA_CONFIG)
             },

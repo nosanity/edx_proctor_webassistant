@@ -11,7 +11,7 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edx_proctor_webassistant.auth import CsrfExemptSessionAuthentication
-from edx_proctor_webassistant.web_soket_methods import send_ws_msg
+from edx_proctor_webassistant.web_soket_methods import send_notification
 from journaling.models import Journaling
 from proctoring.models import Exam, InProgressEventSession
 from proctoring.serializers import ExamSerializer
@@ -131,7 +131,10 @@ class ExamViewSet(mixins.ListModelMixin,
         self.perform_create(serializer)
         data['hash'] = serializer.instance.generate_key()
         data['status'] = 'created'
-        send_ws_msg(data, channel=event.hash_key)
+        data['code'] = data['examCode']
+        ws_data = data.copy()
+        ws_data.pop('examPassword', None)
+        send_notification(ws_data, channel=event.course_event_id)
         headers = self.get_success_headers(serializer.data)
         serializer.instance.event = event
         serializer.instance.save()

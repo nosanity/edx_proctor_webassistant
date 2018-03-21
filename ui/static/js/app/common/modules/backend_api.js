@@ -41,9 +41,9 @@
             });
         };
 
-        this.get_exams_status = function(list){
+        this.get_exams_status = function(list, needResult){
             return generic_api_call({
-                'url':  get_url('poll_status'),
+                'url':  get_url('poll_status') + (needResult ? '?result=1' : ''),
                 'method': 'POST',
                 'data': JSON.stringify({list: list})
             });

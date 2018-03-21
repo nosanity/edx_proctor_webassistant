@@ -1,28 +1,33 @@
 (function(){
     angular.module('proctor')
-        .service('wsData', function($route, TestSession, DateTimeService, Polling) {
+        .service('wsData', function($route, TestSession, DateTimeService, WS, Polling) {
 
             var self = this;
 
             this.attempts = [];
 
-            var updateStatus = function (idx, status) {
-                var obj = self.attempts.filterBy({hash: idx});
+            var updateStatus = function (code, status, updated) {
+                var obj = self.attempts.filterBy({code: code});
                 if (obj.length > 0) {
-                    if (obj[0].review_sent !== true)
+                    if ((obj[0].review_sent !== true)
+                      && (!obj[0]['status_updated'] || !updated || (updated > obj[0]['status_updated']))
+                      && (obj[0]['status'] !== status)) {
                         obj[0]['status'] = status;
+                        obj[0]['status_updated'] = updated;
+                    }
                 }
             };
 
             var addAttempt = function (attempt) {
                 if (!attempt.hasOwnProperty('comments')) {
                     attempt.comments = [];
-                };
+                }
                 self.attempts.push(angular.copy(attempt));
+                Polling.add_item(attempt.examCode);
             };
 
             var recievedComments = function (msg) {
-                var item = self.attempts.filterBy({hash: msg.hash});
+                var item = self.attempts.filterBy({code: msg.code});
                 item = item.length ? item[0] : null;
                 if (item) {
                     var comment = item.comments.filterBy({timestamp: msg.comments.timestamp});
@@ -33,21 +38,34 @@
             };
 
             var pollStatus = function (msg) {
-                var item = self.attempts.filterBy({hash: msg.hash});
+                var item = self.attempts.filterBy({code: msg.code});
                 item = item.length ? item[0] : null;
-                if (msg.status == 'started' && item && item.status == 'ready_to_start') {
+                if (msg.status === 'started' && item && item.status === 'ready_to_start') {
                     // variable to display in view
                     item.started_at = DateTimeService.get_now_time();
                 }
-                updateStatus(msg['hash'], msg['status']);
+                updateStatus(msg['code'], msg['status'], msg['created']);
                 if (['verified', 'error', 'rejected', 'deleted_in_edx'].in_array(msg['status'])) {
                     Polling.stop(msg['hash']);
                 }
             };
 
             var endSession = function () {
+                WS.disconnect();
                 TestSession.flush();
                 $route.reload();
+            };
+
+            this.addNewAttempt = function (attempt) {
+                addAttempt(attempt)
+            };
+
+            this.findAttempt = function(code) {
+                return self.attempts.filterBy({code: code});
+            };
+
+            this.updateAttemptStatus = function (code, status, updated) {
+                updateStatus(code, status, updated);
             };
 
             this.websocket_callback = function(msg) {
@@ -56,11 +74,11 @@
                         addAttempt(msg);
                         return;
                     }
-                    if (msg['hash'] && msg.hasOwnProperty('comments')) {
+                    if (msg.code && msg.hasOwnProperty('comments')) {
                         recievedComments(msg);
                         return;
                     }
-                    if (msg['hash'] && msg['status']) {
+                    if (msg.code && msg['status']) {
                         pollStatus(msg);
                         return;
                     }

@@ -1,54 +1,67 @@
 (function () {
     angular.module('websocket', []).factory('WS', ['$rootScope', function ($rootScope) {
-        var ws, ws_params = {}, ws_msg = null;
+        var sock, sock_params = {}, force_close = false;
 
-        var init = function (subcribe, callback, reconnect) {
-            ws_params.channel = subcribe;
-            ws_params.callback = callback;
-            if (["function", "object"].indexOf(typeof window.WebSocket) >= 0){
-                var protocol = 'ws://';
-                if("https:" == document.location.protocol){
-                    protocol = 'wss://';
-                }
-                ws = new WebSocket(
-                    protocol +
-                    $rootScope.apiConf.ioServer +
-                    '/ws/' +
-                    subcribe +
-                    '?subscribe-broadcast&echo'
-                );
+        var disconnect = function() {
+          if (sock !== null) {
+              force_close = true;
+              console.log("SockJS disconnecting...");
+              sock.close();
+              sock = null;
+          }
+        };
+
+        var init = function (course_event_id, callback, reconnect, onErrorCloseCallback) {
+            if (!course_event_id) {
+                throw new Error("Invalid course_event_id param: " + course_event_id);
             }
-            else {
-                ws = {};
-            }
-            ws.onopen = function () {
-                console.log("Websocket connected");
+
+            sock_params.channel = course_event_id;
+            sock_params.callback = callback;
+            var sock_url = document.location.protocol + '//' + $rootScope.apiConf.ioServer + window.app.notificationsUrl +
+                '?course_event_id=' + course_event_id;
+            sock = new SockJS(sock_url);
+            force_close = false;
+
+            sock.onopen = function () {
+                console.log("SockJS connection opened");
             };
-            ws.onmessage = function (e) {
+            sock.onmessage = function (e) {
                 try {
-                    ws_msg = JSON.parse(e.data);
-
-                    callback(ws_msg);
+                    callback(e.data);
+                } catch (err) {
+                    console.log("SockJS onmessage error", err);
                 }
-                catch (err) { }
             };
-            ws.onerror = function (e) {
-                console.log(e);
+            sock.onerror = function (e) {
+                console.log('SockJS error:', e);
             };
-            ws.onclose = function (e) {
-                console.log("Websocket connection closed");
-                if (reconnect !== undefined && reconnect === true) {
-                    init(subcribe, callback, reconnect);
+            sock.onclose = function () {
+                console.log("SockJS connection closed");
+                sock = null;
+                if (reconnect !== undefined && reconnect === true && !force_close) {
+                    setTimeout(function() {
+                        if (onErrorCloseCallback) {
+                            onErrorCloseCallback(function() {
+                                init(course_event_id, callback, reconnect, onErrorCloseCallback);
+                            });
+                        } else {
+                            init(course_event_id, callback, reconnect);
+                        }
+
+                    }, 3000);
                 }
             };
             $rootScope.$on('$locationChangeStart', function (event, next, current) {
-                init(ws_params.channel, ws_params.callback, false);
-                ws.close();
+                if (sock && !force_close) {
+                    sock.close();
+                }
             });
         };
 
         return {
-            init: init
+            init: init,
+            disconnect: disconnect
         };
     }]);
 })();

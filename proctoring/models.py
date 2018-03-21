@@ -177,12 +177,14 @@ class Exam(models.Model):
     """
     NEW = 'new'
     STARTED = 'started'
+    STOPPED = 'stopped'
     FINISHED = 'finished'
     FAILED = 'failed'
 
     EXAM_STATUS_CHOICES = {
         (NEW, _("Not started")),
         (STARTED, _("Started")),
+        (STOPPED, _("Stopped")),
         (FINISHED, _("Finished")),
         (FAILED, _("Failed")),
     }
@@ -220,6 +222,7 @@ class Exam(models.Model):
         default=NEW)
 
     attempt_status = models.CharField(max_length=20, blank=True, null=True)
+    attempt_status_updated = models.DateTimeField(blank=True, null=True)
 
     event = models.ForeignKey('EventSession', blank=True, null=True, on_delete=models.CASCADE)
 

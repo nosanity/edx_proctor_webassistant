@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
 
-from edx_proctor_webassistant.web_soket_methods import send_ws_msg
+from edx_proctor_webassistant.web_soket_methods import send_notification
 from edx_proctor_webassistant.auth import (CsrfExemptSessionAuthentication,
                                            SsoTokenAuthentication,
                                            IsProctor, IsProctorOrInstructor)
@@ -69,6 +69,7 @@ class StartExam(APIView):
             exam.exam_status = exam.STARTED
             exam.proctor = request.user
             exam.attempt_status = "ready_to_start"
+            exam.attempt_status_updated = datetime.now()
             exam.save()
             Journaling.objects.create(
                 journaling_type=Journaling.EXAM_STATUS_CHANGE,
@@ -80,9 +81,9 @@ class StartExam(APIView):
             data = {
                 'hash': exam.generate_key(),
                 'proctor': exam.proctor.username,
-                'status': exam.attempt_status
+                'status': exam.attempt_status,
+                'code': attempt_code
             }
-            send_ws_msg(data, channel=exam.event.hash_key)
         else:
             data = {'error': 'Edx response error. See logs'}
         return Response(data=data, status=response.status_code)
@@ -135,11 +136,19 @@ class StopExam(APIView):
         if action and user_id:
             response, current_status = _stop_attempt(attempt_code, action,
                                                      user_id)
-            data = {
-                'hash': exam.generate_key(),
-                'status': current_status
-            }
-            send_ws_msg(data, channel=exam.event.hash_key)
+            if response.status_code == 200:
+                exam.exam_status = exam.STOPPED
+                exam.proctor = request.user
+                exam.attempt_status = current_status
+                exam.attempt_status_updated = datetime.now()
+                exam.save()
+                data = {
+                    'hash': exam.generate_key(),
+                    'status': current_status,
+                    'code': attempt_code
+                }
+            else:
+                data = {'error': 'Edx response error. See logs'}
             return Response(status=response.status_code, data=data)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -174,14 +183,14 @@ class StopExams(APIView):
                     response, current_status = _stop_attempt(
                         attempt['attempt_code'], action, user_id
                     )
-                    if response.status_code != 200:
-                        status_list.append(response.status_code)
+                    if response.status_code == 200:
+                        exam.exam_status = exam.STOPPED
+                        exam.proctor = request.user
+                        exam.attempt_status = current_status
+                        exam.attempt_status_updated = datetime.now()
+                        exam.save()
                     else:
-                        data = {
-                            'hash': exam.generate_key(),
-                            'status': current_status
-                        }
-                        send_ws_msg(data, channel=exam.event.hash_key)
+                        status_list.append(response.status_code)
                 else:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
             if status_list:
@@ -211,6 +220,8 @@ class PollStatus(APIView):
         ```
         """
         data = request.data.copy()
+        result_in_response = request.GET.get('result')
+        result = [] if result_in_response else None
         if 'list' in data and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
@@ -222,20 +233,28 @@ class PollStatus(APIView):
                 for attempt_code, new_status in response.items():
                     exam = codes_dict.get(attempt_code, None)
                     if exam and new_status and exam.attempt_status != new_status:
-                        if exam.attempt_status == 'ready_to_start' and new_status == 'started':
-                            exam.actual_start_date = datetime.now()
-                        if (exam.attempt_status == 'started' and new_status == 'submitted') \
-                          or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
-                            exam.actual_end_date = datetime.now()
-                        exam.attempt_status = new_status
-                        exam.last_poll = datetime.now()
-                        exam.save()
-                        data = {
-                            'hash': exam.generate_key(),
-                            'status': exam.attempt_status
-                        }
-                        send_ws_msg(data, channel=exam.event.hash_key)
-            return Response(status=status.HTTP_200_OK)
+                        if exam.attempt_status != new_status:
+                            if exam.attempt_status == 'ready_to_start' and new_status == 'started':
+                                exam.actual_start_date = datetime.now()
+                            if (exam.attempt_status == 'started' and new_status == 'submitted') \
+                              or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
+                                exam.actual_end_date = datetime.now()
+                            exam.attempt_status = new_status
+                            exam.attempt_status_updated = datetime.now()
+                            exam.last_poll = datetime.now()
+                            exam.save()
+                            data = {
+                                'hash': exam.generate_key(),
+                                'status': exam.attempt_status,
+                                'code': attempt_code
+                            }
+                            if not result_in_response:
+                                send_notification(data, channel=exam.event.course_event_id)
+                        if result_in_response:
+                            result.append({'code': attempt_code, 'status': exam.attempt_status,
+                                           'updated': exam.attempt_status_updated.timestamp()})
+            return Response(data=result, status=status.HTTP_200_OK) if result_in_response\
+                else Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -362,7 +381,7 @@ class EventSessionViewSet(mixins.ListModelMixin,
             ws_data = {
                 'end_session': change_end_date
             }
-            send_ws_msg(ws_data, channel=instance.hash_key)
+            send_notification(ws_data, channel=instance.course_event_id)
         return Response(serializer.data)
 
 
@@ -512,6 +531,7 @@ class Review(APIView):
 
         response, current_status = self.send_review(payload)
         exam.attempt_status = current_status
+        exam.attempt_status_updated = datetime.now()
         exam.save()
 
         return Response(
@@ -591,12 +611,6 @@ class BulkStartExams(APIView):
             exam.exam_status = exam.STARTED
             exam.proctor = request.user
             exam.save()
-            data = {
-                'hash': exam.generate_key(),
-                'proctor': exam.proctor.username,
-                'status': "ready_to_start"
-            }
-            send_ws_msg(data, channel=exam.event.hash_key)
         Journaling.objects.create(
             journaling_type=Journaling.BULK_EXAM_STATUS_CHANGE,
             note="%s. %s -> %s" % (
