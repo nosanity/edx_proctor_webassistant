@@ -90,8 +90,11 @@
                         pollStatus(msg);
                         return;
                     }
-                    if (msg.hasOwnProperty('end_session')) {
-                        endSession();
+                    if (msg.hasOwnProperty('end_session') && msg.hasOwnProperty('session_id')) {
+                        var session = TestSession.getSession();
+                        if (session.id === parseInt(msg.session_id)) {
+                            endSession();
+                        }
                     }
                 }
             };

@@ -33,6 +33,10 @@
             attempts.push(key);
         };
 
+        this.get_attempts = function() {
+            return attempts;
+        };
+
         this.fetch_statuses = function (needResult) {
             return Api.get_exams_status(attempts, needResult);
         };

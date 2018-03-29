@@ -3,17 +3,23 @@
         var sock, sock_params = {}, force_close = false;
 
         var disconnect = function() {
+          force_close = true;
           if (sock !== null) {
-              force_close = true;
               console.log("SockJS disconnecting...");
               sock.close();
               sock = null;
           }
         };
 
-        var init = function (course_event_id, callback, reconnect, onErrorCloseCallback) {
+        var init = function (course_event_id, callback, reconnect, onErrorCloseCallback, startNew) {
+            startNew = startNew || false;
+
             if (!course_event_id) {
                 throw new Error("Invalid course_event_id param: " + course_event_id);
+            }
+
+            if (startNew) {
+                force_close = false;
             }
 
             sock_params.channel = course_event_id;
@@ -21,10 +27,10 @@
             var sock_url = document.location.protocol + '//' + $rootScope.apiConf.ioServer + window.app.notificationsUrl +
                 '?course_event_id=' + course_event_id;
             sock = new SockJS(sock_url);
-            force_close = false;
 
             sock.onopen = function () {
                 console.log("SockJS connection opened");
+                force_close = false;
             };
             sock.onmessage = function (e) {
                 try {

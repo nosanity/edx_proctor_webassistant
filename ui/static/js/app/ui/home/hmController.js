@@ -104,18 +104,22 @@
                                 wsData.addNewAttempt(_addNewAttempt(attempt));
                             }
                         });
-                        Polling.fetch_statuses(true).then(function(response) {
-                            angular.forEach(response.data, function (attempt) {
-                                wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                        if (Polling.get_attempts().length > 0) {
+                            Polling.fetch_statuses(true).then(function(response) {
+                                angular.forEach(response.data, function (attempt) {
+                                    wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                                });
+                                wsCallback();
+                            }, function() {
+                                wsCallback();
                             });
+                        } else {
                             wsCallback();
-                        }, function() {
-                            wsCallback();
-                        });
+                        }
                     }, function() {
                         wsCallback();
                     });
-                });
+                }, true);
 
                 $scope.accept_exam_attempt = function (exam) {
                     if (exam.accepted) {

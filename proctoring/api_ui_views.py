@@ -377,6 +377,7 @@ class EventSessionViewSet(mixins.ListModelMixin,
             event_session.save()
             serializer = self.get_serializer(event_session)
             ws_data = {
+                'session_id': event_session.id,
                 'end_session': change_end_date
             }
             send_notification(ws_data, channel=instance.course_event_id)
