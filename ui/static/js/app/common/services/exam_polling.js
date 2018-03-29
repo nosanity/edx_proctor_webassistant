@@ -19,23 +19,18 @@
             }
         };
 
-        this.stop_all = function(){
-            $interval.cancel(timer);
-        };
-
         this.start = function(){
             timer = $interval(function(){
                 get_status();
             }, 5000);
         };
 
-        this.add_item = function(key){
-            attempts.push(key);
+        this.clear = function () {
+            attempts = [];
         };
 
-        this.run = function(key){
-            self.stop_all();
-            self.start();
+        this.add_item = function(key){
+            attempts.push(key);
         };
 
         this.fetch_statuses = function (needResult) {

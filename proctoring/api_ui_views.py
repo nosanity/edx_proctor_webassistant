@@ -12,7 +12,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.conf import settings
 from django.shortcuts import redirect
 
 from edx_proctor_webassistant.web_soket_methods import send_notification
@@ -225,14 +224,13 @@ class PollStatus(APIView):
         if 'list' in data and data['list']:
             exams = models.Exam.objects.by_user_perms(request.user)\
                 .filter(exam_code__in=data['list'])\
-                .exclude(attempt_status__in=settings.FINAL_ATTEMPT_STATUSES)\
                 .select_related('event')
             codes_dict = {exam.exam_code: exam for exam in exams}
             if codes_dict:
                 response = poll_statuses_attempts_request(list(codes_dict.keys()))
                 for attempt_code, new_status in response.items():
                     exam = codes_dict.get(attempt_code, None)
-                    if exam and new_status and exam.attempt_status != new_status:
+                    if exam and new_status:
                         if exam.attempt_status != new_status:
                             if exam.attempt_status == 'ready_to_start' and new_status == 'started':
                                 exam.actual_start_date = datetime.now()

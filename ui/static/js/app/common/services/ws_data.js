@@ -22,8 +22,12 @@
                 if (!attempt.hasOwnProperty('comments')) {
                     attempt.comments = [];
                 }
-                self.attempts.push(angular.copy(attempt));
-                Polling.add_item(attempt.examCode);
+                var item = self.attempts.filterBy({code: attempt.examCode});
+                item = item.length ? item[0] : null;
+                if (!item) {
+                    self.attempts.push(angular.copy(attempt));
+                    Polling.add_item(attempt.examCode);
+                }
             };
 
             var recievedComments = function (msg) {
@@ -46,12 +50,13 @@
                 }
                 updateStatus(msg['code'], msg['status'], msg['created']);
                 if (['verified', 'error', 'rejected', 'deleted_in_edx'].in_array(msg['status'])) {
-                    Polling.stop(msg['hash']);
+                    Polling.stop(msg['code']);
                 }
             };
 
             var endSession = function () {
                 WS.disconnect();
+                Polling.clear();
                 TestSession.flush();
                 $route.reload();
             };
@@ -66,6 +71,9 @@
 
             this.updateAttemptStatus = function (code, status, updated) {
                 updateStatus(code, status, updated);
+                if (['verified', 'error', 'rejected', 'deleted_in_edx'].in_array(status)) {
+                    Polling.stop(code);
+                }
             };
 
             this.websocket_callback = function(msg) {
