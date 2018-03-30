@@ -9,8 +9,7 @@ from django.contrib.auth import logout as lgt, login as auth_login, \
     REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.shortcuts import render, resolve_url
+from django.shortcuts import redirect, render, resolve_url
 from django.utils.http import is_safe_url
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -35,6 +34,8 @@ class Index(View):
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
             'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(login_url)
         return render(
             request,
             self.template_name,

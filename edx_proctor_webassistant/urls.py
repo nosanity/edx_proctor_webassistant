@@ -57,6 +57,7 @@ router.register(r'permission', PermissionViewSet,
 
 urlpatterns = [
     url(r'^$', Index.as_view(), name="index"),
+    url(r'index/?$', Index.as_view()),
     url(r'^grappelli/', include('grappelli.urls')),
 
     # admin urls
