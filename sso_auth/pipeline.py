@@ -34,7 +34,7 @@ def set_roles_for_edx_users(user, permissions):
             ) else Permission.ROLE_INSTRUCTOR
             permission_list.append(
                 Permission(
-                    object_type=permission['obj_type'],
+                    object_type=permission['obj_type'] if permission['obj_type'] else '*',
                     object_id=permission['obj_id'],
                     user=user,
                     role=role
