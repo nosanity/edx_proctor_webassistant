@@ -59,10 +59,12 @@ class Permission(models.Model):
         Delete courserun from object_id if object type is course id
         :return: str
         """
-        if self.object_type != Permission.TYPE_COURSE:
-            result = self.object_id
-        else:
+        if self.object_type == Permission.TYPE_COURSERUN:
+            result = Permission._course_run(self.object_id)
+        elif self.object_type == Permission.TYPE_COURSE:
             result = Permission._course_run_to_course(self.object_id)
+        else:
+            result = self.object_id
         return result
 
     @classmethod
@@ -77,5 +79,14 @@ class Permission(models.Model):
             edxorg, edxcourse, edxcourserun = Course.get_course_data(
                 courserun)
             return "/".join((edxorg, edxcourse))
+        except:
+            return courserun
+
+    @classmethod
+    def _course_run(cls, courserun):
+        try:
+            from proctoring.models import Course
+            edxparts = Course.get_course_data(courserun)
+            return "/".join(edxparts)
         except:
             return courserun
