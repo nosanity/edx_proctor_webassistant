@@ -255,8 +255,8 @@
     });
 
     // MAIN CONTROLLER
-    app.controller('MainController', ['$scope', '$translate', '$http', 'i18n', 'TestSession',
-        function ($scope, $translate, $http, i18n, TestSession) {
+    app.controller('MainController', ['$scope', '$translate', '$http', 'i18n', 'TestSession', 'Auth',
+        function ($scope, $translate, $http, i18n, TestSession, Auth) {
 
             var lng_is_supported = function (val) {
                 return app.language.supported.indexOf(val) >= 0 ? true : false;
@@ -287,6 +287,12 @@
             $scope.i18n = function (text) {
                 return i18n.translate(text);
             };
+
+            $scope.proctorName = Auth.get_proctor();
+            $scope.projectName = window.app.projectName;
+            $scope.projectLogo = window.app.logo;
+            $scope.myProfileUrl = window.app.myProfileUrl;
+            $scope.myCoursesUrl = window.app.myCoursesUrl;
 
             //$scope.changeLanguage();
         }]);

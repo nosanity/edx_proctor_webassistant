@@ -122,6 +122,9 @@ LOGIN_URL = LOGIN_REDIRECT_URL = LOGOUT_REDIRECT_URL = "/"
 AUTH_BACKEND_NAME = 'sso_npoed-oauth2'
 SSO_ENABLED = True
 
+SSO_NPOED_URL = ''
+PLP_NPOED_URL = ''
+
 if SSO_ENABLED:
     TEMPLATES[0]['OPTIONS']['context_processors'] += [
         'social_django.context_processors.backends',
@@ -286,6 +289,9 @@ LOGGING = {
         }
     },
 }
+
+PROJECT_NAME = 'Web Assistant'
+LOGO_NAME = 'img/epw-logo.png'  # may be URL
 
 try:
     from .settings_local import *

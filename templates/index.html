@@ -19,6 +19,10 @@
             loginUrl: "{{ login_url }}",
             notificationsUrl: "{{ notifications_url }}",
             profileUrl: "{{ profile_url }}",
+            myProfileUrl: "{{ my_profile_url }}",
+            myCoursesUrl: "{{ my_courses_url }}",
+            logo: "{% if logo_is_url %}{{ logo }}{% else %}{% static logo %}{% endif %}",
+            projectName: "{{ project_name }}",
             spaConfig: {{ spa_config|safe }},
             langs: {
                 en: "{% static 'js/app/i18n/en.json' %}"
@@ -44,7 +48,7 @@
 {% if user_has_access %}
     <div>
         <header></header>
-        <div class="container-fluid" ng-view></div>
+        <div class="container" ng-view></div>
     </div>
 {% elif user.is_authenticated %}
     <div class="container text-center" ng-init="changeLanguage()">
