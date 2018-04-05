@@ -4,7 +4,7 @@
     app.directive('sessionCreateError', [function(){
         return {
             restrict: 'E',
-            templateUrl: app.path + 'ui/partials/session_create_error.html',
+            templateUrl: window.app.templates.sessionCreateError,
             link: function(scope, e, attr) {}
         };
     }]);

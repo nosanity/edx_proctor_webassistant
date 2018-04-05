@@ -4,7 +4,7 @@
     app.directive('reviewModal', [function(){
         return {
             restrict: 'E',
-            templateUrl: app.path + 'ui/partials/add_review.html',
+            templateUrl: window.app.templates.addReview,
             link: function(scope, e, attr) {}
         };
     }]);
@@ -12,7 +12,7 @@
     app.directive('comments', [function(){
         return {
             restrict: 'E',
-            templateUrl: app.path + 'ui/partials/comments.html',
+            templateUrl: window.app.templates.comments,
             link: function(scope, e, attr) {}
         };
     }]);

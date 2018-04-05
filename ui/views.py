@@ -34,7 +34,7 @@ class Index(View):
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
             'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
-        if not request.user.is_authenticated:
+        if not request.user.is_authenticated and settings.SSO_ENABLED:
             return HttpResponseRedirect(login_url)
         return render(
             request,

@@ -17,15 +17,14 @@
                     </div>
                 {% endif %}
                 <label for="id_username" class="sr-only"
-                       translate="EMAIL_ADDRESS"></label>
+                       translate="USER_NAME"></label>
                 <input type="text" name="username" id="id_username"
                        class="form-control fc-margin-item"
-                       placeholder="{[ USER_NAME | translate ]}" required
-                       autofocus>
+                       required autofocus>
                 <label for="id_password" class="sr-only">Password</label>
                 <input type="password" name="password" id="id_password"
                        class="form-control fc-margin-item"
-                       placeholder="{[ PASSWORD | translate ]}" required>
+                       required>
                 <button class="btn btn-lg btn-primary btn-block" type="submit"
                         translate="SIGN_IN"></button>
             </form>
