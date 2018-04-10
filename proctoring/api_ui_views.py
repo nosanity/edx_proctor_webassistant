@@ -573,11 +573,21 @@ class GetExamsProctored(APIView):
             content = {}
         permissions = request.user.permission_set.all()
         results = []
+        orgs = []
         for row in content.get('results', []):
             if 'proctored_exams' in row and row['proctored_exams']:
                 row['has_access'] = models.has_permission_to_course(
                     request.user, row.get('id'), permissions)
+                row['org_description'] = row['org']
                 results.append(row)
+                if row['org'] not in orgs:
+                    orgs.append(row['org'])
+        if orgs:
+            orgs_descriptions = {item.slug: item.description
+                                 for item in models.OrgDescription.objects.filter(slug__in=orgs)}
+            for i, res in enumerate(results):
+                if res['org'] in orgs_descriptions:
+                    results[i]['org_description'] = orgs_descriptions[res['org']]
         return Response(
             status=response.status_code,
             data={"results": results}

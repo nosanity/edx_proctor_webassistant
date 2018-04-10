@@ -44,3 +44,75 @@ a.dropdown-item {
 .menu-username {
     margin-right: 8px;
 }
+
+/* ----- Data Grid ----- */
+
+.table > tbody > tr:nth-child(even) {
+    background: #f9f9f9;
+}
+.table > tbody > tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.table > thead > tr,
+.table > tbody > tr {
+    font-size: 0.85rem;
+}
+
+.table > thead > tr > th {
+    border-top: none;
+    border-bottom-color: #3d84c4;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.table > thead > tr > th.sortable {
+    cursor: pointer;
+}
+
+.table > tbody > tr:first-child > td {
+    border-top: none;
+}
+
+.margin-bottom-basic {
+    margin-bottom: 15px;
+}
+
+.pagination {
+    margin: 0;
+}
+
+.items-per-page {
+    margin-left: 15px;
+}
+
+.sortable:after {
+    font-family: 'Font Awesome 5 Free';
+    content: "\f0dc";
+}
+
+.sortable.sort-ascent:after {
+    content: '\f0de';
+    vertical-align: bottom;
+}
+
+.sortable.sort-descent:after {
+    content: "\f0dd";
+    vertical-align: top;
+}
+
+/* ----- Main Block ----- */
+
+.main-block {
+    margin-top: 50px;
+}
+
+.form-control:disabled, button:disabled {
+    cursor: not-allowed;
+}
+
+.last-created-sessions-header {
+    display: inline;
+    vertical-align: middle;
+    padding-right: 10px;
+}

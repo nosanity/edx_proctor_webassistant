@@ -18,7 +18,9 @@
         'proctor.date',
         'websocket',
         'pascalprecht.translate',
-        'tokenAuth'
+        'tokenAuth',
+        'dataGrid',
+        'pagination'
     ]);
     app.config(function ($routeProvider,
                          $controllerProvider,

@@ -168,7 +168,12 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
         return HttpResponseRedirect(redirect_url)
 
 
+class OrgDescriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'slug', 'description')
+
+
 admin.site.register(models.Course, CourseAdmin)
 admin.site.register(models.Exam, ExamAdmin)
 admin.site.register(models.InProgressEventSession, InProgressEventSessionAdmin)
 admin.site.register(models.ArchivedEventSession, EventSessionAdmin)
+admin.site.register(models.OrgDescription, OrgDescriptionAdmin)

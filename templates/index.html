@@ -48,7 +48,7 @@
 {% if user_has_access %}
     <div>
         <header></header>
-        <div class="container" ng-view></div>
+        <div class="container main-block" ng-view></div>
     </div>
 {% elif user.is_authenticated %}
     <div class="container text-center" ng-init="changeLanguage()">

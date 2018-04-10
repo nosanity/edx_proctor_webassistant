@@ -162,6 +162,7 @@ BOWER_INSTALLED_APPS = (
     'angular-sanitize#1.6.9',
     'jquery#3.1.1',
     'bootstrap#4.0.0',
+    'moment#2.22.0',
     'angular-data-grid#2aab407',
     'angular-bootstrap#2.5.0',
     'angular-translate#2.17.0',
@@ -198,6 +199,7 @@ PIPELINE_JS = {
     'js': {
         'source_filenames': (
             'jquery/dist/jquery' + FILE_POSTFIX + '.js',
+            'moment/min/moment.min.js',
             'bootstrap/dist/js/bootstrap' + FILE_POSTFIX + '.js',
             'angular/angular' + FILE_POSTFIX + '.js',
             'angular-animate/angular-animate' + FILE_POSTFIX + '.js',
@@ -206,6 +208,8 @@ PIPELINE_JS = {
             'angular-sanitize/angular-sanitize' + FILE_POSTFIX + '.js',
             'angular-data-grid/dist/dataGrid' + FILE_POSTFIX + '.js',
             'angular-data-grid/dist/dataGridUtils' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/pagination' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/loading-bar' + FILE_POSTFIX + '.js',
             'angular-bootstrap/ui-bootstrap' + FILE_POSTFIX + '.js',
             'angular-translate/angular-translate' + FILE_POSTFIX + '.js',
             'angular-translate-storage-local/angular-translate-storage-local' + FILE_POSTFIX + '.js',

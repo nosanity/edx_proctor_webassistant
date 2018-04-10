@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-05 00:56+0000\n"
+"POT-Creation-Date: 2018-04-06 21:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -148,6 +148,22 @@ msgstr ""
 #: proctoring/models.py:275
 msgid "Archived"
 msgstr ""
+
+#: proctoring/models.py:395
+msgid "slug"
+msgstr ""
+
+#: proctoring/models.py:396
+msgid "Description"
+msgstr "Описание"
+
+#: proctoring/models.py:399
+msgid "Organization description"
+msgstr "Описание организации"
+
+#: proctoring/models.py:400
+msgid "Organization descriptions"
+msgstr "Организации"
 
 #: proctoring/serializers.py:51
 #, python-format

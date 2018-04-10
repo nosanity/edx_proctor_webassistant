@@ -3,7 +3,8 @@
         .service('TestSession', function($rootScope, $http, Auth, i18n, DateTimeService){
             var Session = null;
 
-            this.registerSession = function(testing_center, course_id, exam_id, course_name, exam_name){
+            this.registerSession = function(testing_center, course_id, exam_id,
+                                            course_name, exam_name, onErrorCallback) {
                 return $http({
                     url: $rootScope.apiConf.apiServer + '/event_session/',
                     method: 'POST',
@@ -27,8 +28,8 @@
                     } else if (data.status === 200) {
                         return {created: false, exam: data.data}
                     }
-                }, function(data){
-                    alert(i18n.translate('SESSION_ERROR_1'));
+                }, function(data) {
+                    onErrorCallback(data);
                 });
             };
 

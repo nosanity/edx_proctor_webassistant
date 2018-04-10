@@ -253,7 +253,7 @@ class ArchivedEventSessionSerializer(serializers.ModelSerializer):
     """
     course_id = serializers.SerializerMethodField()
     proctor = serializers.SerializerMethodField()
-    serializers.ReadOnlyField(source='proctor.username')
+    course_name = serializers.SerializerMethodField()
 
     def get_course_id(self, obj):
         return obj.course.display_name
@@ -263,9 +263,12 @@ class ArchivedEventSessionSerializer(serializers.ModelSerializer):
         return ' '.join([proctor.first_name,
                          proctor.last_name]).strip() or proctor.username
 
+    def get_course_name(self, obj):
+        return obj.course.course_name
+
     class Meta:
         read_only_fields = (
-            'testing_center', 'course_id', 'course_event_id', 'proctor',
+            'testing_center', 'course_id', 'course_name', 'course_event_id', 'proctor',
             'status', 'hash_key', 'notify', 'start_date', 'end_date', 'comment'
         )
         model = ArchivedEventSession

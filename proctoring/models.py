@@ -389,3 +389,12 @@ class Comment(models.Model):
     event_finish = models.IntegerField()
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     duration = models.IntegerField(blank=True, null=True)
+
+
+class OrgDescription(models.Model):
+    slug = models.CharField(max_length=255, db_index=True, verbose_name=_('slug'))
+    description = models.CharField(max_length=1024, verbose_name=_('Description'))
+
+    class Meta(object):
+        verbose_name = _("Organization description")
+        verbose_name_plural = _("Organization descriptions")

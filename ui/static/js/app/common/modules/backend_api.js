@@ -92,10 +92,11 @@
             });
         };
 
-        this.get_archived_events = function(){
+        this.get_archived_events = function(page_size){
             return generic_api_call({
                 'url': get_url('archived_event_session'),
-                'method': 'GET'
+                'method': 'GET',
+                'params': {page_size: page_size ? page_size: 25}
             })
         };
 
