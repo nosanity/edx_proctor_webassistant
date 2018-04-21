@@ -1,0 +1,17 @@
+<script type="text/ng-template" id="windowConfirmation.html">
+    <div class="modal-header">
+        <h5 class="modal-title">{[ title ]}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        {[ description ]}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary"
+                ng-click="ok()" ng-disabled="btnDisabled">{[ i18n('CONFIRM') ]}</button>
+        <button type="button" class="btn btn-secondary"
+                ng-click="cancel()" ng-disabled="btnDisabled" data-dismiss="modal">{[ i18n('CANCEL') ]}</button>
+    </div>
+</script>

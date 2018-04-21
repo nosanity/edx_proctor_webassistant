@@ -11,6 +11,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 
 from django.shortcuts import redirect
 
@@ -65,11 +66,10 @@ class StartExam(APIView):
         )
         response = start_exam_request(exam.exam_code)
         if response.status_code == 200:
-            exam.exam_status = exam.STARTED
-            exam.proctor = request.user
-            exam.attempt_status = "ready_to_start"
-            exam.attempt_status_updated = datetime.now()
-            exam.save()
+            models.Exam.objects.filter(id=exam.id).update(
+                exam_status=exam.STARTED,
+                proctor=request.user
+            )
             Journaling.objects.create(
                 journaling_type=Journaling.EXAM_STATUS_CHANGE,
                 event=exam.event,
@@ -79,7 +79,7 @@ class StartExam(APIView):
             )
             data = {
                 'hash': exam.generate_key(),
-                'proctor': exam.proctor.username,
+                'proctor': exam.proctor.username if exam.proctor else None,
                 'status': exam.attempt_status,
                 'code': attempt_code
             }
@@ -136,11 +136,10 @@ class StopExam(APIView):
             response, current_status = _stop_attempt(attempt_code, action,
                                                      user_id)
             if response.status_code == 200:
-                exam.exam_status = exam.STOPPED
-                exam.proctor = request.user
-                exam.attempt_status = current_status
-                exam.attempt_status_updated = datetime.now()
-                exam.save()
+                models.Exam.objects.filter(id=exam.id).update(
+                    exam_status=exam.STOPPED,
+                    proctor=request.user
+                )
                 data = {
                     'hash': exam.generate_key(),
                     'status': current_status,
@@ -183,11 +182,10 @@ class StopExams(APIView):
                         attempt['attempt_code'], action, user_id
                     )
                     if response.status_code == 200:
-                        exam.exam_status = exam.STOPPED
-                        exam.proctor = request.user
-                        exam.attempt_status = current_status
-                        exam.attempt_status_updated = datetime.now()
-                        exam.save()
+                        models.Exam.objects.filter(id=exam.id).update(
+                            exam_status=exam.STOPPED,
+                            proctor=request.user
+                        )
                     else:
                         status_list.append(response.status_code)
                 else:
@@ -232,20 +230,22 @@ class PollStatus(APIView):
                     exam = codes_dict.get(attempt_code, None)
                     if exam and new_status:
                         if exam.attempt_status != new_status:
-                            if exam.attempt_status == 'ready_to_start' and new_status == 'started':
-                                exam.actual_start_date = datetime.now()
-                            if (exam.attempt_status == 'started' and new_status == 'submitted') \
-                              or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
-                                exam.actual_end_date = datetime.now()
-                            exam.attempt_status = new_status
-                            exam.attempt_status_updated = datetime.now()
-                            exam.last_poll = datetime.now()
-                            exam.save()
                             data = {
                                 'hash': exam.generate_key(),
                                 'status': exam.attempt_status,
                                 'code': attempt_code
                             }
+                            if exam.attempt_status == 'ready_to_start' and new_status == 'started':
+                                exam.actual_start_date = datetime.now()
+                            if (exam.attempt_status == 'started' and new_status == 'submitted') \
+                              or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
+                                dt_end = datetime.now()
+                                exam.actual_end_date = dt_end
+                                data['actual_end_date'] = dt_end.isoformat()
+                            exam.attempt_status = new_status
+                            exam.attempt_status_updated = datetime.now()
+                            exam.last_poll = datetime.now()
+                            exam.save()
                             if not result_in_response:
                                 send_notification(data, channel=exam.event.course_event_id)
                         if result_in_response:
@@ -529,9 +529,9 @@ class Review(APIView):
                 )
 
         response, current_status = self.send_review(payload)
-        exam.attempt_status = current_status
-        exam.attempt_status_updated = datetime.now()
-        exam.save()
+        models.Exam.objects.filter(id=exam.id).update(
+            proctor=request.user
+        )
 
         return Response(
             status=response.status_code
@@ -578,10 +578,11 @@ class GetExamsProctored(APIView):
             if 'proctored_exams' in row and row['proctored_exams']:
                 row['has_access'] = models.has_permission_to_course(
                     request.user, row.get('id'), permissions)
-                row['org_description'] = row['org']
-                results.append(row)
-                if row['org'] not in orgs:
-                    orgs.append(row['org'])
+                if 'org' in row:
+                    row['org_description'] = row['org']
+                    results.append(row)
+                    if row['org'] not in orgs:
+                        orgs.append(row['org'])
         if orgs:
             orgs_descriptions = {item.slug: item.description
                                  for item in models.OrgDescription.objects.filter(slug__in=orgs)}
@@ -616,10 +617,14 @@ class BulkStartExams(APIView):
         exam_codes = request.data.get('list', [])
         exam_list = models.Exam.objects.filter(exam_code__in=exam_codes)
         items = bulk_start_exams_request(exam_list)
+        ids_list = []
         for exam in items:
-            exam.exam_status = exam.STARTED
-            exam.proctor = request.user
-            exam.save()
+            ids_list.append(exam.id)
+        models.Exam.objects.filter(id__in=ids_list).update(
+            exam_status=exam.STARTED,
+            proctor=request.user
+        )
+
         Journaling.objects.create(
             journaling_type=Journaling.BULK_EXAM_STATUS_CHANGE,
             note="%s. %s -> %s" % (
@@ -712,95 +717,61 @@ class ArchivedExamViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return queryset
 
 
-class CommentViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
+class Comment(APIView):
     """
-    Return list of Archived Exams with pagination.
-
-    You can filter results by `exam_code`, `event_start` and `event_status`
-
-    Add GET parameter in end of URL, for example:
-    `?event_start=1449325446&event_status=Suspicious`
-
-
-
-    Request example for *adding* new comment for exam :
-
-        {
-            "examCode": "<exam_code>",
-            "comment": {
-                "comment": "comment text",
-                "event_status": "Suspicious",
-                "event_start": 123,
-                "event_finish": 321,
-                "duration": 198
-            }
-        }
+    Add comment to exams.
 
     """
-    serializer_class = CommentSerializer
-    pagination_class = PaginationBy25
-    queryset = models.Comment.objects.order_by('-pk')
     authentication_classes = (SsoTokenAuthentication,
                               CsrfExemptSessionAuthentication,
                               BasicAuthentication)
     permission_classes = (IsAuthenticated, IsProctor)
 
-    def get_queryset(self):
-        """
-        Add filters for queryset
-        :return: queryset
-        """
-        queryset = super(CommentViewSet, self).get_queryset()
-        params = self.request.query_params
-        if "event_status" in params:
-            queryset = queryset.filter(event_status=params["event_status"])
-        if "event_start" in params:
-            queryset = queryset.filter(event_start=params["event_start"])
-        if "exam_code" in params:
-            queryset = queryset.filter(exam__exam_code=params["exam_code"])
-        return queryset
-
-    def create(self, request, *args, **kwargs):
-        """
-        Add new comment. Check is exam exists
-        """
-        exam = get_object_or_404(
-            models.Exam.objects.by_user_perms(request.user),
-            exam_code=request.data.get('examCode')
-        )
+    def post(self, request):
         comment = request.data.get('comment')
         if isinstance(comment, str):
             comment = json.loads(comment)
-        comment['exam'] = exam.pk
-        if 'event_start' in comment:
-            comment['event_start'] = int(int(comment['event_start']) / 1000)
-        if 'event_finish' in comment:
-            comment['event_finish'] = int(int(comment['event_finish']) / 1000)
-        serializer = self.get_serializer(data=comment)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        # comment journaling
-        Journaling.objects.create(
-            journaling_type=Journaling.EXAM_COMMENT,
-            event=exam.event,
-            exam=exam,
-            proctor=request.user,
-            note="""
-                Duration: %s
-                Event start: %s
-                Event finish: %s
-                eventStatus": %s
-                Comment:
-                %s
-            """ % (
-                serializer.data.get('duration'),
-                int(serializer.data.get('event_start')) if serializer.data.get('event_start') else None,
-                int(serializer.data.get('event_finish')) if serializer.data.get('event_finish') else None,
-                serializer.data.get('event_status'),
-                serializer.data.get('comment'),
-            ),
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
+        exam_codes = request.data.get('codes', [])
+        if isinstance(exam_codes, str):
+            exam_codes = json.loads(exam_codes)
+        for code in exam_codes:
+            exam = get_object_or_404(
+                models.Exam.objects.by_user_perms(request.user),
+                exam_code=code
+            )
+            exam_comment = comment.copy()
+            exam_comment['exam'] = exam.pk
+            if 'event_start' in exam_comment:
+                exam_comment['event_start'] = int(int(exam_comment['event_start']) / 1000)
+            if 'event_finish' in comment:
+                exam_comment['event_finish'] = int(int(exam_comment['event_finish']) / 1000)
+            serializer = CommentSerializer(data=exam_comment)
+            try:
+                serializer.is_valid(raise_exception=True)
+            except ValidationError as e:
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            send_notification(serializer.data, channel=exam.event.course_event_id)
+
+            # comment journaling
+            Journaling.objects.create(
+                journaling_type=Journaling.EXAM_COMMENT,
+                event=exam.event,
+                exam=exam,
+                proctor=request.user,
+                note="""
+                    Duration: %s
+                    Event start: %s
+                    Event finish: %s
+                    eventStatus": %s
+                    Comment:
+                    %s
+                """ % (
+                    serializer.data.get('duration'),
+                    int(serializer.data.get('event_start')) if serializer.data.get('event_start') else None,
+                    int(serializer.data.get('event_finish')) if serializer.data.get('event_finish') else None,
+                    serializer.data.get('event_status'),
+                    serializer.data.get('comment'),
+                ),
+            )
+        return Response(status=status.HTTP_201_CREATED)

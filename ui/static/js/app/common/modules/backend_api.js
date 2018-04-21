@@ -70,11 +70,9 @@
                 hash_key = session_hash;
             }
             else {
-                if (window.sessionStorage['proctoring'] !== undefined) {
-                    var session = TestSession.getSession();
-                    if (session) {
-                        hash_key = session.hash_key;
-                    }
+                var session = TestSession.getSession();
+                if (session) {
+                    hash_key = session.hash_key;
                 }
             }
             return generic_api_call({
@@ -110,22 +108,14 @@
             return promise;
         };
 
-        this.save_comment = function(code, comment){
+        this.save_comment = function(attemptCodes, comment){
             return generic_api_call({
                 'url': get_url('comment'),
                 'method': 'POST',
                 'data': JSON.stringify({
                     comment: comment,
-                    examCode: code
+                    codes: attemptCodes
                 })
-            });
-        };
-
-        this.get_comments = function(attempt_code){
-            return generic_api_call({
-                'url': get_url('comment'),
-                'method': 'GET',
-                'params': {exam_code: attempt_code}
             });
         };
     }]);

@@ -91,33 +91,6 @@
 
         $routeProvider
             .when('/', {
-                templateUrl: window.app.templates.home,
-                controller: 'MainCtrl',
-                resolve: {
-                    students: function ($location, TestSession, Api) {
-                        if (window.sessionStorage['proctoring'] !== undefined) {
-                            TestSession.setSession(
-                                JSON.parse(window.sessionStorage['proctoring'])
-                            );
-                        }
-                        var session = TestSession.getSession();
-                        if (!session) {
-                            $location.path('/session');
-                            return true;
-                        } else {
-                            var ret = Api.restore_session();
-                            if (ret == undefined) {
-                                $location.path('/session');
-                                return true;
-                            }
-                            else {
-                                return ret;
-                            }
-                        }
-                    }
-                }
-            })
-            .when('/session', {
                 templateUrl: window.app.templates.sessions,
                 controller: 'SessionCtrl',
                 resolve: {
@@ -127,25 +100,34 @@
                 }
             })
             .when('/session/:hash', {
-                controller: 'MainController',
+                templateUrl: window.app.templates.home,
+                controller: 'MainCtrl',
                 resolve: {
-                    deps: function ($location, TestSession, $q, $route, Auth) {
+                    students: function ($location, $route, $q, TestSession, Api, Auth) {
                         var deferred = $q.defer();
                         Auth.is_instructor().then(function (is) {
                             if (is) {
-                                $location.path('/archive');
+                                deferred.resolve();
+                                $location.path('/');
                             } else {
-                                TestSession.fetchSession($route.current.params.hash)
-                                .then(function(){
-                                    deferred.resolve();
-                                    $location.path('/');
-                                }, function(reason) {
-                                    if(reason.status == 403){
-                                        $location.path('/archive');
-                                    }
-                                });
+                                TestSession
+                                    .fetchSession($route.current.params.hash)
+                                    .then(function() {
+                                        Api.restore_session().then(function(response) {
+                                            deferred.resolve(response);
+                                        }, function() {
+                                            deferred.resolve();
+                                            $location.path('/');
+                                        });
+                                    }, function(reason) {
+                                        if (reason.status == 403) {
+                                            deferred.resolve();
+                                            $location.path('/archive');
+                                        }
+                                    });
                             }
                         });
+
                         return deferred.promise;
                     }
                 }
@@ -232,30 +214,6 @@
         //});
     }]);
 
-    // Lazy loading feature for angular 1.x
-    app.factory('resolver', function ($rootScope, $q, $timeout, $location, Auth) {
-        return {
-            load_deps: function (dependencies, callback) {
-                // Preload resources only if authenticated
-                if (Auth.authenticate()) {
-                    var deferred = $q.defer();
-                    $script(dependencies, function () {
-                        $timeout(function () {
-                            $rootScope.$apply(function () {
-                                deferred.resolve();
-                                if (callback !== undefined)
-                                    callback();
-                            });
-                        });
-                    });
-                    return deferred.promise;
-                } else {
-                    $location.path('/');
-                }
-            }
-        };
-    });
-
     // MAIN CONTROLLER
     app.controller('MainController', ['$scope', '$translate', '$http', 'i18n', 'TestSession', 'Auth',
         function ($scope, $translate, $http, i18n, TestSession, Auth) {
@@ -305,12 +263,66 @@
         };
     }]);
 
+    app.controller('WindowAlertCtrl', ['$scope', '$uibModalInstance', 'i18n', 'data',
+            function ($scope, $uibModalInstance, i18n, data) {
+        $scope.title = data.title;
+        $scope.description = data.description;
+
+        $scope.close = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.i18n = function (text) {
+            return i18n.translate(text);
+        };
+    }]);
+
+    app.controller('WindowConfirmationCtrl', ['$scope', '$uibModalInstance', 'i18n', 'data',
+            function ($scope, $uibModalInstance, i18n, data) {
+        $scope.title = data.title;
+        $scope.description = data.description;
+        $scope.btnDisabled = false;
+
+        $scope.ok = function () {
+            $scope.btnDisabled = true;
+            if (data.okFunc) {
+                data.okFunc();
+            }
+            $uibModalInstance.close();
+        };
+
+        $scope.cancel = function () {
+            if (!$scope.btnDisabled) {
+                $uibModalInstance.close();
+            }
+        };
+
+        $scope.i18n = function (text) {
+            return i18n.translate(text);
+        };
+    }]);
+
     app.directive('header', [function () {
         return {
             restrict: 'E',
             templateUrl: window.app.templates.header,
-            link: function (scope, e, attr) {
-            }
+            link: function (scope, e, attr) {}
+        };
+    }]);
+
+    app.directive('windowAlert', [function(){
+        return {
+            restrict: 'E',
+            templateUrl: window.app.templates.windowAlert,
+            link: function(scope, e, attr) {}
+        };
+    }]);
+
+    app.directive('windowConfirmation', [function(){
+        return {
+            restrict: 'E',
+            templateUrl: window.app.templates.windowConfirmation,
+            link: function(scope, e, attr) {}
         };
     }]);
 })();

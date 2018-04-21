@@ -89,7 +89,7 @@
         $scope.showSessionCreateError = function (exam) {
             $uibModal.open({
                 animation: true,
-                templateUrl: 'sessionCreateError.html',
+                templateUrl: "sessionCreateError.html",
                 controller: 'SessionErrorCtrl',
                 size: 'lg',
                 resolve: {
@@ -102,9 +102,6 @@
             $scope.startSessionInProgress = true;
             $scope.errorMsg = '';
 
-            console.log($scope.testingCentre, $scope.chosenRun.id, $scope.chosenExam.id,
-                $scope.chosenRun.name, $scope.chosenExam.exam_name);
-
             TestSession.registerSession($scope.testingCentre, $scope.chosenRun.id, $scope.chosenExam.id,
                 $scope.chosenRun.name, $scope.chosenExam.exam_name, function() {
                     $scope.errorMsg = i18n.translate('SESSION_ERROR_1');
@@ -113,7 +110,7 @@
                     $scope.startSessionInProgress = false;
                     if (data) {
                         if (data.created) {
-                            $location.path('/');
+                            $location.path('/session/' + data.exam.hash_key);
                         } else {
                             $scope.showSessionCreateError(data.exam);
                         }

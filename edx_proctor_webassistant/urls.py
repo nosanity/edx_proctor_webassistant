@@ -50,8 +50,6 @@ router.register(r'journaling', JournalingViewSet,
                 base_name="journaling")
 router.register(r'archived_exam', api_ui_views.ArchivedExamViewSet,
                 base_name="archived-exam")
-router.register(r'comment', api_ui_views.CommentViewSet,
-                base_name="comment")
 router.register(r'permission', PermissionViewSet,
                 base_name="permission")
 
@@ -71,8 +69,8 @@ urlpatterns = [
     url(r'^api/', include('proctoring.urls')),
     url(r'^api/', include(router.urls)),
     # few angular views
-    url(r'^session/', api_ui_views.redirect_ui),
-    url(r'^archive/', api_ui_views.redirect_ui),
+    url(r'^session/', Index.as_view()),
+    url(r'^archive/', Index.as_view()),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if not settings.SSO_ENABLED:

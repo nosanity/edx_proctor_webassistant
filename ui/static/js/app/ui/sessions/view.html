@@ -1,91 +1,94 @@
-<div class="row">
-    <div class="col-lg-3"></div>
-    <div class="col-lg-6">
-        <h2>{[ i18n('NEW_SESSION') ]}</h2>
-        <form class="mt-4 mb-4" name="sessionForm">
-          <div class="form-group">
-            <label for="orgSelector">{[ i18n('CHOOSE_ORG') ]}</label>
-            <select id="orgSelector" class="form-control" ng-model="chosenOrg"
-                    ng-options="o as o.name for o in orgDetails track by o.key" ng-change="updateCourses()">
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="courseSelector">{[ i18n('CHOOSE_COURSE') ]}</label>
-            <select id="courseSelector" class="form-control" ng-model="chosenCourse"
-                    ng-options="c for c in courses" ng-change="updateRuns()"></select>
-          </div>
-          <div class="form-group">
-            <label for="runSelector">{[ i18n('CHOOSE_RUN') ]}</label>
-            <select id="runSelector" class="form-control" ng-model="chosenRun"
-                    ng-options="r as r.run for r in runs track by r.id" ng-change="updateSessions()"></select>
-          </div>
-          <div class="form-group">
-            <label for="runSession">{[ i18n('CHOOSE_EXAM_SESSION') ]}</label>
-            <select id="runSession" class="form-control" ng-model="chosenExam"
-                    ng-options="e as e.exam_name for e in exams track by e.id"></select>
-          </div>
-          <div class="form-group">
-            <label for="testCenterName">{[ i18n('TESTING_CENTRE') ]}</label>
-            <input type="text" class="form-control" id="testCenterName" aria-describedby="testCenterHelp"
-                   ng-model="testingCentre" required>
-            <small id="testCenterHelp" class="form-text text-muted">{[ i18n('SESSION_NOTES') ]}</small>
-          </div>
-          <button type="submit" class="btn btn-success btn-block mt-4"
-                  ng-disabled="!sessionForm.$valid || startSessionInProgress"
-                  ng-click="startSession() && sessionForm.$valid">
-              {[ startSessionInProgress ? i18n('BTN_PLEASE_WAIT') : i18n('START_SESSION') ]}</button>
-          <div class="alert alert-danger mt-2" role="alert" ng-if="errorMsg">{[ errorMsg ]}</div>
-        </form>
+<div class="container main-block">
+    <div class="row">
+        <div class="col-lg-3"></div>
+        <div class="col-lg-6">
+            <h2>{[ i18n('NEW_SESSION') ]}</h2>
+            <form class="mt-4 mb-4" name="sessionForm">
+              <div class="form-group">
+                <label for="orgSelector">{[ i18n('ORG') ]}</label>
+                <select id="orgSelector" class="form-control" ng-model="chosenOrg"
+                        ng-options="o as o.name for o in orgDetails track by o.key" ng-change="updateCourses()">
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="courseSelector">{[ i18n('COURSE_NUM') ]}</label>
+                <select id="courseSelector" class="form-control" ng-model="chosenCourse"
+                        ng-options="c for c in courses" ng-change="updateRuns()"></select>
+              </div>
+              <div class="form-group">
+                <label for="runSelector">{[ i18n('RUN') ]}</label>
+                <select id="runSelector" class="form-control" ng-model="chosenRun"
+                        ng-options="r as r.run for r in runs track by r.id" ng-change="updateSessions()"></select>
+              </div>
+              <div class="form-group">
+                <label for="runSession">{[ i18n('EXAM_SESSION') ]}</label>
+                <select id="runSession" class="form-control" ng-model="chosenExam"
+                        ng-options="e as e.exam_name for e in exams track by e.id"></select>
+              </div>
+              <div class="form-group">
+                <label for="testCenterName">{[ i18n('TESTING_CENTRE') ]}</label>
+                <input type="text" class="form-control" id="testCenterName" aria-describedby="testCenterHelp"
+                       ng-model="testingCentre" required>
+                <small id="testCenterHelp" class="form-text text-muted">{[ i18n('SESSION_NOTES') ]}</small>
+              </div>
+              <button type="submit" class="btn btn-success btn-block mt-4"
+                      ng-disabled="!sessionForm.$valid || startSessionInProgress"
+                      ng-click="startSession() && sessionForm.$valid">
+                  {[ startSessionInProgress ? i18n('BTN_PLEASE_WAIT') : i18n('START_SESSION') ]}</button>
+              <div class="alert alert-danger mt-2" role="alert" ng-if="errorMsg">{[ errorMsg ]}</div>
+            </form>
+        </div>
+        <div class="col-lg-3"></div>
     </div>
-    <div class="col-lg-3"></div>
-</div>
-<div class="row">
-    <div class="col-lg-12">
-        <hr class="mt-4 mb-4" />
-    </div>
-</div>
-<div class="row">
-    <div class="col-lg-3"></div>
-    <div class="col-lg-9">
-        <div class="mt-2 mb-2">
-            <h2 class="last-created-sessions-header">{[ i18n('LAST_CREATED_SESSIONS') ]}</h2>
-            <span><a href="/archive">{[ i18n('WHOLE_ARCHIVE') ]}</a></span>
+    <div class="row">
+        <div class="col-lg-12">
+            <hr class="mt-4 mb-4" />
         </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-lg-12">
-        <div grid-data grid-options="archGridOptions" grid-actions="gridActions" class="mt-4 mb-2">
-            <table class="table table-responsive-sm">
-                <thead>
-                    <tr>
-                        <th sortable="testing_center" class="sortable" width="20%">
-                            {[ i18n('COLUMN_TESTING_CENTER') ]}
-                        </th>
-                        <th sortable="course_name" class="sortable" width="20%">
-                            {[ i18n('COLUMN_COURSE') ]}
-                        </th>
-                        <th sortable="exam_name" class="sortable" width="20%">
-                            {[ i18n('COLUMN_SESSION_NAME') ]}
-                        </th>
-                        <th sortable="datetimeFull" class="sortable" width="15%">
-                            {[ i18n('COLUMN_DATE_AND_TIME') ]}
-                        </th>
-                        <th width="25%">
-                            {[ i18n('COLUMN_COMMENT') ]}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr grid-item>
-                        <td><a href="/#/archive/{[ item.hash_key ]}">{[ item.testing_center ]}</a></td>
-                        <td>{[ item.course_name ]}</td>
-                        <td>{[ item.exam_name ]}</td>
-                        <td ng-bind-html="item.datetime"></td>
-                        <td>{[ item.comment ]}</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-lg-3"></div>
+        <div class="col-lg-9">
+            <div class="mt-2 mb-2">
+                <h2 class="last-created-sessions-header">{[ i18n('LAST_CREATED_SESSIONS') ]}</h2>
+                <span><a href="/archive">{[ i18n('WHOLE_ARCHIVE') ]}</a></span>
+            </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div grid-data grid-options="archGridOptions" grid-actions="gridActions" class="mt-4 mb-2">
+                <table class="table table-responsive-sm">
+                    <thead>
+                        <tr>
+                            <th sortable="testing_center" class="sortable" width="20%">
+                                {[ i18n('COLUMN_TESTING_CENTER') ]}
+                            </th>
+                            <th sortable="course_name" class="sortable" width="20%">
+                                {[ i18n('COLUMN_COURSE') ]}
+                            </th>
+                            <th sortable="exam_name" class="sortable" width="20%">
+                                {[ i18n('COLUMN_SESSION_NAME') ]}
+                            </th>
+                            <th sortable="datetimeFull" class="sortable" width="15%">
+                                {[ i18n('COLUMN_DATE_AND_TIME') ]}
+                            </th>
+                            <th width="25%">
+                                {[ i18n('COLUMN_COMMENT') ]}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr grid-item>
+                            <td><a href="/#/archive/{[ item.hash_key ]}">{[ item.testing_center ]}</a></td>
+                            <td>{[ item.course_name ]}</td>
+                            <td>{[ item.exam_name ]}</td>
+                            <td ng-bind-html="item.datetime"></td>
+                            <td>{[ item.comment ]}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <session-create-error></session-create-error>
 </div>

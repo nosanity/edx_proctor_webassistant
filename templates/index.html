@@ -38,8 +38,9 @@
                 profile: "{% static 'js/app/ui/profile/view.html' %}",
                 header: "{% static 'js/app/ui/partials/header.html' %}",
                 addReview: "{% static 'js/app/ui/partials/add_review.html' %}",
-                comments: "{% static 'js/app/ui/partials/comments.html' %}",
                 sessionCreateError: "{% static 'js/app/ui/partials/session_create_error.html' %}",
+                windowAlert: "{% static 'js/app/ui/partials/window_alert.html' %}",
+                windowConfirmation: "{% static 'js/app/ui/partials/window_confirmation.html' %}"
             }
         }
     </script>
@@ -48,7 +49,9 @@
 {% if user_has_access %}
     <div>
         <header></header>
-        <div class="container main-block" ng-view></div>
+        <div ng-view></div>
+        <window-alert></window-alert>
+        <window-confirmation></window-confirmation>
     </div>
 {% elif user.is_authenticated %}
     <div class="container text-center" ng-init="changeLanguage()">

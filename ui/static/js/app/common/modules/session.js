@@ -23,7 +23,6 @@
                             Session.course_name = course_name;
                             Session.exam_name = exam_name;
                         }
-                        window.sessionStorage['proctoring'] = JSON.stringify(Session);
                         return {created: true}
                     } else if (data.status === 200) {
                         return {created: false, exam: data.data}
@@ -59,9 +58,6 @@
                     params: {'session': hash_key}
                 }).then(function(data){
                     Session = data.data.length == 1 ? data.data[0]: null;
-                    if (Session){
-                        window.sessionStorage['proctoring'] = JSON.stringify(Session);
-                    }
                 });
             };
 
@@ -83,7 +79,6 @@
 
             this.flush = function(){
                 Session = null;
-                delete window.sessionStorage['proctoring'];
             };
 
             this.is_owner = function() {

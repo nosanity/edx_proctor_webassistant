@@ -38,7 +38,7 @@ class APIRoot(APIView):
                                               request=request),
             "archived_exam": reverse('archived-exam-list', request=request),
             "permission": reverse('permission-list', request=request),
-            "comment": reverse('comment-list', request=request),
+            "comment": reverse('comment', request=request),
 
         }
         return Response(result)
@@ -84,7 +84,7 @@ class ExamViewSet(mixins.ListModelMixin,
     authentication_classes = (CsrfExemptSessionAuthentication,
                               BasicAuthentication)
     serializer_class = ExamSerializer
-    queryset = Exam.objects.all()
+    queryset = Exam.objects.all().prefetch_related('comment_set')
 
     def get_queryset(self):
         """
@@ -99,9 +99,9 @@ class ExamViewSet(mixins.ListModelMixin,
                 )
                 return Exam.objects.by_user_perms(self.request.user).filter(
                     event=event
-                )
+                ).prefetch_related('comment_set')
             except InProgressEventSession.DoesNotExist:
-                return Exam.objects.filter(pk__lt=0)
+                return Exam.objects.filter(pk__lt=0).prefetch_related('comment_set')
         else:
             return []
 
@@ -132,6 +132,7 @@ class ExamViewSet(mixins.ListModelMixin,
         data['hash'] = serializer.instance.generate_key()
         data['status'] = 'created'
         data['code'] = data['examCode']
+        data['comments'] = []
         ws_data = data.copy()
         ws_data.pop('examPassword', None)
         send_notification(ws_data, channel=event.course_event_id)

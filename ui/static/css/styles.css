@@ -74,6 +74,10 @@ a.dropdown-item {
     border-top: none;
 }
 
+.table > tbody > tr > td {
+    vertical-align: middle !important;
+}
+
 .margin-bottom-basic {
     margin-bottom: 15px;
 }
@@ -84,6 +88,11 @@ a.dropdown-item {
 
 .items-per-page {
     margin-left: 15px;
+}
+
+.exam-actions {
+    text-align: center;
+    padding-bottom: 2px;
 }
 
 .sortable:after {
@@ -103,6 +112,10 @@ a.dropdown-item {
 
 /* ----- Main Block ----- */
 
+.exam-info {
+    color: #3d84c4;
+}
+
 .main-block {
     margin-top: 50px;
 }
@@ -115,4 +128,66 @@ a.dropdown-item {
     display: inline;
     vertical-align: middle;
     padding-right: 10px;
+}
+
+.students-selected-block {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #eeeeee;
+    border-top: 2px solid #3d84c4;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.students-selected-block-content {
+    font-size: 0.95rem;
+    padding-top: 7px;
+}
+
+.status-blue {
+    color: #3d84c4
+}
+
+.status-red {
+    color: #ff0000
+}
+
+.status-orange {
+    color: #ffc107
+}
+
+.status-green {
+    color: #28a745
+}
+
+.deselect-link {
+    padding-right: 0.75rem;
+}
+
+.exam-comment-block {
+    word-wrap: break-word;
+}
+
+.exam-comment-block-icon {
+    margin-top: 5px;
+    margin-right: 5px;
+    float: left;
+}
+
+/* ----- Model Window ----- */
+
+.fade.in {
+    opacity: 1;
+}
+
+.modal.in .modal-dialog {
+  -webkit-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
+}
+
+.modal-backdrop.in {
+    filter: alpha(opacity=50);
+    opacity: .5;
 }

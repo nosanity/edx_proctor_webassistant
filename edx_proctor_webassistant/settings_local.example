@@ -32,7 +32,12 @@ DATABASES = {
         "NAME": "db_name",
         "USER": "db_user"
         "PASSWORD": "db_pass",
-        "PORT": "3306"
+        "PORT": "3306",
+        "TEST": {
+            "NAME": "test_webassistant",
+            "CHARSET": "utf8",
+            "COLLATION": "utf8_general_ci",
+        }
      }
 }
 

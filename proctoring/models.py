@@ -240,6 +240,9 @@ class Exam(models.Model):
     def __str__(self):
         return self.exam_id
 
+    class Meta:
+        ordering = ['id']
+
 
 class InProgressEventSessionManager(models.Manager):
     """
@@ -383,12 +386,27 @@ class Comment(models.Model):
     """
     Comment model
     """
+    BASE_TYPE = 'comment'
+    WARNING_TYPE = 'warning'
+
+    COMMENT_TYPES = {
+        (BASE_TYPE, _("Comment")),
+        (WARNING_TYPE, _("Warning")),
+    }
+
     comment = models.TextField()
     event_status = models.CharField(max_length=60)
+    event_type = models.CharField(
+        max_length=20,
+        choices=COMMENT_TYPES,
+        default=BASE_TYPE)
     event_start = models.IntegerField()
     event_finish = models.IntegerField()
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     duration = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-event_start']
 
 
 class OrgDescription(models.Model):
