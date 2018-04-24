@@ -293,8 +293,12 @@ LOGGING = {
     },
 }
 
+
+INSTRUCTOR_IS_PROCTOR = True
+
 PROJECT_NAME = 'Web Assistant'
 LOGO_NAME = 'img/epw-logo.png'  # may be URL
+
 
 try:
     from .settings_local import *

@@ -42,7 +42,7 @@ class PermissionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             Permission.ROLE_INSTRUCTOR: []
         }
         if serializer.data:
-            result['role'] = serializer.data[0]['role']
+            result['role'] = 'proctor' if 'proctor' in [obj['role'] for obj in serializer.data] else 'instructor'
         for row in serializer.data:
             result[row['role']].append({
                 "object_type": row['object_type'],

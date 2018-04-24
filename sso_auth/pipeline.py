@@ -6,6 +6,7 @@ import logging
 from social_core.pipeline import partial
 
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import transaction
 
 from person.models import Permission
@@ -25,6 +26,7 @@ def set_roles_for_edx_users(user, permissions):
         'Read', 'Update', 'Delete', 'Publication', 'Enroll',
         'Manage(permissions)'
     }
+    instructor_is_proctor = settings.INSTRUCTOR_IS_PROCTOR
     permission_list = []
     for permission in permissions:
         if bool(set(permission['obj_perm']) & proctor_perm) or \
@@ -32,14 +34,18 @@ def set_roles_for_edx_users(user, permissions):
             role = Permission.ROLE_PROCTOR if bool(
                 set(permission['obj_perm']) & proctor_perm
             ) else Permission.ROLE_INSTRUCTOR
-            permission_list.append(
-                Permission(
-                    object_type=permission['obj_type'],
-                    object_id=permission['obj_id'],
-                    user=user,
-                    role=role
+            roles = [role]
+            if role == Permission.ROLE_INSTRUCTOR and instructor_is_proctor:
+                roles.append(Permission.ROLE_PROCTOR)
+            for role in roles:
+                permission_list.append(
+                    Permission(
+                        object_type=permission['obj_type'] if permission['obj_type'] else '*',
+                        object_id=permission['obj_id'],
+                        user=user,
+                        role=role
+                    )
                 )
-            )
     Permission.objects.filter(user=user).delete()
     Permission.objects.bulk_create(permission_list)
 
