@@ -1,134 +1,248 @@
-button{
-    min-width: 110px;
-    text-align: center;
+/* ----- Header ----- */
+
+.navbar {
+    background-color: #20323c;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
-.global-header {
-    background: url('/static/img/body-bg-small.jpg');
+.navbar,
+a.nav-link,
+a.nav-link:hover,
+a.navbar-brand,
+.menu-icon,
+.dropdown-menu a:hover{
+    color: #ffffff;
 }
 
-.icon {
-    background-repeat: no-repeat;
-    display: inline-block;
+.nav-user {
+    text-align: right;
+}
+
+.menu-icon {
     vertical-align: middle;
-    margin-right: 7px;
-    overflow: hidden;
+    font-size: 42px;
 }
 
-.profile-icon {
-    background-image: url('/static/img/profile-icon.png');
-    background-position: 0 0;
-    width: 31px;
-    height: 31px;
+.nav .show .nav-user,
+.dropdown-menu a:hover {
+    background-color: #36474f;
 }
 
-.fc-margin-item{
+.dropdown-menu {
+    margin-top: 0;
+}
+
+a.dropdown-item {
+    color: #000000;
+}
+
+.dropdown-menu a:hover {
+    background-color: #3d84c4;
+}
+
+.menu-username {
+    margin-right: 8px;
+}
+
+/* ----- Data Grid ----- */
+
+.table > tbody > tr:nth-child(even) {
+    background: #f9f9f9;
+}
+.table > tbody > tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.table > thead > tr,
+.table > tbody > tr {
+    font-size: 0.85rem;
+}
+
+.table > thead > tr > th {
+    border-top: none;
+    border-bottom-color: #3d84c4;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.table > thead > tr > th.sortable {
+    cursor: pointer;
+}
+
+.table > tbody > tr:first-child > td {
+    border-top: none;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle !important;
+}
+
+.margin-bottom-basic {
     margin-bottom: 15px;
 }
 
-.logo-small img{
-    height: 45px;
+.pagination {
+    margin: 0;
 }
 
-.navbar {
-    min-height: 80px;
+.items-per-page {
+    margin-left: 15px;
 }
 
-.navbar-left h4 {
-    margin: 0 30px;
+.exam-actions {
+    text-align: center;
+    padding-bottom: 2px;
 }
 
-.navbar-nav li a {
-    padding-top: 30px;
-    padding-bottom: 30px;
+.sortable:after {
+    font-family: 'Font Awesome 5 Free';
+    content: "\f0dc";
 }
 
-.navbar-default .navbar-nav li a {
-    color: lightgray;
+.sortable.sort-ascent:after {
+    content: '\f0de';
+    vertical-align: bottom;
 }
 
-.navbar-default .navbar-nav li a:hover {
-    color: gray;
+.sortable.sort-descent:after {
+    content: "\f0dd";
+    vertical-align: top;
 }
 
-.dropdown-menu li a {
-    padding-top: 6px;
-    padding-bottom: 6px;
-    color: #333 !important;
+.grid-navigation > ul > li:first-child > a {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
 }
 
-.ng-table th{
-    text-align: left;
+.grid-navigation > ul > li:last-child > a {
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
 }
 
-/* Angular animation */
-.animate.ng-enter, .animate.ng-move {
-    -webkit-transition: 0.5s linear all;
-    -moz-transition: 0.5s linear all;
-    -o-transition: 0.5s linear all;
-    transition: 0.5s linear all;
-    opacity: 0;
+.grid-navigation > ul > li > a:not(:disabled):not(.disabled) {
+    cursor: pointer;
 }
 
-/*
- The ng-enter-active and ng-move-active
- are where the transition destination properties
- are set so that the animation knows what to
- animate.
-*/
-.animate.ng-enter.ng-enter-active,
-.animate.ng-move.ng-move-active {
+.grid-navigation > ul > li > a {
+    position: relative;
+    display: block;
+    padding: .5rem .75rem;
+    line-height: 1.25;
+    color: #007bff;
+    margin-left: -1px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    text-decoration: none;
+}
+
+.grid-navigation > ul > li > a:hover {
+    background-color: #dee2e6;
+}
+
+.grid-navigation > ul > li.active > a {
+    position: relative;
+    display: block;
+    padding: .5rem .75rem;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-left: -1px;
+    cursor: default !important;
+    background-color: #337ab7;
+    border-color: #337ab7;
+    text-decoration: none;
+}
+
+.grid-navigation > ul > li.disabled > a,
+.grid-navigation > ul > li.disabled > a:focus,
+.grid-navigation > ul > li.disabled > a:hover,
+.grid-navigation > ul > li.disabled > span,
+.grid-navigation > ul > li.disabled > span:focus,
+.grid-navigation > ul > li.disabled > span:hover {
+    color: #777;
+    cursor: not-allowed;
+    background-color: #fff;
+    border-color: #ddd;
+}
+
+/* ----- Main Block ----- */
+
+.exam-info {
+    color: #3d84c4;
+}
+
+.main-block {
+    margin-top: 50px;
+}
+
+.form-control:disabled, button:disabled {
+    cursor: not-allowed;
+}
+
+.last-created-sessions-header {
+    display: inline;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+
+.students-selected-block {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #eeeeee;
+    border-top: 2px solid #3d84c4;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.students-selected-block-content {
+    font-size: 0.95rem;
+    padding-top: 7px;
+}
+
+.status-blue {
+    color: #3d84c4
+}
+
+.status-red {
+    color: #ff0000
+}
+
+.status-orange {
+    color: #ffc107
+}
+
+.status-green {
+    color: #28a745
+}
+
+.deselect-link {
+    padding-right: 0.75rem;
+}
+
+.exam-comment-block {
+    word-wrap: break-word;
+}
+
+.exam-comment-block-icon {
+    margin-top: 5px;
+    margin-right: 5px;
+    float: left;
+}
+
+/* ----- Model Window ----- */
+
+.fade.in {
     opacity: 1;
 }
 
-/*
-  We're using CSS keyframe animations for when
-  the leave event is triggered for the element
-  that has the .animate class
-*/
-.animate.ng-leave {
-    -webkit-animation: 0.5s my_animation;
-    -moz-animation: 0.5s my_animation;
-    -o-animation: 0.5s my_animation;
-    animation: 0.5s my_animation;
+.modal.in .modal-dialog {
+  -webkit-transform: translate(0, 0);
+       -o-transform: translate(0, 0);
+          transform: translate(0, 0);
 }
 
-@keyframes my_animation {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-/*
-  Unfortunately each browser vendor requires
-  its own definition of keyframe animation code...
-*/
-@-webkit-keyframes my_animation {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-@-moz-keyframes my_animation {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
-}
-
-@-o-keyframes my_animation {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
+.modal-backdrop.in {
+    filter: alpha(opacity=50);
+    opacity: .5;
 }

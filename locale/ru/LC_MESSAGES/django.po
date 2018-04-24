@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-14 16:24+0000\n"
+"POT-Creation-Date: 2018-04-24 09:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,9 @@ msgstr "Закрыть сессию ?"
 
 #: proctoring/admin.py:159
 msgid "Error during request to API edX. Please try again later"
-msgstr "Ошибка при обращении к edX. Пожалуйста, попробуйте ещё раз через одну минуту. При повторной ошибке, пожалуйста, обратитесь в службу поддержки"
+msgstr ""
+"Ошибка при обращении к edX. Пожалуйста, попробуйте ещё раз через одну "
+"минуту. При повторной ошибке, пожалуйста, обратитесь в службу поддержки"
 
 #: proctoring/admin.py:164
 msgid "Closed forcibly from the admin panel"
@@ -119,36 +121,64 @@ msgstr ""
 msgid "There is no active room for the chosen exam"
 msgstr "Для выбранного экзамена нет ни одной открытой комнаты"
 
-#: proctoring/models.py:184
+#: proctoring/models.py:185
 msgid "Not started"
 msgstr ""
 
-#: proctoring/models.py:185
+#: proctoring/models.py:186
 msgid "Started"
 msgstr ""
 
-#: proctoring/models.py:186
+#: proctoring/models.py:187
+msgid "Stopped"
+msgstr ""
+
+#: proctoring/models.py:188
 msgid "Finished"
 msgstr ""
 
-#: proctoring/models.py:187
+#: proctoring/models.py:189
 msgid "Failed"
 msgstr ""
 
-#: proctoring/models.py:271
+#: proctoring/models.py:277
 msgid "In progress"
 msgstr ""
 
-#: proctoring/models.py:272
+#: proctoring/models.py:278
 msgid "Archived"
 msgstr ""
 
-#: proctoring/serializers.py:51
+#: proctoring/models.py:393
+msgid "Comment"
+msgstr ""
+
+#: proctoring/models.py:394
+msgid "Warning"
+msgstr ""
+
+#: proctoring/models.py:413
+msgid "slug"
+msgstr ""
+
+#: proctoring/models.py:414
+msgid "Description"
+msgstr "Описание"
+
+#: proctoring/models.py:417
+msgid "Organization description"
+msgstr "Описание организации"
+
+#: proctoring/models.py:418
+msgid "Organization descriptions"
+msgstr "Организации"
+
+#: proctoring/serializers.py:64
 #, python-format
 msgid "orgExtra fields list incorrect. Missed %s"
 msgstr ""
 
-#: proctoring/serializers.py:54
+#: proctoring/serializers.py:67
 msgid "orgExtra field value error. Must be json"
 msgstr ""
 
@@ -171,3 +201,7 @@ msgstr "Пожалуйста, подождите"
 #: templates/admin/end_session.html:26
 msgid "No, take me back"
 msgstr "Нет"
+
+#: templates/index.html:8
+msgid "Proctoring"
+msgstr "Прокторинг Web Assistant"

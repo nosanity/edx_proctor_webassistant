@@ -4,71 +4,118 @@
     angular.module('proctor').controller(
         'MainCtrl', ['$scope', '$interval', '$location',
             '$q', '$route', 'WS', 'Api', 'Auth', 'i18n',
-            'NgTableParams', '$uibModal',
-            'TestSession', 'wsData', 'Polling',
+            '$uibModal', 'TestSession', 'wsData', 'Polling',
             'DateTimeService', 'students',
             function ($scope, $interval, $location, $q, $route, WS, Api, Auth, i18n,
-                      NgTableParams, $uibModal, TestSession, wsData, Polling, DateTimeService, students) {
+                      $uibModal, TestSession, wsData, Polling, DateTimeService, students) {
 
                 var session = TestSession.getSession();
-
-                if (session) {
-                    $interval(function () {
-                        $scope.session_duration = TestSession.getSessionDuration();
-                    }, 1000);
+                $scope.readOnlyMode = false;
+                $scope.courseInfo = session.course_id.split('+');
+                $scope.startDate = moment(session.start_date).format('DD.MM.YYYY HH:mm');
+                $scope.isFinished = !!session.end_date;
+                $scope.endSessionBtnDisabled = false;
+                $scope.endDate = '';
+                if ($scope.isFinished) {
+                    $scope.endDate = moment(session.end_date).format('DD.MM.YYYY HH:mm');
+                    $scope.readOnlyMode = true;
                 }
-
-                $scope.ws_data = [];
-
-                // Update table with students attempts on next new attempt
-                $scope.$watch(
-                    function() {
-                        return wsData.attempts;
+                $scope.chosenMassAction = 'activate_all_inactive';
+                $scope.massAction = {
+                    btnDisabled: false,
+                    inProgress: false,
+                    options: [{
+                        key: 'activate_all_inactive',
+                        name: i18n.translate('ACTIVATE_ALL_INACTIVE')
+                    }, {
+                        key: 'make_verified_all_submitted',
+                        name: i18n.translate('MAKE_VERIFIED_ALL_SUBMITTED')
+                    }, {
+                        key: 'make_rejected_all_submitted',
+                        name: i18n.translate('MAKE_REJECTED_ALL_SUBMITTED')
+                    }]
+                };
+                $scope.statuses = {
+                    created: {
+                        title: i18n.translate('STATUS_CREATED'),
+                        cssClass: 'status-blue',
+                        actions: [{
+                            title: i18n.translate('ACTIVATE'),
+                            cssClass: 'btn-primary',
+                            action: 'activate'
+                        }]
                     },
-                    function(new_val) {
-                        $scope.ws_data = angular.copy(new_val);
-                        $scope.tableParams.reload();
+                    download_software_clicked: {
+                        title: i18n.translate('STATUS_DOWNLOAD_SOFTWARE_CLICKED'),
+                        cssClass: 'status-blue',
+                        actions: []
                     },
-                    true
-                );
-
-                // helper function
-                function _addNewAttempt(attempt) {
-                    var started_at = '';
-                    if (attempt.actual_start_date) {
-                        started_at = DateTimeService.get_localized_time_from_string(attempt.actual_start_date);
+                    error: {
+                        title: i18n.translate('STATUS_ERROR'),
+                        cssClass: 'status-red',
+                        actions: []
+                    },
+                    ready_to_start: {
+                        title: i18n.translate('STATUS_READY_TO_START'),
+                        cssClass: 'status-orange',
+                        actions: []
+                    },
+                    started: {
+                        title: i18n.translate('STATUS_STARTED'),
+                        cssClass: 'status-blue',
+                        actions: [{
+                            title: i18n.translate('STOP'),
+                            cssClass: 'btn-warning',
+                            action: 'stop'
+                        }]
+                    },
+                    ready_to_submit: {
+                        title: i18n.translate('STATUS_STARTED'),
+                        cssClass: 'status-orange',
+                        actions: []
+                    },
+                    submitted: {
+                        title: i18n.translate('STATUS_SUBMITTED'),
+                        cssClass: 'status-blue',
+                        actions: [{
+                            title: i18n.translate('PASSED'),
+                            cssClass: 'btn-success',
+                            action: 'set_passed'
+                        }, {
+                            title: i18n.translate('NOT_PASSED'),
+                            cssClass: 'btn-danger',
+                            action: 'set_not_passed'
+                        }]
+                    },
+                    deleted_in_edx: {
+                        title: i18n.translate('STATUS_DELETED_IN_EDX'),
+                        cssClass: 'status-red',
+                        actions: []
+                    },
+                    rejected: {
+                        title: i18n.translate('STATUS_REJECTED'),
+                        cssClass: 'status-red',
+                        actions: []
+                    },
+                    verified: {
+                        title: i18n.translate('STATUS_VERIFIED'),
+                        cssClass: 'status-green',
+                        actions: []
+                    },
+                    timed_out: {
+                        title: i18n.translate('STATUS_TIMED_OUT'),
+                        cssClass: 'status-red',
+                        actions: []
                     }
+                };
 
-                    attempt.started_at = started_at;
-                    attempt.status_updated = attempt.attempt_status_updated;
-                    attempt.status = attempt.attempt_status;
-                    if (!attempt.code) {
-                        attempt.code = attempt.examCode;
+                $scope.studentsGridOptions = {
+                    data: [],
+                    sort: {
+                        predicate: 'id',
+                        direction: 'asc'
                     }
-
-                    return attempt;
-                }
-
-                // get student exams from session
-                if (students !== undefined) {
-                    angular.forEach(students.data, function (attempt) {
-                        // restore attempt comments
-                        Api.get_comments(attempt.examCode).then(function (data) {
-                            var comments = data.data.results;
-                            attempt.comments = [];
-                            angular.forEach(comments, function (comment) {
-                                var item = {
-                                    comment: comment.comment,
-                                    timestamp: comment.event_start,
-                                    status: comment.event_status
-                                };
-                                attempt.comments.push(item);
-                            });
-
-                            wsData.addNewAttempt(_addNewAttempt(attempt));
-                        });
-                    });
-                }
+                };
 
                 $scope.test_center = session.testing_center;
                 $scope.course_name = session.course_name;
@@ -80,318 +127,512 @@
                     ended: []
                 };
 
-                $scope.tableParams = new NgTableParams({
-                    page: 1,
-                    count: 10
-                }, {
-                    data: wsData.attempts
-                });
+                $scope.isOwner = TestSession.is_owner();
 
-                $scope.is_owner = function () {
-                    return TestSession.is_owner();
+                $scope.changeCheckbox = function(item) {
+                    if (item.checked) {
+                        $scope.checkedItems.number++;
+                        $scope.checkedItems.items[item.examCode] = item.status;
+                    } else {
+                        $scope.checkedItems.number--;
+                        delete $scope.checkedItems.items[item.examCode];
+                    }
+                    updateStatusForCheckedItems();
                 };
 
-                var attempt_end = function (hash) {};
+                $scope.removeSelections = function() {
+                    $scope.checkedItems.number = 0;
+                    $scope.checkedItems.items = [];
+                    wsData.removeCheckedAll();
+                    initCheckedItems();
+                };
 
-                // Start SockJS (websocket) connection
-                WS.init(session.course_event_id, wsData.websocket_callback, true, function(wsCallback) {
-                    // fallback function in case if SockJS connection is failed
-                    Api.restore_session().then(function(response) {
-                        angular.forEach(response.data, function (attempt) {
-                            var item = wsData.findAttempt(attempt.examCode);
-                            item = item.length ? item[0] : null;
-                            if (!item) {
-                                wsData.addNewAttempt(_addNewAttempt(attempt));
-                            }
-                        });
-                        if (Polling.get_attempts().length > 0) {
-                            Polling.fetch_statuses(true).then(function(response) {
-                                angular.forEach(response.data, function (attempt) {
-                                    wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                $scope.applyAction = function(item, actionName) {
+                    var newStatus = (actionName === 'set_passed') ? 'Clean'
+                        : ((actionName === 'set_not_passed') ? 'Suspicious' : null);
+
+                    if (actionName === 'activate') {
+                        item.btnDisabled = true;
+                        Api.accept_exam_attempt(item.examCode)
+                            .then(
+                                function (data) {},
+                                function () {
+                                    item.btnDisabled = false;
+                                    showServerError();
                                 });
-                                wsCallback();
-                            }, function() {
-                                wsCallback();
-                            });
-                        } else {
-                            wsCallback();
-                        }
-                    }, function() {
-                        wsCallback();
-                    });
-                }, true);
-
-                $scope.accept_exam_attempt = function (exam) {
-                    if (exam.accepted) {
-                        Api.accept_exam_attempt(exam.examCode)
-                            .success(function (data) {});
-                    }
-                };
-
-                $scope.stop_exam_attempt = function (exam) {
-                    if (confirm(i18n.translate('STOP_ATTEMPT')) === true) {
-                        Api.stop_exam_attempt(exam.examCode, exam.orgExtra.userID).then(function (data) {
-                            if (data.data.status = 'submitted') {
-                                $scope.add_review(exam, 'personal', $scope.attempt_review_callback);
+                    } else if (actionName === 'stop') {
+                        $uibModal.open({
+                            animation: true,
+                            templateUrl: 'windowConfirmation.html',
+                            controller: 'WindowConfirmationCtrl',
+                            size: 'md',
+                            resolve: {
+                                data: {
+                                    title: i18n.translate('WARNING'),
+                                    description: i18n.translate('STOP_ATTEMPT'),
+                                    okFunc: function() {
+                                        item.btnDisabled = true;
+                                        Api.stop_exam_attempt(item.examCode, item.orgExtra.userID).then(
+                                            function (data) {
+                                                if (data.data.status = 'submitted') {
+                                                    addReviewComment(item, [item.examCode]);
+                                                }
+                                            }, function () {
+                                                item.btnDisabled = false;
+                                                showServerError();
+                                            });
+                                    }
+                                }
                             }
-                        }, function () {
-                            alert(i18n.translate('STOP_EXAM_FAILED'));
                         });
+                    } else if ((actionName === 'set_passed') || (actionName === 'set_not_passed')) {
+                        item.btnDisabled = true;
+                        sendReview(item, newStatus);
                     }
                 };
 
-                $scope.add_review = function (exam, type, callback) {
-                    var deferred = $q.defer();
+                $scope.applyActionForChecked = function(actionName) {
+                    applyBulkAction(actionName, $scope.checkedItems.items, false, false, function() {
+                        $scope.removeSelections();
+                    });
+                };
 
-                    if (exam.comments == undefined) {
-                        exam.comments = [];
+                $scope.applyMassAction = function() {
+                    var selectedItems = {};
+                    var found = false;
+                    var onFinish = function () {
+                        $scope.massAction.btnDisabled = false;
+                        $scope.massAction.inProgress = false;
+                    };
+                    var beforeStart = function() {
+                        $scope.massAction.btnDisabled = true;
+                        $scope.massAction.inProgress = true;
+                    };
+
+                    angular.forEach(wsData.attempts, function (attempt) {
+                        if ((($scope.chosenMassAction === 'activate_all_inactive') && (attempt.status === 'created'))
+                        || (($scope.chosenMassAction === 'make_verified_all_submitted') && (attempt.status === 'submitted'))
+                        || (($scope.chosenMassAction === 'make_rejected_all_submitted') && (attempt.status === 'submitted'))) {
+                            selectedItems[attempt.code] = attempt.status;
+                            found = true;
+                        }
+                    });
+
+                    if (found) {
+                        if ($scope.chosenMassAction === 'activate_all_inactive') {
+                            applyBulkAction('activate', selectedItems, onFinish, onFinish, beforeStart);
+                        } else if ($scope.chosenMassAction === 'make_verified_all_submitted') {
+                            applyBulkAction('set_passed', selectedItems, onFinish, onFinish, beforeStart);
+                        } else if ($scope.chosenMassAction === 'make_rejected_all_submitted') {
+                            applyBulkAction('set_not_passed', selectedItems, onFinish, onFinish, beforeStart);
+                        }
                     }
+                };
 
-                    exam['review_type'] = type;
-
-                    var modalInstance = $uibModal.open({
+                $scope.endSession = function() {
+                    $uibModal.open({
                         animation: true,
                         templateUrl: 'reviewContent.html',
                         controller: 'ReviewCtrl',
                         size: 'lg',
                         resolve: {
-                            exam: exam
+                            params: {
+                                exam: null,
+                                attemptCodes: [],
+                                review_type: 'session',
+                                okCallback: function() {
+                                    $scope.endSessionBtnDisabled = true;
+                                    WS.disconnect();
+                                    wsData.clear();
+                                    $location.path('/');
+                                },
+                                errorCallback: function() {},
+                                statuses: $scope.statuses,
+                                readOnlyMode: $scope.readOnlyMode
+                            }
                         }
                     });
-
-                    modalInstance.result.then(function (data) {
-                        if (callback !== undefined)
-                            callback(exam, data);
-                        deferred.resolve(data);
-                    }, function () {
-                        deferred.reject();
-                    });
-
-                    return deferred.promise;
                 };
 
-                // When proctor adds any comment for single student's exam attempt
-                $scope.attempt_review_callback = function (attempt, data) {
-                    attempt.comments.push(data);
-                    Api.save_comment(attempt.examCode,
-                        {
-                            "comment": data.comment,
+                $scope.showInfo = function(examCode) {
+                    var exam = wsData.findAttempt(examCode);
+                    addReviewComment(exam, [examCode]);
+                };
+
+                $scope.expand = function(examCode, expanded) {
+                    wsData.setExpanded(examCode, expanded);
+                };
+
+                var initCheckedItems = function() {
+                    $scope.checkedItems = {
+                        number: 0,
+                        items: {},
+                        status: ''
+                    };
+                };
+
+                var updateStatusForCheckedItems = function() {
+                    var newStatus = null;
+                    var firstItem = true;
+                    angular.forEach($scope.checkedItems.items, function(status) {
+                        if (firstItem) {
+                            newStatus = status;
+                            firstItem = false;
+                        } else if (newStatus !== status) {
+                            newStatus = '';
+                        }
+                    });
+                    $scope.checkedItems.status = newStatus;
+                };
+
+                var showServerError = function() {
+                    $uibModal.open({
+                        animation: true,
+                        templateUrl: 'windowAlert.html',
+                        controller: 'WindowAlertCtrl',
+                        size: 'md',
+                        resolve: {
+                            data: {
+                                title: i18n.translate('SERVER_ERROR'),
+                                description: i18n.translate('SOMETHING_WRONG')
+                            }
+                        }
+                    });
+                };
+
+                var getReviewPayload = function(exam, status) {
+                    var payload = {
+                        "examMetaData": {
+                            "examCode": exam.examCode,
+                            "reviewedExam": true,
+                            "proctor_username": Auth.get_proctor()
+                        },
+                        "reviewStatus": status,
+                        "videoReviewLink": "",
+                        "desktopComments": []
+                    };
+                    angular.forEach(exam.comments, function (val) {
+                        payload.desktopComments.push({
+                            "comments": val.comment,
                             "duration": 1,
-                            "event_finish": data.timestamp,
-                            "event_start": data.timestamp,
-                            "event_status": data.status
-                        }
-                    );
+                            "eventFinish": val.event_finish,
+                            "eventStart": val.event_start,
+                            "eventStatus": val.event_status
+                        });
+                    });
+                    return payload;
                 };
 
-                $scope.send_review = function (exam, status) {
-                    if (exam.status == 'submitted' && exam.review_sent !== true) {
-                        var payload = {
-                            "examMetaData": {
-                                "examCode": exam.examCode,
-                                "reviewedExam": true,
-                                "proctor_username": Auth.get_proctor()
-                            },
-                            "reviewStatus": status,
-                            "videoReviewLink": "",
-                            "desktopComments": []
-                        };
-                        angular.forEach(exam.comments, function (val, key) {
-                            payload.desktopComments.push(
-                                {
-                                    "comments": val.comment,
-                                    "duration": 1,
-                                    "eventFinish": val.timestamp,
-                                    "eventStart": val.timestamp,
-                                    "eventStatus": val.status
-                                }
-                            );
-                        });
-                        Api.send_review(payload).success(function () {
-                            var idx = 0;
-                            while ($scope.ws_data[idx].examCode !== exam.examCode) {
-                                idx++;
+                var addReviewComment = function (exam, attemptCodes) {
+                    $uibModal.open({
+                        animation: true,
+                        templateUrl: 'reviewContent.html',
+                        controller: 'ReviewCtrl',
+                        size: 'lg',
+                        resolve: {
+                            params: {
+                                exam: exam,
+                                attemptCodes: attemptCodes,
+                                review_type: 'personal',
+                                okCallback: function(commentObj) {
+                                    wsData.addComments(attemptCodes, commentObj);
+                                },
+                                errorCallback: function() {},
+                                statuses: $scope.statuses,
+                                readOnlyMode: $scope.readOnlyMode
                             }
-                            if (status === 'Clean')
-                                wsData.attempts[idx].status = 'verified';
-                            else if (status === 'Suspicious')
-                                wsData.attempts[idx].status = 'rejected';
+                        }
+                    });
+                };
+
+                var sendReview = function (exam, status) {
+                    if (exam.review_sent !== true) {
+                        Api.send_review(getReviewPayload(exam, status)).then(function () {
                             exam.review_sent = true;
-                            attempt_end(exam.hash);
-                        }).error(function () {
-                            alert(i18n.translate('REVIEW_SEND_FAILED') + " " + exam.examCode);
-                        });
-                    }
-                };
-
-                $scope.check_all_attempts = function () {
-                    var list = [];
-                    angular.forEach($scope.ws_data, function (val) {
-                        if (!list.in_array(val.examCode)) {
-                            list.push(val.examCode);
-                        }
-                    });
-                    $scope.exams.checked = angular.copy(list);
-                };
-
-                $scope.uncheck_all_attempts = function () {
-                    $scope.exams.checked = [];
-                };
-
-                var get_not_started_attempts = function () {
-                    var list = [];
-                    angular.forEach($scope.ws_data, function (val, key) {
-                        if (val.status == undefined || !val.status || val.status == 'created') {
-                            if (!$scope.exams.checked.in_array(val.examCode)) {
-                                list.push(val.examCode);
-                            }
-                        }
-                    });
-                    return list;
-                };
-
-                var there_are_not_reviewed_attempts = function () {
-                    var list = [];
-                    angular.forEach($scope.ws_data, function (val) {
-                        if (!['verified', 'rejected', 'error', 'deleted_in_edx', 'timed_out'].in_array(val.status)) {
-                            var not_started_attempts = get_not_started_attempts();
-                            if (!not_started_attempts.in_array(val.examCode))
-                                list.push(val.hash);
-                        }
-                    });
-                    return list.length > 0;
-                };
-
-                $scope.end_session = function () {
-                    if (!there_are_not_reviewed_attempts()) {
-                        $scope.add_review({}, 'session').then(function (data) {
-                            TestSession.endSession(data.comment).then(function () {
-                                delete window.sessionStorage['proctoring'];
-                                WS.disconnect();
-                                wsData.clear();
-                                $location.path('/session');
-                            }, function () {
-                            });
                         }, function () {
-                            alert(i18n.translate('EVENT_COMMENT_ERROR'));
+                            exam.btnDisabled = false;
+                            showServerError();
                         });
-                    }
-                    else {
-                        alert(i18n.translate('NOT_REVIEWED_SESSIONS'));
-                    }
-                };
-
-                $scope.start_all_attempts = function () {
-                    if (confirm(i18n.translate('APPROVE_ALL_STUDENTS')) === true) {
-                        Api.start_all_exams($scope.exams.checked).then(function () {});
+                    } else {
+                        exam.btnDisabled = false;
                     }
                 };
 
-                var get_items_to_stop = function () {
-                    var list = [];
-                    angular.forEach($scope.exams.checked, function (val, key) {
-                        var item = $scope.ws_data.filterBy({examCode: val});
-                        if (item.length) {
-                            if (!['verified', 'rejected', 'submitted', 'deleted_in_edx'].in_array(item[0].status)) {
-                                list.push({user_id: item[0].orgExtra.userID, attempt_code: val});
-                            }
-                        }
-                    });
-                    return list;
-                };
-
-                $scope.end_all_attempts = function () {
-                    if (confirm(i18n.translate('STOP_ALL_ATTEMPTS')) === true) {
-                        var list = get_items_to_stop();
-                        if (list.length){
-                            Api.stop_all_exam_attempts(list).then(function () {
-                                $scope.add_review({}, 'common').then(function (data) {
-                                    data.status = i18n.translate('COMMENT').toString();
-                                    angular.forEach(list, function (val, key) {
-                                        var res = $scope.ws_data.filterBy({examCode: val.attempt_code})[0];
-                                        if (res.comments == undefined) {
-                                            res.comments = [];
-                                        }
-                                        res.comments.push(data);
-                                        Api.save_comment(val.attempt_code,
-                                            {
-                                                "comments": data.comment,
-                                                "duration": 1,
-                                                "eventFinish": data.timestamp,
-                                                "eventStart": data.timestamp,
-                                                "eventStatus": data.status
-                                            }
-                                        );
-                                    });
+                var sendBatchReview = function (codes, status, onErrorCallback, onSuccessCallback) {
+                    var sendNextReview = function(i) {
+                        if (i < codes.length) {
+                            var exam = wsData.findAttempt(codes[i]);
+                            if (exam.review_sent !== true) {
+                                Api.send_review(getReviewPayload(exam, status)).then(function () {
+                                    exam.review_sent = true;
+                                    sendNextReview(i+1);
+                                }, function () {
+                                    exam.btnDisabled = false;
+                                    if (onErrorCallback) {
+                                        onErrorCallback();
+                                    }
                                 });
-                            }, function () {
-                                alert(i18n.translate('STOP_EXAMS_FAILED'));
-                            });
+                            } else {
+                                exam.btnDisabled = false;
+                                sendNextReview(i+1);
+                            }
+                        } else {
+                            if (onSuccessCallback) {
+                                onSuccessCallback();
+                            }
                         }
-                    }
+                    };
+
+                    sendNextReview(0);
                 };
 
-                $scope.accept_student = function (exam) {
-                    exam.accepted = true;
-                };
+                var applyBulkAction = function(actionName, selectedItems, onErrorCallback, onSuccessCallback,
+                                               beforeStartFunc) {
+                    var lstUpdate = [];
+                    var attemptsParam = [];
+                    var newStatus = (actionName === 'set_passed') ? 'Clean'
+                        : ((actionName === 'set_not_passed') ? 'Suspicious' : null);
 
-                $scope.show_comments = function (exam) {
-                    if (exam.comments.length) {
-                        var deferred = $q.defer();
+                    angular.forEach(selectedItems, function(st, code) {
+                        var at = wsData.findAttempt(code);
+                        lstUpdate.push(code);
+                        attemptsParam.push({
+                            attempt_code: code,
+                            user_id: at.orgExtra.userID,
+                            action: 'submit'
+                        });
+                    });
 
-                        var modalInstance = $uibModal.open({
+                    if (actionName === 'activate') {
+                        if (beforeStartFunc) {
+                            beforeStartFunc();
+                        }
+                        wsData.setDisabled(lstUpdate, true);
+                        Api.start_all_exams(lstUpdate)
+                            .then(
+                                function () {
+                                    if (onSuccessCallback) {
+                                        onSuccessCallback();
+                                    }
+                                },
+                                function () {
+                                    wsData.setDisabled(lstUpdate, false);
+                                    showServerError();
+                                    if (onErrorCallback) {
+                                        onErrorCallback();
+                                    }
+                                });
+                    } else if (actionName === 'stop') {
+                        $uibModal.open({
                             animation: true,
-                            templateUrl: 'comments.html',
-                            controller: 'CommentCtrl',
-                            size: 'lg',
+                            templateUrl: 'windowConfirmation.html',
+                            controller: 'WindowConfirmationCtrl',
+                            size: 'md',
                             resolve: {
-                                exam: exam
+                                data: {
+                                    title: i18n.translate('WARNING'),
+                                    description: i18n.translate('STOP_ATTEMPTS'),
+                                    okFunc: function() {
+                                        if (beforeStartFunc) {
+                                            beforeStartFunc();
+                                        }
+                                        wsData.setDisabled(lstUpdate, true);
+                                        Api.stop_all_exam_attempts(attemptsParam).then(
+                                            function () {
+                                                if (onSuccessCallback) {
+                                                    onSuccessCallback();
+                                                }
+                                                addReviewComment(null, lstUpdate);
+                                            }, function () {
+                                                wsData.setDisabled(lstUpdate, false);
+                                                showServerError();
+                                                if (onErrorCallback) {
+                                                    onErrorCallback();
+                                                }
+                                            });
+                                    }
+                                }
                             }
                         });
-
-                        modalInstance.result.then(function () {
-                            deferred.resolve();
+                    } else if ((actionName === 'set_passed') || (actionName === 'set_not_passed')) {
+                        $uibModal.open({
+                            animation: true,
+                            templateUrl: 'windowConfirmation.html',
+                            controller: 'WindowConfirmationCtrl',
+                            size: 'md',
+                            resolve: {
+                                data: {
+                                    title: i18n.translate('WARNING'),
+                                    description: (actionName === 'set_passed') ? i18n.translate('MARK_ATTEMPTS_AS_PASSED')
+                                        : i18n.translate('MARK_ATTEMPTS_AS_NOT_PASSED'),
+                                    okFunc: function() {
+                                        if (beforeStartFunc) {
+                                            beforeStartFunc();
+                                        }
+                                        wsData.setDisabled(lstUpdate, true);
+                                        sendBatchReview(lstUpdate, newStatus, function() {
+                                            wsData.setDisabled(lstUpdate, false);
+                                            showServerError();
+                                            if (onErrorCallback) {
+                                                onErrorCallback();
+                                            }
+                                        }, onSuccessCallback);
+                                    }
+                                }
+                            }
                         });
-
-                        return deferred.promise;
                     }
                 };
+
+                if (session && !$scope.readOnlyMode) {
+                    $interval(function () {
+                        $scope.session_duration = TestSession.getSessionDuration();
+                    }, 1000);
+                }
+
+                // get student exams from session
+                if (students !== undefined) {
+                    angular.forEach(students.data, function (attempt) {
+                        wsData.addNewAttempt(attempt);
+                    });
+                }
+
+                // Start SockJS (websocket) connection
+                if (!$scope.readOnlyMode) {
+                    WS.init(session.course_event_id, wsData.websocket_callback, true,
+                        function(attempt, prevStatus, code, newStatus) {
+                            if (attempt.checked) {
+                                updateStatusForCheckedItems();
+                            }
+                        },
+                        function(wsCallback) {
+                            // fallback function in case if SockJS connection is failed
+                            Api.restore_session().then(function(response) {
+                                angular.forEach(response.data, function (attempt) {
+                                    var item = wsData.findAttempt(attempt.examCode);
+                                    if (!item) {
+                                        wsData.addNewAttempt(attempt);
+                                    }
+                                    if (item && item.hasOwnProperty('comments') && attempt.comments
+                                        && (item.comments.length < attempt.comments.length)) {
+                                        item.comments = attempt.comments.slice();
+                                    }
+                                });
+                                if (Polling.get_attempts().length > 0) {
+                                    Polling.fetch_statuses(true).then(function(response) {
+                                        angular.forEach(response.data, function (attempt) {
+                                            wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                                        });
+                                        wsCallback();
+                                    }, function() {
+                                        wsCallback();
+                                    });
+                                } else {
+                                    wsCallback();
+                                }
+                            }, function() {
+                                wsCallback();
+                            });
+                        }, true);
+                }
+
+                $scope.studentsGridOptions.data = wsData.attempts;
+                $scope.statusesCounters = wsData.counters;
+                initCheckedItems();
             }]);
 
-    angular.module('proctor').controller('ReviewCtrl', function ($scope, $uibModalInstance, TestSession, DateTimeService, i18n, exam) {
-        $scope.exam = exam;
+    angular.module('proctor').controller('ReviewCtrl', function ($scope, $uibModalInstance, i18n, TestSession, Api,
+                                                                 DateTimeService, params) {
         var session = TestSession.getSession();
-        $scope.exam.course_name = session.course_name;
-        $scope.exam.exam_name = session.exam_name;
-        $scope.available_statuses = [];
-        if (exam.review_type == 'common') {
-            $scope.available_statuses = [
-                i18n.translate('COMMENT')
-            ];
-        }
-        else if (exam.review_type == 'personal') {
-            $scope.available_statuses = [
-                i18n.translate('COMMENT').toString(),
-                i18n.translate('SUSPICIOUS').toString()
-            ];
+        var okCallback = params.okCallback;
+        var errorCallback = params.errorCallback;
+
+        $scope.exam = params.exam;
+
+        $scope.courseInfo = session.course_id.split('+');
+        $scope.startDate = moment(session.start_date).format('DD.MM.YYYY HH:mm');
+        $scope.course_name = session.course_name;
+        $scope.exam_name = session.exam_name;
+        $scope.test_center = session.testing_center;
+
+        $scope.review_type = params.review_type;
+        $scope.errorMsg = '';
+        $scope.requestInProgress = false;
+        $scope.readOnlyMode = params.readOnlyMode;
+        $scope.statuses = params.statuses;
+
+        $scope.available_statuses_dict = {
+            comment: i18n.translate('COMMENT'),
+            warning: i18n.translate('SUSPICIOUS')
+        };
+
+        $scope.available_statuses = [{
+            type: 'comment',
+            status: $scope.available_statuses_dict['comment']
+        }];
+        if ($scope.review_type === 'personal') {
+            $scope.available_statuses.push({
+                type: 'warning',
+                status: $scope.available_statuses_dict['warning']
+            });
         }
         $scope.comment = {
-            status: $scope.available_statuses.length ? $scope.available_statuses[0] : '',
+            type: $scope.available_statuses[0].type,
             message: ""
         };
 
         $scope.ok = function () {
-            var ret = {
-                timestamp: new Date(),
-                comment: $scope.comment.message,
-                status: $scope.comment.status
-            };
-            ret.timestamp = ret.timestamp.getTime();
-            $uibModalInstance.close(ret);
+            var dt = new Date();
+            var timestamp = dt.getTime();
+
+            $scope.errorMsg = '';
+            $scope.requestInProgress = true;
+
+            if ($scope.review_type === 'session') {
+                TestSession.endSession($scope.comment.message).then(
+                    function () {
+                        $uibModalInstance.close();
+                        if (okCallback) {
+                            okCallback();
+                        }
+                    },
+                    function () {
+                        $scope.requestInProgress = false;
+                        $scope.errorMsg = i18n.translate('SOMETHING_WRONG');
+                        if (errorCallback) {
+                            errorCallback();
+                        }
+                    }
+                );
+            } else {
+                var obj = {
+                    comment: $scope.comment.message,
+                    duration: 1,
+                    event_finish: parseInt(timestamp / 1000),
+                    event_start: parseInt(timestamp / 1000),
+                    event_type: $scope.comment.type,
+                    event_status: $scope.available_statuses_dict[$scope.comment.type]
+                };
+                Api.save_comment(params.attemptCodes, obj).then(
+                    function () {
+                        $uibModalInstance.close();
+                        if (okCallback) {
+                            okCallback(obj);
+                        }
+                    },
+                    function () {
+                        $scope.requestInProgress = false;
+                        $scope.errorMsg = i18n.translate('SOMETHING_WRONG');
+                        if (errorCallback) {
+                            errorCallback();
+                        }
+                    }
+                );
+            }
         };
 
         $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
+            $uibModalInstance.close();
         };
 
         $scope.i18n = function (text) {
@@ -404,22 +645,6 @@
 
         $scope.get_time = function () {
             return DateTimeService.get_now_time();
-        };
-    });
-
-    angular.module('proctor').controller('CommentCtrl', function ($scope, $uibModalInstance, DateTimeService, i18n, exam) {
-        $scope.comments = exam.comments;
-
-        $scope.ok = function () {
-            $uibModalInstance.close();
-        };
-
-        $scope.i18n = function (text) {
-            return i18n.translate(text);
-        };
-
-        $scope.get_date = function (timestamp) {
-            return DateTimeService.get_localized_date_from_timestamp(timestamp);
         };
     });
 })();

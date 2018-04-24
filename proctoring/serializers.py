@@ -17,6 +17,19 @@ from proctoring.models import (Exam, ArchivedEventSession, Comment,
 from person.models import Student
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Comment serializer
+    """
+    exam_code = serializers.ReadOnlyField(source='exam.exam_code')
+    exam = serializers.PrimaryKeyRelatedField(queryset=Exam.objects.all(),
+                                              write_only=True)
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+
 class JSONSerializerField(serializers.Field):
     """ Serializer for orgExtraField"""
     FIELD_LIST = [
@@ -86,11 +99,12 @@ class ExamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Exam
-        fields = ('examCode', 'organization', 'duration', 'reviewedExam',
+        fields = ('id', 'examCode', 'organization', 'duration', 'reviewedExam',
                   'reviewerNotes', 'examPassword', 'examSponsor',
-                  'examName', 'ssiProduct', 'orgExtra', 'attempt_status', 'attempt_status_updated',
+                  'examName', 'ssiProduct', 'orgExtra', 'comments', 'attempt_status', 'attempt_status_updated',
                   'hash', 'actual_start_date', 'actual_end_date')
 
+    id = serializers.IntegerField(read_only=True)
     examCode = serializers.CharField(source='exam_code', max_length=60)
     reviewedExam = serializers.BooleanField(source='reviewed')
     reviewerNotes = serializers.CharField(source='reviewer_notes',
@@ -105,6 +119,7 @@ class ExamSerializer(serializers.ModelSerializer):
     attempt_status_updated = serializers.SerializerMethodField()
     hash = serializers.SerializerMethodField()
 
+    comments = CommentSerializer(source='comment_set', many=True, read_only=True)
     orgExtra = JSONSerializerField(
         style={'base_template': 'textarea.html'},
     )
@@ -168,24 +183,13 @@ class ExamSerializer(serializers.ModelSerializer):
         )[0]
         data['student'] = student
         del (data['orgExtra'])
+        if 'comments' in data:
+            del (data['comments'])
         try:
             Exam(**data).full_clean()
         except ValidationError as e:
             raise serializers.ValidationError(e.message_dict)
         return super(ExamSerializer, self).validate(data)
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    """
-    Comment serializer
-    """
-    exam_code = serializers.ReadOnlyField(source='exam.exam_code')
-    exam = serializers.PrimaryKeyRelatedField(queryset=Exam.objects.all(),
-                                              write_only=True)
-
-    class Meta:
-        model = Comment
-        fields = '__all__'
 
 
 class ArchivedExamSerializer(ExamSerializer):
@@ -253,7 +257,7 @@ class ArchivedEventSessionSerializer(serializers.ModelSerializer):
     """
     course_id = serializers.SerializerMethodField()
     proctor = serializers.SerializerMethodField()
-    serializers.ReadOnlyField(source='proctor.username')
+    course_name = serializers.SerializerMethodField()
 
     def get_course_id(self, obj):
         return obj.course.display_name
@@ -263,9 +267,12 @@ class ArchivedEventSessionSerializer(serializers.ModelSerializer):
         return ' '.join([proctor.first_name,
                          proctor.last_name]).strip() or proctor.username
 
+    def get_course_name(self, obj):
+        return obj.course.course_name
+
     class Meta:
         read_only_fields = (
-            'testing_center', 'course_id', 'course_event_id', 'proctor',
+            'testing_center', 'course_id', 'course_name', 'course_event_id', 'proctor',
             'status', 'hash_key', 'notify', 'start_date', 'end_date', 'comment'
         )
         model = ArchivedEventSession

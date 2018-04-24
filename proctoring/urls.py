@@ -16,6 +16,8 @@ urlpatterns = [
         name='bulk_start_exams'),
     url(r'poll_status/$', api_ui_views.PollStatus.as_view(),
         name='poll_status'),
+    url(r'comment/$', api_ui_views.Comment.as_view(),
+        name='comment'),
     url(r'review/$', api_ui_views.Review.as_view(),
         name='review'),
     url(r'proctored_exams/$', login_required(api_ui_views.GetExamsProctored.as_view()),

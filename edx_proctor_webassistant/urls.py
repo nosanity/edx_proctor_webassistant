@@ -46,17 +46,17 @@ router.register(r'event_session', api_ui_views.EventSessionViewSet,
 router.register(r'archived_event_session',
                 api_ui_views.ArchivedEventSessionViewSet,
                 base_name="archived-event-session")
+router.register(r'archived_event_session_all',
+                api_ui_views.ArchivedEventSessionAllViewSet,
+                base_name="archived-event-session-all")
 router.register(r'journaling', JournalingViewSet,
                 base_name="journaling")
-router.register(r'archived_exam', api_ui_views.ArchivedExamViewSet,
-                base_name="archived-exam")
-router.register(r'comment', api_ui_views.CommentViewSet,
-                base_name="comment")
 router.register(r'permission', PermissionViewSet,
                 base_name="permission")
 
 urlpatterns = [
     url(r'^$', Index.as_view(), name="index"),
+    url(r'index/?$', Index.as_view()),
     url(r'^grappelli/', include('grappelli.urls')),
 
     # admin urls
@@ -70,8 +70,8 @@ urlpatterns = [
     url(r'^api/', include('proctoring.urls')),
     url(r'^api/', include(router.urls)),
     # few angular views
-    url(r'^session/', api_ui_views.redirect_ui),
-    url(r'^archive/', api_ui_views.redirect_ui),
+    url(r'^session/', Index.as_view()),
+    url(r'^archive/', Index.as_view()),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if not settings.SSO_ENABLED:

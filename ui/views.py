@@ -9,8 +9,7 @@ from django.contrib.auth import logout as lgt, login as auth_login, \
     REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.shortcuts import render, resolve_url
+from django.shortcuts import redirect, render, resolve_url
 from django.utils.http import is_safe_url
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -35,16 +34,23 @@ class Index(View):
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
             'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
+        if not request.user.is_authenticated and settings.SSO_ENABLED:
+            return HttpResponseRedirect(login_url)
         return render(
             request,
             self.template_name,
             {
                 'user_has_access': user_has_access,
                 'sso_enabled': settings.SSO_ENABLED,
+                'project_name': settings.PROJECT_NAME,
+                'my_profile_url': settings.SSO_NPOED_URL + '/profile' if settings.SSO_ENABLED else '',
+                'my_courses_url': settings.PLP_NPOED_URL + '/my' if settings.PLP_NPOED_URL else '',
+                'logo': settings.LOGO_NAME,
+                'logo_is_url': settings.LOGO_NAME.startswith('http') if settings.LOGO_NAME else False,
                 'login_url': login_url,
                 'notifications_url': settings.NOTIFICATIONS['WEB_URL'],
                 'profile_url': NpoedBackend.PROFILE_URL,
-                'spa_config': json.dumps(settings.SPA_CONFIG)
+                'spa_config': json.dumps(settings.SPA_CONFIG),
             },
         )
 

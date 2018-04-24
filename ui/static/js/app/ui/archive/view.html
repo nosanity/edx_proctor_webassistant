@@ -1,45 +1,62 @@
-
-<table ng-table="tableParams" show-filter="true" class="table table-bordered table-striped">
-    <tr ng-repeat="event in $data track by event.id">
-        <td data-title="i18n('COURSE_NAME')"
-            uib-tooltip=""
-            filter="{course_name: 'text'}"
-            sortable="'course_name'">
-            <a href="/#/archive/{[ event.hash_key ]}">{[event.course_name]}</a>
-        </td>
-        <td data-title="i18n('EXAM_NAME')"
-            uib-tooltip=""
-            filter="{exam_name: 'text'}"
-            sortable="'exam_name'">
-            <a href="/#/archive/{[ event.hash_key ]}">{[event.exam_name]}</a>
-        </td>
-        <td data-title="i18n('TESTING_CENTER')"
-            uib-tooltip=""
-            filter="{testing_center: 'text'}"
-            sortable="'testing_center'">
-            <a href="/#/archive/{[ event.hash_key ]}">{[event.testing_center]}</a>
-        </td>
-        <td data-title="i18n('EVENT_START_TIME')"
-            uib-tooltip=""
-            filter="{start_date: 'text'}"
-            sortable="'start_date'">
-            {[ event.start_date | date_localize ]}
-        </td>
-        <td data-title="i18n('EVENT_END_TIME')"
-            uib-tooltip=""
-            filter="{end_date: 'text'}"
-            sortable="'end_date'">
-            {[ event.end_date | date_localize ]}
-        </td>
-        <td data-title="i18n('PROCTOR')"
-            uib-tooltip=""
-            filter="{proctor: 'text'}"
-            sortable="'proctor'">
-            {[ event.proctor ]}
-        </td>
-        <td data-title="i18n('COMMENT')"
-            uib-tooltip="">
-            {[ event.comment ]}
-        </td>
-    </tr>
-</table>
+<div class="container main-block">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <h2>{[ i18n('EXAM_ARCHIVE') ]}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <input class="form-control" type="text" placeholder="{[ i18n('SESSION_ARCHIVE') ]}"
+                   ng-change="gridActions.filter()" filter-type="text" ng-model="searchBar" filter-by="searchField">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div grid-data grid-options="archGridOptions" grid-actions="gridActions" class="mt-4 mb-2">
+                <table class="table table-responsive-sm">
+                    <thead>
+                        <tr>
+                            <th sortable="testing_center" class="sortable" width="20%">
+                                {[ i18n('COLUMN_TESTING_CENTER') ]}
+                            </th>
+                            <th sortable="course_name" class="sortable" width="20%">
+                                {[ i18n('COLUMN_COURSE') ]}
+                            </th>
+                            <th sortable="exam_name" class="sortable" width="20%">
+                                {[ i18n('COLUMN_SESSION_NAME') ]}
+                            </th>
+                            <th sortable="datetimeFull" class="sortable" width="15%">
+                                {[ i18n('COLUMN_DATE_AND_TIME') ]}
+                            </th>
+                            <th width="25%">
+                                {[ i18n('COLUMN_COMMENT') ]}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr grid-item>
+                            <td><a href="javascript:void(0);" ng-click="gotoSession(item.hash_key)">{[ item.testing_center ]}</a></td>
+                            <td>{[ item.course_name ]}</td>
+                            <td>{[ item.exam_name ]}</td>
+                            <td ng-bind-html="item.datetime"></td>
+                            <td>{[ item.comment ]}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <nav class="grid-navigation mt-4">
+                    <grid-pagination
+                            max-size="5"
+                            boundary-links="false"
+                            direction-links="true"
+                            class="pagination justify-content-center"
+                            previous-text="{[ i18n('PREVIOUS_BTN') ]}"
+                            next-text="{[ i18n('NEXT_BTN') ]}"
+                            total-items="paginationOptions.totalItems"
+                            ng-model="paginationOptions.currentPage"
+                            ng-change="reloadGrid()"
+                            items-per-page="paginationOptions.itemsPerPage"></grid-pagination>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>

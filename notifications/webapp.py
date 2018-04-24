@@ -91,7 +91,9 @@ class NotificationWebApp(tornado.web.Application):
                             data_to_update['actual_start_date'] = str(datetime.now())
                         if (proctoring_exam['attempt_status'] == 'started' and new_status == 'submitted') \
                               or (proctoring_exam['attempt_status'] == 'ready_to_submit' and new_status == 'submitted'):
-                            data_to_update['actual_end_date'] = str(datetime.now())
+                            dt_end = datetime.now()
+                            data_to_update['actual_end_date'] = str(dt_end)
+                            message['actual_end_date'] = dt_end.isoformat()
                         data_to_update['attempt_status'] = new_status
                         data_to_update['attempt_status_updated'] = dt.strftime('%Y-%m-%d %H:%M:%S.%f')
                         data_to_update['last_poll'] = str(datetime.now())

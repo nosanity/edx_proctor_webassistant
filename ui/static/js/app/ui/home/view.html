@@ -1,146 +1,135 @@
-<div>
-    <div class="col-xs-12 col-sm-6">
-        <h3>
-            {[ test_center ]}
-        </h3>
-        <h5>
-            {[ course_name ]}
-            <br>
-            {[ exam_name ]}
-            <br>
-            {[ exam_link ]}
-        </h5>
-    </div>
-    <div class="col-xs-12 col-sm-6">
-        <div>
-            <h3>
-                <button class="btn btn-xs btn-warning pull-right"
-                        ng-if="is_owner()"
-                        ng-click="end_session()">
-                    {[ i18n('END_SESSION') ]}
-                </button>
-                <span class="clearfix"></span>
-            </h3>
-            <br>
-            <h5>
-                <span class="pull-right">
-                    {[ i18n('TIME_ELAPSED') ]}: {[ session_duration ]}
-                </span>
-                <span class="clearfix"></span>
-            </h5>
+<div class="container main-block">
+    <div class="row">
+        <div class="col-md-12 col-lg-8 mb-2">
+            <h2>{[ i18n('INFORMATION_ABOUT') ]} <span class="exam-info">"{[ test_center ]}"</span></h2>
+            <div>{[ i18n('START_DATE') ]}: {[ startDate ]}</div>
+            <div ng-if="isFinished">{[ i18n('FINISH_DATE') ]}: {[ endDate ]}</div>
+            <div ng-if="!isFinished">{[ i18n('TIME_ELAPSED') ]}: {[ session_duration ]}</div>
+            <div>{[ i18n('COURSE') ]}: {[ course_name ]} ( {[ courseInfo[1] ]} / {[ courseInfo[2] ]} )</div>
+            <div>{[ i18n('EXAM_SESSION') ]}: {[ exam_name ]}</div>
+        </div>
+        <div class="col-md-12 col-lg-4">
+            <div class="float-right" ng-if="!readOnlyMode && isOwner"><button class="btn btn-success" ng-disabled="(statusesCounters.notFinal > 0) || endSessionBtnDisabled" ng-click="endSession()">{[ i18n('END_SESSION') ]}</button></div>
         </div>
     </div>
-    <div class="clearfix"></div>
-
-    <br>
-
-    <div class="row" ng-if="ws_data.length">
-        <div class="col-xs-6">
-            <a href=""
-               ng-click="check_all_attempts()">
-                {[ i18n('SELECT_ALL') ]}
-            </a>&nbsp;
-            <a href=""
-               ng-click="uncheck_all_attempts()">
-                {[ i18n('DESELECT_ALL') ]}
-            </a>&nbsp;
-            <button class="btn btn-xs btn-primary"
-                    ng-click="start_all_attempts()">
-                {[ i18n('ACTIVATE_SELECTED') ]}
-            </button>
+    <div class="row">
+        <div ng-class="readOnlyMode ? 'col-md-12 col-lg-12 mt-4' : 'col-md-12 col-lg-6 mt-4'">
+            <input class="form-control" type="text" placeholder="{[ i18n('SESSION_SEARCH') ]}"
+                   ng-change="gridActions.filter()" filter-type="text" ng-model="searchBar" filter-by="searchField">
         </div>
-        <div class="col-xs-6">
-            <span class="pull-right">
-                <button class="btn btn-primary btn-xs"
-                        ng-click="end_all_attempts()">
-                    {[ i18n('END_STUDENT_SESSIONS') ]}
-                </button>
-            </span>
-        </div>
-        <div class="clearfix"></div>
-    </div>
-    <div class="row" ng-if="!ws_data.length">
-        <div class="col-xs-12">
-            {[ i18n('STUDENT_SESSIONS') ]}
-        </div>
-    </div>
-
-    <table ng-table="tableParams" show-filter="false" class="table table-bordered table-striped">
-        <tr ng-repeat="attempt in $data">
-            <td>
-                <input type="checkbox" checklist-model="exams.checked" checklist-value="attempt.examCode">
-            </td>
-            <td data-title="i18n('FULL_NAME')"
-                uib-tooltip=""
-                sortable="'orgExtra.firstName'">
-                <a href="" ng-click="show_comments(attempt)">
-                    {[attempt.orgExtra.firstName]} {[attempt.orgExtra.lastName]}
-                </a>
-            </td>
-            <td data-title="'E-mail'"
-                uib-tooltip=""
-                sortable="'orgExtra.email'">
-                {[attempt.orgExtra.email]}
-            </td>
-            <td data-title="i18n('EXAM_START_TIME')"
-                uib-tooltip="">
-                {[ attempt.started_at ]}
-            </td>
-            <td data-title="i18n('EXAM_CODE')"
-                uib-tooltip=""
-                sortable="'examCode'">
-                {[attempt.examCode]}
-            </td>
-            <td data-title="i18n('COURSE_NAME')"
-                uib-tooltip=""
-                sortable="'orgExtra.courseID'">
-                {[ attempt.orgExtra.courseID ]}
-            </td>
-            <td data-title="i18n('STATUS')"
-                uib-tooltip=""
-                sortable="'status'">
-                {[ attempt.status ]}
-            </td>
-            <td class="text-center">
-                <div ng-if="!attempt.status || attempt.status == 'created'">
-                    <button class="btn btn-xs btn-success fc-margin-item"
-                            ng-click="accept_student(attempt)"
-                            ng-if="!(attempt.accepted === true)">
-                        {[ i18n('ACCEPT') ]}
-                    </button>
-                    <br>
-                    <button class="btn btn-xs btn-success fc-margin-item"
-                            ng-click="accept_exam_attempt(attempt)"
-                            ng-disabled="!(attempt.accepted === true)">
-                        {[ i18n('ACTIVATE') ]}
-                    </button>
+        <div ng-class="readOnlyMode ? '' : 'col-md-12 col-lg-6 mt-4'">
+            <div class="form-row" ng-if="!readOnlyMode">
+                <div class="col-sm-9">
+                    <select class="form-control mb-1" ng-model="chosenMassAction"
+                        ng-options="o.key as o.name for o in massAction.options">
+                    </select>
                 </div>
-                <div ng-if="attempt.status == 'started'">
-                    <button class="btn btn-xs btn-success fc-margin-item"
-                            ng-click="add_review(attempt, 'personal', attempt_review_callback)">
-                        {[ i18n('ADD_COMMENT') ]}
-                    </button>
-                    <br>
-                    <button class="btn btn-xs btn-warning fc-margin-item"
-                            ng-click="stop_exam_attempt(attempt)">
-                        {[ i18n('STOP') ]}
-                    </button>
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-primary float-right mb-1"
+                            ng-click="applyMassAction()"
+                            ng-disabled="massAction.btnDisabled || ((chosenMassAction === 'activate_all_inactive') && (statusesCounters.created === 0)) || ((chosenMassAction !== 'activate_all_inactive') && (statusesCounters.submitted === 0))">{[ massAction.inProgress ? i18n('APPLYING') : i18n('APPLY') ]}</button>
                 </div>
-                <div ng-if="attempt.status == 'submitted'" class="text-center">
-                    <button class="btn btn-xs btn-success fc-margin-item"
-                            ng-click="send_review(attempt, 'Clean')">
-                        {[ i18n('PASSED') ]}
-                    </button>
-                    <br>
-                    <button class="btn btn-xs btn-warning fc-margin-item"
-                            ng-click="send_review(attempt, 'Suspicious')">
-                        {[ i18n('NOT_PASSED') ]}
-                    </button>
-                </div>
-            </td>
-        </tr>
-    </table>
-
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 mt-2 mb-4">
+            <div grid-data grid-options="studentsGridOptions" grid-actions="gridActions" class="mt-4 mb-2">
+                <table class="table table-responsive-sm">
+                    <thead>
+                        <tr>
+                            <th width="3%">&nbsp;</th>
+                            <th sortable="studentName" class="sortable" width="17%">
+                                {[ i18n('STUDENT_FIO') ]}
+                            </th>
+                            <th sortable="studentEmail" class="sortable" width="17%">
+                                {[ i18n('E_MAIL') ]}
+                            </th>
+                            <th sortable="started_at" class="sortable" width="10%">
+                                {[ i18n('START') ]}
+                            </th>
+                            <th sortable="finished_at" class="sortable" width="10%">
+                                {[ i18n('FINISH') ]}
+                            </th>
+                            <th sortable="status" class="sortable" width="13%">
+                                {[ i18n('STATUS') ]}
+                            </th>
+                            <th width="15%">
+                                {[ i18n('COMMENTS') ]}
+                            </th>
+                            <th width="15%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr grid-item>
+                            <td class="table-checkbox">
+                                <input type="checkbox" value="{[ item.examCode ]}"
+                                       ng-model="item.checked" ng-change="changeCheckbox(item)"
+                                       name="examCode" ng-if="!readOnlyMode" ng-disabled="item.btnDisabled">
+                            </td>
+                            <td><a href="javascript: void(0);" ng-click="showInfo(item.examCode)">{[ item.studentName ]}</a></td>
+                            <td>{[ item.studentEmail ]}</td>
+                            <td>{[ item.started_at ]}</td>
+                            <td>{[ item.finished_at ]}</td>
+                            <td>
+                                <div ng-class="item.btnDisabled ? 'status-blue' : statuses[item.status].cssClass">{[ item.btnDisabled ? i18n('STATUS_UPDATING') : statuses[item.status].title ]}</div>
+                            </td>
+                            <td>
+                                <div ng-if="item.comments.length > 0">
+                                    <div ng-if="!item.expanded">
+                                        <div class="exam-comment-block" ng-attr-title="{[ item.comments[0].event_status ]}">
+                                            <i ng-class="item.comments[0].event_type === 'warning' ? 'exam-comment-block-icon fa fa-exclamation-triangle' : 'exam-comment-block-icon fa fa-comment'" aria-hidden="true"></i>
+                                            {[ (item.comments[0].comment.length > 35) ? (item.comments[0].comment.substr(0, 35) + '...') : item.comments[0].comment ]}
+                                        </div>
+                                        <div class="exam-comment-block" ng-if="(item.comments.length > 1) || (item.comments[0].comment.length > 35)">
+                                            <a href="javascript:void(0)" ng-click="expand(item.examCode, true)">{[ i18n('SHOW_ALL') ]}</a>
+                                        </div>
+                                    </div>
+                                    <div ng-if="item.expanded">
+                                        <div ng-repeat="comment in item.comments" class="exam-comment-block" ng-attr-title="{[ comment.event_status ]}">
+                                            <i ng-class="comment.event_type === 'warning' ? 'exam-comment-block-icon fa fa-exclamation-triangle' : 'exam-comment-block-icon fa fa-comment'" aria-hidden="true"></i>
+                                            {[ comment.comment ]}
+                                        </div>
+                                        <div class="exam-comment-block">
+                                            <a href="javascript:void(0)" ng-click="expand(item.examCode, false)">{[ i18n('HIDE') ]}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div ng-repeat="action in statuses[item.status].actions" class="exam-actions" ng-if="!readOnlyMode">
+                                    <button type="button" class="btn btn-sm" ng-class="action.cssClass"
+                                            ng-click="applyAction(item, action.action)"
+                                            ng-disabled="item.btnDisabled">{[ item.btnDisabled ? i18n('SERVER_REQUEST') : action.title ]}</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <review-modal></review-modal>
-    <comments></comments>
+</div>
+<div class="students-selected-block" ng-class="(checkedItems.number === 0) ? 'd-none' : ''">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-lg-5 students-selected-block-content">
+                {[ i18n('CHOSEN_STUDENTS') ]}: <strong>{[ checkedItems.number ]}</strong>.&nbsp;
+                <span ng-if="(checkedItems.status != '') && (statuses[checkedItems.status].actions.length > 0)">{[ i18n('APPLY_ACTIONS') ]}:</span>
+            </div>
+            <div class="col-md-12 col-lg-4 students-selected-block-content-btn">
+                <div ng-if="(checkedItems.status != '') && (statuses[checkedItems.status].actions.length > 0)">
+                    <span ng-repeat="action in statuses[checkedItems.status].actions">
+                        <button type="button" class="btn btn-sm" ng-class="action.cssClass"
+                                ng-click="applyActionForChecked(action.action)">{[ action.title ]}</button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-3 students-selected-block-content">
+                <span class="deselect-link float-right"><a href="javascript: void(0);"
+                    ng-click="removeSelections()">{[ i18n('REMOVE_SELECTION') ]}</a></span>
+            </div>
+        </div>
+    </div>
 </div>

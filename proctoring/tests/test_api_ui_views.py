@@ -268,45 +268,6 @@ class ViewsUITestCase(TestCase):
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class GetExamsProctoredTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            'test', 'test@example.com', 'testpassword'
-        )
-        Permission.objects.create(
-            user=self.user,
-            object_id='*',
-            object_type='*'
-        )
-
-    def test_get(self):
-        factory = APIRequestFactory()
-        with patch(
-            'proctoring.api_ui_views.get_proctored_exams_request') as exams:
-            exams.return_value = MockResponse(status_code=200, content="""{
-                "results": [
-                    {
-                        "id": "org/course/id",
-
-                        "proctored_exams": ["exam"]
-                    }
-                ]
-            }""")
-            request = factory.get('/api/proctored_exams/')
-            force_authenticate(request, user=self.user)
-            view = api_ui_views.GetExamsProctored.as_view()
-            response = view(request)
-            response.render()
-            data = json.loads(str(response.content, 'utf-8'))
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(type(data), dict)
-            self.assertDictContainsSubset({
-                "id": "org/course/id",
-                "proctored_exams": ['exam'],
-                "has_access": True
-            }, data['results'][0])
-
-
 class BulkStartExamTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -613,121 +574,6 @@ class ArchivedEventSessionViewSetTestCase(TestCase):
         self.assertEqual(len(data.get('results')), 0)
 
 
-class ArchivedExamViewSetTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            'test',
-            'test@test.com',
-            'password'
-        )
-        self.permission = Permission.objects.create(
-            user=self.user,
-            object_type="*",
-            object_id="*",
-            role=Permission.ROLE_PROCTOR
-        )
-        event = EventSession()
-        event.testing_center = "new center"
-        event.course = Course.create_by_course_run('org/course/run')
-        event.course_event_id = "new event"
-        event.proctor = self.user
-        event.save()
-        self.event = event
-        exam = Exam()
-        exam.exam_code = 'examCode'
-        exam.organization = 'organization'
-        exam.duration = 1
-        exam.reviewed = True
-        exam.reviewer_notes = 'reviewerNotes'
-        exam.exam_password = 'examPassword'
-        exam.exam_sponsor = 'examSponsor'
-        exam.exam_name = 'examName'
-        exam.ssi_product = 'ssiProduct'
-        exam.first_name = 'firstName'
-        exam.last_name = 'lastName'
-        exam.username = 'test'
-        exam.user_id = 1
-        exam.email = 'test@test.com'
-        exam.exam_id = event.course_event_id
-        exam.course_id = event.course_id
-        exam.event = event
-        student = Student.objects.get_or_create(
-            sso_id=exam.user_id,
-            email=exam.email,
-            first_name=exam.first_name,
-            last_name=exam.last_name
-        )[0]
-        exam.student = student
-        exam.exam_status = Exam.FINISHED
-        exam.save()
-        self.exam = exam
-
-    def test_list(self):
-        factory = APIRequestFactory()
-        request = factory.get(
-            '/api/archived_exam/')
-        force_authenticate(request, user=self.user)
-        view = api_ui_views.ArchivedExamViewSet.as_view({'get': 'list'})
-        response = view(request)
-        response.render()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        self.assertEqual(len(data.get('results')), Exam.objects.filter(
-            event__status=EventSession.ARCHIVED
-        ).count())
-
-        # test filters
-        request = factory.get(
-            '/api/comment/?event_hash=%s'
-            '&courseID=%s'
-            '&username=%s'
-            '&email=%s'
-            '&examStartDate=%s'
-            '&examEndDate=%s' % (
-                self.event.hash_key,
-                self.event.course.get_full_course(),
-                'test',
-                'test@test.com',
-                datetime.now().date(),
-                datetime.now().date()
-            ))
-        force_authenticate(request, user=self.user)
-        view = api_ui_views.ArchivedExamViewSet.as_view({'get': 'list'})
-        response = view(request)
-        response.render()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        self.assertEqual(len(data.get('results')), Exam.objects.filter(
-            event__status=EventSession.ARCHIVED
-        ).count())
-
-        # test proctor role and wrong date
-        self.permission.object_type = Permission.TYPE_COURSE
-        self.permission.object_id = self.exam.course.get_full_course()
-        self.permission.save()
-
-        request = factory.get(
-            '/api/archived_exam/?'
-            'examStartDate=%s'
-            '&examEndDate=%s' % (
-                'wrong_date',
-                'wrong_date'
-            ))
-        force_authenticate(request, user=self.user)
-        view = api_ui_views.ArchivedExamViewSet.as_view({'get': 'list'})
-        response = view(request)
-        response.render()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        self.assertEqual(len(data.get('results')), Exam.objects.filter(
-            event__status=EventSession.ARCHIVED,
-            event__proctor=self.user
-        ).count())
-
-
 class CommentViewSetTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -783,40 +629,11 @@ class CommentViewSetTestCase(TestCase):
             duration=10
         )
 
-    def test_list(self):
-        factory = APIRequestFactory()
-        request = factory.get(
-            '/api/comment/')
-        force_authenticate(request, user=self.user)
-        view = api_ui_views.CommentViewSet.as_view({'get': 'list'})
-        response = view(request)
-        response.render()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        self.assertEqual(len(data.get('results')), Comment.objects.count())
-
-        # test filters
-        request = factory.get(
-            '/api/comment/?event_status=%s&event_start=%s&'
-            'exam_code=%s' % (
-                'status',
-                '120',
-                'examCode'
-            ))
-        force_authenticate(request, user=self.user)
-        view = api_ui_views.CommentViewSet.as_view({'get': 'list'})
-        response = view(request)
-        response.render()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        self.assertEqual(len(data.get('results')), Comment.objects.count())
-
-    def test_create_event(self):
+    @patch('proctoring.api_ui_views.send_notification')
+    def test_create_event(self, send_notification):
         factory = APIRequestFactory()
         comment_data = {
-            "examCode": "examCode",
+            "codes": '["examCode"]',
             "comment": """{
                 "comment": "comment text",
                 "event_status": "Suspicious",
@@ -828,13 +645,11 @@ class CommentViewSetTestCase(TestCase):
         request = factory.post(
             '/api/comment/', data=comment_data)
         force_authenticate(request, user=self.user)
-        view = api_ui_views.CommentViewSet.as_view({'post': 'create'})
+        view = api_ui_views.Comment.as_view()
         response = view(request)
         response.render()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = json.loads(str(response.content, 'utf-8'))
-        self.assertEqual(type(data), dict)
-        comment = Comment.objects.get(pk=data['id'])
+        comment = Comment.objects.filter()[0]
         self.assertDictContainsSubset(
             {
                 "comment": "comment text",

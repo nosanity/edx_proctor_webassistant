@@ -122,6 +122,9 @@ LOGIN_URL = LOGIN_REDIRECT_URL = LOGOUT_REDIRECT_URL = "/"
 AUTH_BACKEND_NAME = 'sso_npoed-oauth2'
 SSO_ENABLED = True
 
+SSO_NPOED_URL = ''
+PLP_NPOED_URL = ''
+
 if SSO_ENABLED:
     TEMPLATES[0]['OPTIONS']['context_processors'] += [
         'social_django.context_processors.backends',
@@ -136,7 +139,7 @@ if SSO_ENABLED:
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR + '/static/'
 STATICFILES_FINDERS = ('django.contrib.staticfiles.finders.FileSystemFinder',
@@ -153,31 +156,40 @@ STATICFILES_DIRS = (
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 BOWER_INSTALLED_APPS = (
-    'angular#1.5.8',
-    'angular-route#1.5.8',
-    'angular-animate#1.5.8',
-    'angular-sanitize#1.5.8',
+    'angular#1.6.9',
+    'angular-route#1.6.9',
+    'angular-animate#1.6.9',
+    'angular-sanitize#1.6.9',
     'jquery#3.1.1',
-    'bootstrap#3.3.7',
-    'ng-table#0.8.3',
-    'angular-bootstrap#2.1.4',
-    'angular-translate#2.12.1',
-    'angular-translate-storage-local#2.12.1',
-    'angular-translate-loader-static-files#2.12.1',
-    'sockjs-client#1.1.4'
+    'bootstrap#4.0.0',
+    'moment#2.22.0',
+    'angular-data-grid#2aab407',
+    'angular-bootstrap#2.5.0',
+    'angular-translate#2.17.0',
+    'angular-translate-storage-local#2.17.0',
+    'angular-translate-loader-static-files#2.17.0',
+    'sockjs-client#1.1.4',
+    'components-font-awesome#5.0.6'
 )
 
 # Pipeline
-# PIPELINE_ENABLED = True
+
+PIPELINE_ENABLED = False
+FILE_POSTFIX = '.min'
+
+# no compression because we use already minified files (FILE_POSTFIX = '.min')
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+
 PIPELINE_DISABLE_WRAPPER = True
 PIPELINE_CSS = {
     'css': {
         'source_filenames': (
-            'bootstrap/dist/css/bootstrap.min.css',
-            'ng-table/dist/ng-table.css',
-            'css/*.css',
+            'bootstrap/dist/css/bootstrap' + FILE_POSTFIX + '.css',
+            'components-font-awesome/css/fontawesome-all' + FILE_POSTFIX + '.css',
+            'css/styles.css',
         ),
-        'output_filename': 'css/styles.css',
+        'output_filename': 'css/bundle.css',
         'extra_context': {
             'media': 'screen,projection',
         },
@@ -186,21 +198,25 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'js': {
         'source_filenames': (
-            'jquery/dist/jquery.min.js',
-            'bootstrap/dist/js/bootstrap.js',
-            'angular/angular.js',
-            'angular-animate/angular-animate.min.js',
-            'angular-route/angular-route.min.js',
-            'angular-cookies/angular-cookies.min.js',
-            'angular-sanitize/angular-sanitize.min.js',
-            'ng-table/dist/ng-table.min.js',
-            'angular-bootstrap/ui-bootstrap.js',
-            'angular-translate/angular-translate.min.js',
-            'angular-translate-storage-local/angular-translate-storage-local.min.js',
-            'angular-translate-storage-cookie/angular-translate-storage-cookie.min.js',
-            'angular-translate-loader-static-files/angular-translate-loader-static-files.min.js',
-            'sockjs-client/dist/sockjs.min.js',
-            'js/app/app.js',
+            'jquery/dist/jquery' + FILE_POSTFIX + '.js',
+            'moment/min/moment.min.js',
+            'bootstrap/dist/js/bootstrap' + FILE_POSTFIX + '.js',
+            'angular/angular' + FILE_POSTFIX + '.js',
+            'angular-animate/angular-animate' + FILE_POSTFIX + '.js',
+            'angular-route/angular-route' + FILE_POSTFIX + '.js',
+            'angular-cookies/angular-cookies' + FILE_POSTFIX + '.js',
+            'angular-sanitize/angular-sanitize' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/dataGrid' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/dataGridUtils' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/pagination' + FILE_POSTFIX + '.js',
+            'angular-data-grid/dist/loading-bar' + FILE_POSTFIX + '.js',
+            'angular-bootstrap/ui-bootstrap' + FILE_POSTFIX + '.js',
+            'angular-translate/angular-translate' + FILE_POSTFIX + '.js',
+            'angular-translate-storage-local/angular-translate-storage-local' + FILE_POSTFIX + '.js',
+            'angular-translate-storage-cookie/angular-translate-storage-cookie' + FILE_POSTFIX + '.js',
+            'angular-translate-loader-static-files/angular-translate-loader-static-files' + FILE_POSTFIX + '.js',
+            'sockjs-client/dist/sockjs' + FILE_POSTFIX + '.js',
+            'js/app.js',
             'js/lib/checklist-model.js',
             'js/app/common/modules/websocket.js',
             'js/app/common/modules/auth.js',
@@ -208,16 +224,24 @@ PIPELINE_JS = {
             'js/app/common/modules/session.js',
             'js/app/common/modules/i18n.js',
             'js/app/common/modules/date.js',
+            'js/app/common/services/exam_polling.js',
+            'js/app/common/services/ws_data.js',
             'js/app/common/helpers.js',
+            'js/app/ui/archive/archController.js',
+            'js/app/ui/error/errController.js',
+            'js/app/ui/home/hmController.js',
+            'js/app/ui/home/hmDirectives.js',
+            'js/app/ui/profile/pfController.js',
+            'js/app/ui/sessions/rsController.js',
+            'js/app/ui/sessions/rsDirectives.js',
         ),
-        'output_filename': 'js/app.js',
+        'output_filename': 'js/bundle.js',
     }
 }
 
 # Config for Single Page Application
 SPA_CONFIG = {
     "sso_enabled": SSO_ENABLED,
-    # "language": "en",
     "language": "en",
     "allow_language_change": False,
     "supported_languages": ['en']
@@ -269,7 +293,12 @@ LOGGING = {
     },
 }
 
+
 INSTRUCTOR_IS_PROCTOR = True
+
+PROJECT_NAME = 'Web Assistant'
+LOGO_NAME = 'img/epw-logo.png'  # may be URL
+
 
 try:
     from .settings_local import *

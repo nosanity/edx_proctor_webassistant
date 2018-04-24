@@ -1,18 +1,19 @@
-<div>
-    <script type="text/ng-template" id="sessionCreateError.html">
-        <div class="modal-header">
-            <h3 class="modal-title">
-                {[ i18n('WARNING') ]}
-            </h3>
-        </div>
-        <div class="modal-body">
-            <div>{[ i18n('SESSION_ALREADY_EXISTS') ]}</div><br />
-            <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{{ exam.testing_center }}</strong></div><br />
-            <div><a href="#" ng-click="ok()">{{ examLink }}</a></div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="ok()">{[ i18n('JOIN') ]}</button>
-            <button class="btn btn-primary" type="button" ng-click="cancel()">{[ i18n('CANCEL') ]}</button>
-        </div>
-    </script>
-</div>
+<script type="text/ng-template" id="sessionCreateError.html">
+    <div class="modal-header">
+        <h5 class="modal-title">{[ i18n('WARNING') ]}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div>{[ i18n('SESSION_ALREADY_EXISTS') ]}</div><br />
+        <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{{ exam.testing_center }}</strong></div><br />
+        <div><a href="javascript:void(0);" ng-click="ok()">{{ examLink }}</a></div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary"
+                ng-click="ok()">{[ i18n('JOIN') ]}</button>
+        <button type="button" class="btn btn-secondary"
+                ng-click="cancel()" data-dismiss="modal">{[ i18n('CANCEL') ]}</button>
+    </div>
+</script>

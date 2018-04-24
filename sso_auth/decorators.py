@@ -37,7 +37,7 @@ def set_token_cookie(view):
                 if not settings.SSO_ENABLED:
                     str_to_hash = "%s-%s-%s" % (
                         user.username, user.email, user.last_login)
-                    access_token = hashlib.md5(str_to_hash).hexdigest()
+                    access_token = hashlib.md5(str_to_hash.encode('utf-8')).hexdigest()
                     UserSocialAuth.objects.update_or_create(
                         provider=settings.AUTH_BACKEND_NAME,
                         uid=user.username,

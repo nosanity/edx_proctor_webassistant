@@ -1,16 +1,16 @@
+{% load i18n %}
 {% load static %}
 {% load pipeline %}
 <!DOCTYPE html>
 <html lang="en" ng-app="proctor">
 <head>
     <meta charset="UTF-8">
-    <title>Proctoring</title>
+    <title>{% trans 'Proctoring' %}</title>
     <base href="/">
     <meta name="viewport" content="width=device-width">
     <script src="{% static 'js/lib/script.min.js' %}"></script>
-    {% javascript 'js' %}
     {% stylesheet 'css' %}
-    <script type="text/javascript" src='{% static 'js/app.js' %}'></script>
+    {% javascript 'js' %}
 
     <script>
         window.app = {
@@ -19,7 +19,28 @@
             loginUrl: "{{ login_url }}",
             notificationsUrl: "{{ notifications_url }}",
             profileUrl: "{{ profile_url }}",
-            spaConfig: {{ spa_config|safe }}
+            myProfileUrl: "{{ my_profile_url }}",
+            myCoursesUrl: "{{ my_courses_url }}",
+            logo: "{% if logo_is_url %}{{ logo }}{% else %}{% static logo %}{% endif %}",
+            projectName: "{{ project_name }}",
+            spaConfig: {{ spa_config|safe }},
+            langs: {
+                en: "{% static 'js/app/i18n/en.json' %}"
+            },
+            templates: {
+                backdrop: "{% static 'js/app/ui/partials/modal/backdrop.html' %}",
+                window: "{% static 'js/app/ui/partials/modal/window.html' %}",
+                tooltipPopup: "{% static 'js/app/ui/partials/tooltip/tooltip-popup.html' %}",
+                home: "{% static 'js/app/ui/home/view.html' %}",
+                sessions: "{% static 'js/app/ui/sessions/view.html' %}",
+                archive: "{% static 'js/app/ui/archive/view.html' %}",
+                profile: "{% static 'js/app/ui/profile/view.html' %}",
+                header: "{% static 'js/app/ui/partials/header.html' %}",
+                addReview: "{% static 'js/app/ui/partials/add_review.html' %}",
+                sessionCreateError: "{% static 'js/app/ui/partials/session_create_error.html' %}",
+                windowAlert: "{% static 'js/app/ui/partials/window_alert.html' %}",
+                windowConfirmation: "{% static 'js/app/ui/partials/window_confirmation.html' %}"
+            }
         }
     </script>
 </head>
@@ -27,31 +48,24 @@
 {% if user_has_access %}
     <div>
         <header></header>
-        <div class="container-fluid" ng-view></div>
+        <div ng-view></div>
+        <window-alert></window-alert>
+        <window-confirmation></window-confirmation>
     </div>
 {% elif user.is_authenticated %}
     <div class="container text-center" ng-init="changeLanguage()">
         <h1 translate="ONLY_PROCTORS_INSTRUCTORS_ALLOWED"></h1>
 
         <h1>
-            <button class="btn btn-default"
+            <button class="btn btn-secondary"
                     ng-click="logout()"
                     translate="LOGOUT">
             </button>
         </h1>
     </div>
-{% else %}
+{% elif not sso_enabled %}
     <div class="container text-center">
-    {%  if sso_enabled %}
-        <h1>
-            <button class="btn btn-default"
-                    ng-click="sso_auth()"
-                    translate="AUTHORIZE">
-            </button>
-        </h1>
-    {% else %}
         {% include "registration/login.html" %}
-    {% endif %}
     </div>
 {% endif %}
 

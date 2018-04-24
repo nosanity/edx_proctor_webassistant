@@ -70,11 +70,9 @@
                 hash_key = session_hash;
             }
             else {
-                if (window.sessionStorage['proctoring'] !== undefined) {
-                    var session = TestSession.getSession();
-                    if (session) {
-                        hash_key = session.hash_key;
-                    }
+                var session = TestSession.getSession();
+                if (session) {
+                    hash_key = session.hash_key;
                 }
             }
             return generic_api_call({
@@ -92,39 +90,30 @@
             });
         };
 
-        this.get_archived_events = function(){
-            return generic_api_call({
-                'url': get_url('archived_event_session'),
-                'method': 'GET'
-            })
+        this.get_archived_events = function(page_size){
+            if (page_size) {
+                return generic_api_call({
+                    'url': get_url('archived_event_session'),
+                    'method': 'GET',
+                    'params': {page_size: page_size}
+                });
+            } else {
+                return generic_api_call({
+                    'url': get_url('archived_event_session_all'),
+                    'method': 'GET',
+                    'params': {}
+                });
+            }
         };
 
-        this.get_archived_sessions = function(event_hash){
-            var promise = generic_api_call({
-                'url': get_url('archived_exam'),
-                'method': 'GET',
-                'params': {event_hash: event_hash}
-            });
-            
-            return promise;
-        };
-
-        this.save_comment = function(code, comment){
+        this.save_comment = function(attemptCodes, comment){
             return generic_api_call({
                 'url': get_url('comment'),
                 'method': 'POST',
                 'data': JSON.stringify({
                     comment: comment,
-                    examCode: code
+                    codes: attemptCodes
                 })
-            });
-        };
-
-        this.get_comments = function(attempt_code){
-            return generic_api_call({
-                'url': get_url('comment'),
-                'method': 'GET',
-                'params': {exam_code: attempt_code}
             });
         };
     }]);

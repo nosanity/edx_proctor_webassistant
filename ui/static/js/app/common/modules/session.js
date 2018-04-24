@@ -3,7 +3,8 @@
         .service('TestSession', function($rootScope, $http, Auth, i18n, DateTimeService){
             var Session = null;
 
-            this.registerSession = function(testing_center, course_id, exam_id, course_name, exam_name){
+            this.registerSession = function(testing_center, course_id, exam_id,
+                                            course_name, exam_name, onErrorCallback) {
                 return $http({
                     url: $rootScope.apiConf.apiServer + '/event_session/',
                     method: 'POST',
@@ -21,14 +22,14 @@
                         if (course_name !== undefined && exam_name !== undefined) {
                             Session.course_name = course_name;
                             Session.exam_name = exam_name;
+                            $rootScope.sessionPageRunning = true;
                         }
-                        window.sessionStorage['proctoring'] = JSON.stringify(Session);
-                        return {created: true}
+                        return {created: true, exam: data.data}
                     } else if (data.status === 200) {
                         return {created: false, exam: data.data}
                     }
-                }, function(data){
-                    alert(i18n.translate('SESSION_ERROR_1'));
+                }, function(data) {
+                    onErrorCallback(data);
                 });
             };
 
@@ -44,9 +45,8 @@
                         })
                     }).then(function(){
                         Session = null;
-                    }, function(){
-                        alert(i18n.translate('SESSION_ERROR_2'));
-                    });
+                        $rootScope.sessionPageRunning = false;
+                    }, function(){});
                 }
             };
 
@@ -58,18 +58,19 @@
                     params: {'session': hash_key}
                 }).then(function(data){
                     Session = data.data.length == 1 ? data.data[0]: null;
-                    if (Session){
-                        window.sessionStorage['proctoring'] = JSON.stringify(Session);
-                    }
                 });
             };
 
             this.getSession = function(){
+                if (Session) {
+                    $rootScope.sessionPageRunning = true;
+                }
                 return angular.copy(Session);
             };
 
             this.setSession = function(obj){
                 if (!Session){
+                    $rootScope.sessionPageRunning = true;
                     Session = obj;
                 }
             };
@@ -81,8 +82,8 @@
             };
 
             this.flush = function(){
+                $rootScope.sessionPageRunning = false;
                 Session = null;
-                delete window.sessionStorage['proctoring'];
             };
 
             this.is_owner = function() {
