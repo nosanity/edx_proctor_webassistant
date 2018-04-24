@@ -1,6 +1,6 @@
 (function () {
     angular.module('proctor').controller('SessionCtrl', function ($scope, $location, data, TestSession,
-                                                                  DateTimeService, $uibModal, Api) {
+                                                                  DateTimeService, i18n, $uibModal, Api) {
         $scope.orgs = [];
         $scope.orgDetails = [];
         $scope.courses = [];
@@ -20,6 +20,7 @@
                 direction: 'desc'
             }
         };
+        $scope.currentActiveSession = null;
 
         function checkProctoredExams(v) {
             return v.proctored_exams.length && (v.has_access === true);
@@ -123,16 +124,16 @@
                 var data = [];
                 angular.forEach(response.data.results, function (val) {
                     var start = moment(val.start_date);
-                    var end = moment(val.end_date);
+                    var end = val.end_date ? moment(val.end_date) : null;
                     var dateAndTime = '';
-                    if (start.format('YYYY MM DD') === end.format('YYYY MM DD')) {
+                    if (end && (start.format('YYYY MM DD') === end.format('YYYY MM DD'))) {
                         dateAndTime = start.format('HH:mm') + ' - ' + end.format('HH:mm')
                             + '<br />' + start.format('DD.MM.YYYY');
                     } else {
-                        dateAndTime = start.format('DD.MM.YYYY HH:mm') + ' - ' + end.format('DD.MM.YYYY HH:mm');
+                        dateAndTime = start.format('DD.MM.YYYY HH:mm') + ' - ' + (end ? end.format('DD.MM.YYYY HH:mm') : i18n.translate('NOT_SET'));
                     }
                     val.datetime = dateAndTime;
-                    val.datetimeFull = start.format('YYYY.MM.DD HH:mm') + ' - ' + end.format('YYYY.MM.DD HH:mm');
+                    val.datetimeFull = start.format('YYYY.MM.DD HH:mm') + ' - ' + (end ? end.format('YYYY.MM.DD HH:mm') : i18n.translate('NOT_SET'));
                     data.push(val);
                 });
                 $scope.archGridOptions.data = data;
@@ -162,6 +163,14 @@
             }
             $scope.updateCourses();
         }
+
+        if (data.data.current_active_sessions !== undefined && data.data.current_active_sessions.length) {
+            $scope.currentActiveSession = data.data.current_active_sessions[0];
+        }
+
+        $scope.gotoSession = function(hash_key) {
+            window.location.href = window.location.origin + '/session/' + hash_key;
+        };
 
         getArchData();
     });

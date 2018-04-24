@@ -19,13 +19,11 @@ from edx_proctor_webassistant.web_soket_methods import send_notification
 from edx_proctor_webassistant.auth import (CsrfExemptSessionAuthentication,
                                            SsoTokenAuthentication,
                                            IsProctor, IsProctorOrInstructor)
-from edx_proctor_webassistant.rest_framework import PaginationBy25, PaginationBy50
-from person.models import Permission
+from edx_proctor_webassistant.rest_framework import PaginationBy25
 from journaling.models import Journaling
 from proctoring import models
 from proctoring.serializers import (EventSessionSerializer, CommentSerializer,
-                                    ArchivedEventSessionSerializer,
-                                    ArchivedExamSerializer)
+                                    ArchivedEventSessionSerializer)
 from proctoring.edx_api import (start_exam_request, stop_exam_request,
                                 poll_statuses_attempts_request, poll_status,
                                 send_review_request,
@@ -271,7 +269,7 @@ class EventSessionViewSet(mixins.ListModelMixin,
     You can **update** only `status` and `notify` fields
     """
     serializer_class = EventSessionSerializer
-    queryset = models.InProgressEventSession.objects.all()
+    queryset = models.EventSession.objects.all()
     authentication_classes = (SsoTokenAuthentication,
                               CsrfExemptSessionAuthentication,
                               BasicAuthentication)
@@ -284,13 +282,13 @@ class EventSessionViewSet(mixins.ListModelMixin,
         """
         hash_key = self.request.query_params.get('session')
         if hash_key:
-            queryset = models.InProgressEventSession.objects.filter(
+            queryset = models.EventSession.objects.filter(
                 hash_key=hash_key)
-            queryset = models.InProgressEventSession.update_queryset_with_permissions(
+            queryset = models.EventSession.update_queryset_with_permissions(
                 queryset, self.request.user
             )
         else:
-            queryset = models.InProgressEventSession.objects.all()
+            queryset = models.EventSession.objects.all()
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -457,6 +455,10 @@ class ArchivedEventSessionViewSet(mixins.ListModelMixin,
         return queryset
 
 
+class ArchivedEventSessionAllViewSet(ArchivedEventSessionViewSet):
+    pagination_class = None
+
+
 class Review(APIView):
     """
     POST Request example:
@@ -522,8 +524,8 @@ class Review(APIView):
                 models.Comment.objects.get_or_create(
                     comment=comment.get('comments'),
                     event_status=comment.get('eventStatus'),
-                    event_start=int(comment.get('eventStart')/1000),
-                    event_finish=int(comment.get('eventFinish')/1000),
+                    event_start=int(comment.get('eventStart')),
+                    event_finish=int(comment.get('eventFinish')),
                     duration=comment.get('duration'),
                     exam=exam
                 )
@@ -589,9 +591,14 @@ class GetExamsProctored(APIView):
             for i, res in enumerate(results):
                 if res['org'] in orgs_descriptions:
                     results[i]['org_description'] = orgs_descriptions[res['org']]
+        current_active_sessions = models.InProgressEventSession.objects.filter(
+            proctor=request.user
+        ).order_by('-start_date')
+
         return Response(
             status=response.status_code,
-            data={"results": results}
+            data={"results": results,
+                  "current_active_sessions": [EventSessionSerializer(sess).data for sess in current_active_sessions]}
         )
 
 
@@ -642,81 +649,6 @@ def redirect_ui(request):
     return redirect('/#{}'.format(request.path))
 
 
-class ArchivedExamViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """
-    Return list of Archived Exams with pagination.
-
-    You can filter results by `event_hash`, `courseID`, `examStartDate`,
-    `examEndDate`, `username`, `email`
-
-    Add GET parameter in end of URL, for example:
-    `?examStartDate=2015-12-04&email=test@test.com`
-    """
-    serializer_class = ArchivedExamSerializer
-    pagination_class = PaginationBy50
-    queryset = models.Exam.objects.filter(
-        event__status=models.EventSession.ARCHIVED
-    ).order_by('-pk')
-    authentication_classes = (SsoTokenAuthentication,
-                              CsrfExemptSessionAuthentication,
-                              BasicAuthentication)
-    permission_classes = (IsAuthenticated, IsProctorOrInstructor)
-
-    def get_queryset(self):
-        """
-        Add filters for queryset
-        :return: queryset
-        """
-        queryset = models.Exam.objects.by_user_perms(self.request.user).filter(
-            event__status=models.EventSession.ARCHIVED).order_by('-pk')
-        permissions = self.request.user.permission_set
-        if permissions.filter(role=Permission.ROLE_PROCTOR).exists():
-            is_super_proctor = False
-            for permission in permissions.filter(
-                role=Permission.ROLE_PROCTOR
-            ):
-                if permission.object_id == "*":
-                    is_super_proctor = True
-                    break
-            if not is_super_proctor:
-                queryset = queryset.filter(
-                    event__proctor=self.request.user)
-
-        params = self.request.query_params
-        if "event_hash" in params:
-            queryset = queryset.filter(event__hash_key=params["event_hash"])
-        if "courseID" in params:
-            queryset = queryset.filter(course__display_name=params["courseID"])
-        if "username" in params:
-            queryset = queryset.filter(username=params["username"])
-        if "email" in params:
-            queryset = queryset.filter(email=params["email"])
-        if "examStartDate" in params:
-            try:
-                query_date = datetime.strptime(
-                    params["examStartDate"], "%Y-%m-%d"
-                )
-                queryset = queryset.filter(
-                    exam_start_date__gte=query_date,
-                    exam_start_date__lt=query_date + timedelta(days=1)
-                )
-            except ValueError:
-                pass
-        if "examEndDate" in params:
-            try:
-                query_date = datetime.strptime(
-                    params["examEndDate"], "%Y-%m-%d"
-                )
-                queryset = queryset.filter(
-                    exam_end_date__gte=query_date,
-                    exam_end_date__lt=query_date + timedelta(days=1)
-                )
-            except ValueError:
-                pass
-
-        return queryset
-
-
 class Comment(APIView):
     """
     Add comment to exams.
@@ -742,9 +674,9 @@ class Comment(APIView):
             exam_comment = comment.copy()
             exam_comment['exam'] = exam.pk
             if 'event_start' in exam_comment:
-                exam_comment['event_start'] = int(int(exam_comment['event_start']) / 1000)
+                exam_comment['event_start'] = int(exam_comment['event_start'])
             if 'event_finish' in comment:
-                exam_comment['event_finish'] = int(int(exam_comment['event_finish']) / 1000)
+                exam_comment['event_finish'] = int(exam_comment['event_finish'])
             serializer = CommentSerializer(data=exam_comment)
             try:
                 serializer.is_valid(raise_exception=True)

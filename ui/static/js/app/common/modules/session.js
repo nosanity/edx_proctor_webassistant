@@ -22,8 +22,9 @@
                         if (course_name !== undefined && exam_name !== undefined) {
                             Session.course_name = course_name;
                             Session.exam_name = exam_name;
+                            $rootScope.sessionPageRunning = true;
                         }
-                        return {created: true}
+                        return {created: true, exam: data.data}
                     } else if (data.status === 200) {
                         return {created: false, exam: data.data}
                     }
@@ -44,9 +45,8 @@
                         })
                     }).then(function(){
                         Session = null;
-                    }, function(){
-                        alert(i18n.translate('SESSION_ERROR_2'));
-                    });
+                        $rootScope.sessionPageRunning = false;
+                    }, function(){});
                 }
             };
 
@@ -62,11 +62,15 @@
             };
 
             this.getSession = function(){
+                if (Session) {
+                    $rootScope.sessionPageRunning = true;
+                }
                 return angular.copy(Session);
             };
 
             this.setSession = function(obj){
                 if (!Session){
+                    $rootScope.sessionPageRunning = true;
                     Session = obj;
                 }
             };
@@ -78,6 +82,7 @@
             };
 
             this.flush = function(){
+                $rootScope.sessionPageRunning = false;
                 Session = null;
             };
 

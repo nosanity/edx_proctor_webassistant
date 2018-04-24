@@ -136,36 +136,13 @@
                 templateUrl: window.app.templates.archive,
                 controller: 'ArchCtrl',
                 resolve: {
-                    events: function (Api, $location) {
+                    sessions: function (Api, $location) {
                         return Api.get_archived_events().then(function(response) {
                             return response;
                         }, function(err) {
                             console.error(err);
-                            $location.path('/index');
+                            $location.path('/');
                             return { resolveError : err }
-                        });
-                    },
-                    courses_data: function (Api, $location) {
-                        return Api.get_session_data().then(function(response) {
-                            return response
-                        }, function(err) {
-                            console.error(err);
-                            $location.path('/index');
-                            return { resolveError : err }
-                        });
-                    }
-                }
-            })
-            .when('/archive/:hash', {
-                templateUrl: window.app.templates.archiveSessions,
-                controller: 'ArchAttCtrl',
-                resolve: {
-                    sessions: function ($route, Api) {
-                        return Api.get_archived_sessions($route.current.params.hash).then(function(response) {
-                            return response
-                        }, function(err) {
-                            console.error(err);
-                            return { resolveError: err }
                         });
                     }
                 }
@@ -202,8 +179,9 @@
             domain: domain,
             protocol: protocol,
             ioServer: domain + (socket_port ? ':' + socket_port : ''),
-            apiServer: protocol + domain + (api_port ? ':' + api_port : '') + '/api'
+            apiServer: protocol + domain + (api_port ? ':' + api_port : '') + '/api',
         };
+        $rootScope.sessionPageRunning = false;
 
         // Preload language files
         // Use only if `allow_language_change` is true
@@ -254,14 +232,13 @@
             $scope.myProfileUrl = window.app.myProfileUrl;
             $scope.myCoursesUrl = window.app.myCoursesUrl;
 
+            $scope.gotoMainPage = function() {
+                TestSession.flush();
+                window.location.href = window.location.origin + '/';
+            };
+
             //$scope.changeLanguage();
         }]);
-
-    app.controller('HeaderController', ['$scope', '$location', function ($scope, $location) {
-        $scope.session = function () {
-            $location.path('/session');
-        };
-    }]);
 
     app.controller('WindowAlertCtrl', ['$scope', '$uibModalInstance', 'i18n', 'data',
             function ($scope, $uibModalInstance, i18n, data) {

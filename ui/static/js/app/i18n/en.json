@@ -34,7 +34,7 @@
   "TIMESTAMP": "Время",
   "TYPE": "Тип",
   "NO_COMMENTS": "За время сессии не было оставлено ни одного комментария",
-  "EXAM_ARCHIVE": "Архив сессий для",
+  "EXAM_ARCHIVE": "Архив сессий",
   "NO_SESSIONS": "Не найдено сессий студентов",
 
   "ACTIVATE": "Активировать",
@@ -99,7 +99,7 @@
   "ORG": "Университет",
   "COURSE_NUM": "Номер курса",
   "RUN": "Курс",
-  "EXAM_SESSION": "Зкзамен",
+  "EXAM_SESSION": "Экзамен",
   "NEW_SESSION": "Новая сессия",
   "BTN_PLEASE_WAIT": "Пожалуйста, подождите ...",
   "COLUMN_TESTING_CENTER": "Название сессии",
@@ -114,6 +114,7 @@
   "FINISH_DATE": "Дата окончания",
   "ADD_SESSION_COMMENT": "Прокомментировать сессию",
   "SESSION_SEARCH": "Поиск по сессии",
+  "SESSION_ARCHIVE": "Поиск по архиву",
   "STUDENT_FIO": "ФИО студента",
   "E_MAIL": "E-mail",
   "START": "Начало",
@@ -146,5 +147,10 @@
   "UNIQUE_EXAM_CODE": "Уникальный код",
   "COMMENT_TYPE": "Тип записи",
   "SHOW_ALL": "Показать все",
-  "HIDE": "Свернуть"
+  "HIDE": "Свернуть",
+  "ACTIVE_SESSION_IS_RUNNING": "В данный момент идет запущенная Вами сессия:",
+  "GOTO_ACTIVE_SESSION": "Перейти к ней ?",
+  "NOT_SET": "Не определено",
+  "PREVIOUS_BTN": "Назад",
+  "NEXT_BTN": "Вперёд"
 }

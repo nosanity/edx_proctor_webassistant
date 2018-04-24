@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from edx_proctor_webassistant.auth import CsrfExemptSessionAuthentication
 from edx_proctor_webassistant.web_soket_methods import send_notification
 from journaling.models import Journaling
-from proctoring.models import Exam, InProgressEventSession
+from proctoring.models import Exam, InProgressEventSession, EventSession
 from proctoring.serializers import ExamSerializer
 
 
@@ -94,13 +94,13 @@ class ExamViewSet(mixins.ListModelMixin,
         hash_key = self.request.query_params.get('session')
         if hash_key is not None and hash_key:
             try:
-                event = InProgressEventSession.objects.get(
+                event = EventSession.objects.get(
                     hash_key=hash_key,
                 )
                 return Exam.objects.by_user_perms(self.request.user).filter(
                     event=event
                 ).prefetch_related('comment_set')
-            except InProgressEventSession.DoesNotExist:
+            except EventSession.DoesNotExist:
                 return Exam.objects.filter(pk__lt=0).prefetch_related('comment_set')
         else:
             return []

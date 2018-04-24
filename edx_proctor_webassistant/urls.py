@@ -46,10 +46,11 @@ router.register(r'event_session', api_ui_views.EventSessionViewSet,
 router.register(r'archived_event_session',
                 api_ui_views.ArchivedEventSessionViewSet,
                 base_name="archived-event-session")
+router.register(r'archived_event_session_all',
+                api_ui_views.ArchivedEventSessionAllViewSet,
+                base_name="archived-event-session-all")
 router.register(r'journaling', JournalingViewSet,
                 base_name="journaling")
-router.register(r'archived_exam', api_ui_views.ArchivedExamViewSet,
-                base_name="archived-exam")
 router.register(r'permission', PermissionViewSet,
                 base_name="permission")
 

@@ -217,7 +217,15 @@
             this.addComments = function(codes, comment) {
                 angular.forEach(codes, function (code) {
                     var at = self.findAttempt(code);
-                    at.comments.unshift(comment);
+                    var found = false;
+                    angular.forEach(at.comments, function (c) {
+                        if (c.comment === comment.comment) {
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        at.comments.unshift(comment);
+                    }
                 });
             }
         });

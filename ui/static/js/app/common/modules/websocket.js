@@ -46,7 +46,7 @@
             sock.onclose = function () {
                 console.log("SockJS connection closed");
                 sock = null;
-                if (reconnect !== undefined && reconnect === true && !force_close) {
+                if (reconnect !== undefined && reconnect === true && !force_close && $rootScope.sessionPageRunning) {
                     setTimeout(function() {
                         if (onErrorCloseCallback) {
                             onErrorCloseCallback(function() {

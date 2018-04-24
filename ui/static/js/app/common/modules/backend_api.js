@@ -91,21 +91,19 @@
         };
 
         this.get_archived_events = function(page_size){
-            return generic_api_call({
-                'url': get_url('archived_event_session'),
-                'method': 'GET',
-                'params': {page_size: page_size ? page_size: 25}
-            })
-        };
-
-        this.get_archived_sessions = function(event_hash){
-            var promise = generic_api_call({
-                'url': get_url('archived_exam'),
-                'method': 'GET',
-                'params': {event_hash: event_hash}
-            });
-            
-            return promise;
+            if (page_size) {
+                return generic_api_call({
+                    'url': get_url('archived_event_session'),
+                    'method': 'GET',
+                    'params': {page_size: page_size}
+                });
+            } else {
+                return generic_api_call({
+                    'url': get_url('archived_event_session_all'),
+                    'method': 'GET',
+                    'params': {}
+                });
+            }
         };
 
         this.save_comment = function(attemptCodes, comment){

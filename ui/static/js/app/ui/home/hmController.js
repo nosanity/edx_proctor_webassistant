@@ -18,6 +18,7 @@
                 $scope.endDate = '';
                 if ($scope.isFinished) {
                     $scope.endDate = moment(session.end_date).format('DD.MM.YYYY HH:mm');
+                    $scope.readOnlyMode = true;
                 }
                 $scope.chosenMassAction = 'activate_all_inactive';
                 $scope.massAction = {
@@ -314,9 +315,9 @@
                         payload.desktopComments.push({
                             "comments": val.comment,
                             "duration": 1,
-                            "eventFinish": val.timestamp,
-                            "eventStart": val.timestamp,
-                            "eventStatus": val.status
+                            "eventFinish": val.event_finish,
+                            "eventStart": val.event_start,
+                            "eventStatus": val.event_status
                         });
                     });
                     return payload;
@@ -483,7 +484,7 @@
                     }
                 };
 
-                if (session) {
+                if (session && !$scope.readOnlyMode) {
                     $interval(function () {
                         $scope.session_duration = TestSession.getSessionDuration();
                     }, 1000);
@@ -497,41 +498,43 @@
                 }
 
                 // Start SockJS (websocket) connection
-                WS.init(session.course_event_id, wsData.websocket_callback, true,
-                    function(attempt, prevStatus, code, newStatus) {
-                        if (attempt.checked) {
-                            updateStatusForCheckedItems();
-                        }
-                    },
-                    function(wsCallback) {
-                        // fallback function in case if SockJS connection is failed
-                        Api.restore_session().then(function(response) {
-                            angular.forEach(response.data, function (attempt) {
-                                var item = wsData.findAttempt(attempt.examCode);
-                                if (!item) {
-                                    wsData.addNewAttempt(attempt);
-                                }
-                                if (item && item.hasOwnProperty('comments') && attempt.comments
-                                    && (item.comments.length < attempt.comments.length)) {
-                                    item.comments = attempt.comments.slice();
-                                }
-                            });
-                            if (Polling.get_attempts().length > 0) {
-                                Polling.fetch_statuses(true).then(function(response) {
-                                    angular.forEach(response.data, function (attempt) {
-                                        wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
-                                    });
-                                    wsCallback();
-                                }, function() {
-                                    wsCallback();
-                                });
-                            } else {
-                                wsCallback();
+                if (!$scope.readOnlyMode) {
+                    WS.init(session.course_event_id, wsData.websocket_callback, true,
+                        function(attempt, prevStatus, code, newStatus) {
+                            if (attempt.checked) {
+                                updateStatusForCheckedItems();
                             }
-                        }, function() {
-                            wsCallback();
-                        });
-                    }, true);
+                        },
+                        function(wsCallback) {
+                            // fallback function in case if SockJS connection is failed
+                            Api.restore_session().then(function(response) {
+                                angular.forEach(response.data, function (attempt) {
+                                    var item = wsData.findAttempt(attempt.examCode);
+                                    if (!item) {
+                                        wsData.addNewAttempt(attempt);
+                                    }
+                                    if (item && item.hasOwnProperty('comments') && attempt.comments
+                                        && (item.comments.length < attempt.comments.length)) {
+                                        item.comments = attempt.comments.slice();
+                                    }
+                                });
+                                if (Polling.get_attempts().length > 0) {
+                                    Polling.fetch_statuses(true).then(function(response) {
+                                        angular.forEach(response.data, function (attempt) {
+                                            wsData.updateAttemptStatus(attempt.code, attempt.status, attempt.updated);
+                                        });
+                                        wsCallback();
+                                    }, function() {
+                                        wsCallback();
+                                    });
+                                } else {
+                                    wsCallback();
+                                }
+                            }, function() {
+                                wsCallback();
+                            });
+                        }, true);
+                }
 
                 $scope.studentsGridOptions.data = wsData.attempts;
                 $scope.statusesCounters = wsData.counters;
@@ -605,8 +608,8 @@
                 var obj = {
                     comment: $scope.comment.message,
                     duration: 1,
-                    event_finish: timestamp,
-                    event_start: timestamp,
+                    event_finish: parseInt(timestamp / 1000),
+                    event_start: parseInt(timestamp / 1000),
                     event_type: $scope.comment.type,
                     event_status: $scope.available_statuses_dict[$scope.comment.type]
                 };

@@ -13,11 +13,11 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12 col-lg-6 mt-4">
+        <div ng-class="readOnlyMode ? 'col-md-12 col-lg-12 mt-4' : 'col-md-12 col-lg-6 mt-4'">
             <input class="form-control" type="text" placeholder="{[ i18n('SESSION_SEARCH') ]}"
                    ng-change="gridActions.filter()" filter-type="text" ng-model="searchBar" filter-by="searchField">
         </div>
-        <div class="col-md-12 col-lg-6 mt-4">
+        <div ng-class="readOnlyMode ? '' : 'col-md-12 col-lg-6 mt-4'">
             <div class="form-row" ng-if="!readOnlyMode">
                 <div class="col-sm-9">
                     <select class="form-control mb-1" ng-model="chosenMassAction"
@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-sm-3">
                     <button type="button" class="btn btn-primary float-right mb-1"
-                            ng-click="applyMassAction"
+                            ng-click="applyMassAction()"
                             ng-disabled="massAction.btnDisabled || ((chosenMassAction === 'activate_all_inactive') && (statusesCounters.created === 0)) || ((chosenMassAction !== 'activate_all_inactive') && (statusesCounters.submitted === 0))">{[ massAction.inProgress ? i18n('APPLYING') : i18n('APPLY') ]}</button>
                 </div>
             </div>

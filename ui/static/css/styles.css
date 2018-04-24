@@ -110,6 +110,61 @@ a.dropdown-item {
     vertical-align: top;
 }
 
+.grid-navigation > ul > li:first-child > a {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}
+
+.grid-navigation > ul > li:last-child > a {
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.grid-navigation > ul > li > a:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
+
+.grid-navigation > ul > li > a {
+    position: relative;
+    display: block;
+    padding: .5rem .75rem;
+    line-height: 1.25;
+    color: #007bff;
+    margin-left: -1px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    text-decoration: none;
+}
+
+.grid-navigation > ul > li > a:hover {
+    background-color: #dee2e6;
+}
+
+.grid-navigation > ul > li.active > a {
+    position: relative;
+    display: block;
+    padding: .5rem .75rem;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-left: -1px;
+    cursor: default !important;
+    background-color: #337ab7;
+    border-color: #337ab7;
+    text-decoration: none;
+}
+
+.grid-navigation > ul > li.disabled > a,
+.grid-navigation > ul > li.disabled > a:focus,
+.grid-navigation > ul > li.disabled > a:hover,
+.grid-navigation > ul > li.disabled > span,
+.grid-navigation > ul > li.disabled > span:focus,
+.grid-navigation > ul > li.disabled > span:hover {
+    color: #777;
+    cursor: not-allowed;
+    background-color: #fff;
+    border-color: #ddd;
+}
+
 /* ----- Main Block ----- */
 
 .exam-info {

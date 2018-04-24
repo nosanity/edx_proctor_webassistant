@@ -227,7 +227,6 @@ PIPELINE_JS = {
             'js/app/common/services/exam_polling.js',
             'js/app/common/services/ws_data.js',
             'js/app/common/helpers.js',
-            'js/app/ui/archive/archAttController.js',
             'js/app/ui/archive/archController.js',
             'js/app/ui/error/errController.js',
             'js/app/ui/home/hmController.js',
