@@ -150,8 +150,8 @@
                     attempt.comments = [];
                 }
 
+                addAttempt(attempt);
                 self.updateCounters(attempt);
-                addAttempt(attempt)
             };
 
             this.findAttempt = function(code) {

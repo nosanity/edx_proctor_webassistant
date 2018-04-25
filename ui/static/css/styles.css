@@ -220,8 +220,14 @@ a.dropdown-item {
     padding-right: 0.75rem;
 }
 
+.session-comment-block {
+    word-wrap: break-word;
+    max-width: 300px;
+}
+
 .exam-comment-block {
     word-wrap: break-word;
+    max-width: 200px;
 }
 
 .exam-comment-block-icon {
