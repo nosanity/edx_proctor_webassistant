@@ -239,7 +239,7 @@ class PollStatus(APIView):
                               or (exam.attempt_status == 'ready_to_submit' and new_status == 'submitted'):
                                 dt_end = datetime.now()
                                 exam.actual_end_date = dt_end
-                                data['actual_end_date'] = dt_end.isoformat()
+                                data['actual_end_date'] = dt_end.isoformat() + 'Z'
                             exam.attempt_status = new_status
                             exam.attempt_status_updated = datetime.now()
                             exam.last_poll = datetime.now()

@@ -170,7 +170,7 @@
             window.location.href = $scope.examLink;
         };
 
-        $scope.cancel = function () {
+        $scope.close = function () {
             $uibModalInstance.close();
         };
 

@@ -497,6 +497,14 @@
                     });
                 }
 
+                $scope.$on('$routeChangeStart', function($event, next, current) {
+                    if (!$scope.readOnlyMode) {
+                        WS.disconnect();
+                    }
+                    wsData.clear();
+                    TestSession.flush();
+                });
+
                 // Start SockJS (websocket) connection
                 if (!$scope.readOnlyMode) {
                     WS.init(session.course_event_id, wsData.websocket_callback, true,

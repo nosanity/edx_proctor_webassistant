@@ -7,13 +7,13 @@
     </div>
     <div class="modal-body">
         <div>{[ i18n('SESSION_ALREADY_EXISTS') ]}</div><br />
-        <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{{ exam.testing_center }}</strong></div><br />
-        <div><a href="javascript:void(0);" ng-click="ok()">{{ examLink }}</a></div>
+        <div>{[ i18n('TESTING_CENTRE') ]}: <strong>{[ exam.testing_center ]}</strong></div><br />
+        <div><a href="/session/{[ exam.hash_key ]}" ng-click="close()">{[ examLink ]}</a></div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-primary"
                 ng-click="ok()">{[ i18n('JOIN') ]}</button>
         <button type="button" class="btn btn-secondary"
-                ng-click="cancel()" data-dismiss="modal">{[ i18n('CANCEL') ]}</button>
+                ng-click="close()" data-dismiss="modal">{[ i18n('CANCEL') ]}</button>
     </div>
 </script>

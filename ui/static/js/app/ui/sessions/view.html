@@ -3,7 +3,7 @@
         <div class="col-lg-3"></div>
         <div class="col-lg-6">
             <div class="alert alert-warning" role="alert" ng-if="currentActiveSession">
-                {[ i18n('ACTIVE_SESSION_IS_RUNNING') ]}&nbsp;<strong>{[ currentActiveSession.testing_center ]}</strong>.&nbsp;<a href="javascript:void(0);" ng-click="gotoSession(currentActiveSession.hash_key)">{[ i18n('GOTO_ACTIVE_SESSION') ]}</a>
+                {[ i18n('ACTIVE_SESSION_IS_RUNNING') ]}&nbsp;<strong>{[ currentActiveSession.testing_center ]}</strong>.&nbsp;<a href="/session/{[ currentActiveSession.hash_key ]}">{[ i18n('GOTO_ACTIVE_SESSION') ]}</a>
             </div>
             <h2>{[ i18n('NEW_SESSION') ]}</h2>
             <form class="mt-4 mb-4" name="sessionForm">
@@ -82,11 +82,11 @@
                     </thead>
                     <tbody>
                         <tr grid-item>
-                            <td><a href="javascript:void(0);" ng-click="gotoSession(item.hash_key)">{[ item.testing_center ]}</a></td>
+                            <td><a href="/session/{[ item.hash_key ]}">{[ item.testing_center ]}</a></td>
                             <td>{[ item.course_name ]}</td>
                             <td>{[ item.exam_name ]}</td>
                             <td ng-bind-html="item.datetime"></td>
-                            <td>{[ item.comment ]}</td>
+                            <td><div class="session-comment-block">{[ item.comment ]}</div></td>
                         </tr>
                     </tbody>
                 </table>

@@ -35,7 +35,7 @@
                     </thead>
                     <tbody>
                         <tr grid-item>
-                            <td><a href="javascript:void(0);" ng-click="gotoSession(item.hash_key)">{[ item.testing_center ]}</a></td>
+                            <td><a href="/session/{[ item.hash_key ]}">{[ item.testing_center ]}</a></td>
                             <td>{[ item.course_name ]}</td>
                             <td>{[ item.exam_name ]}</td>
                             <td ng-bind-html="item.datetime"></td>
