@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-sm-3">
                     <button type="button" class="btn btn-primary float-right mb-1"
-                            ng-click="applyMassAction()"
+                            ng-click="applyMassAction(chosenMassAction)"
                             ng-disabled="massAction.btnDisabled || ((chosenMassAction === 'activate_all_inactive') && (statusesCounters.created === 0)) || ((chosenMassAction !== 'activate_all_inactive') && (statusesCounters.submitted === 0))">{[ massAction.inProgress ? i18n('APPLYING') : i18n('APPLY') ]}</button>
                 </div>
             </div>

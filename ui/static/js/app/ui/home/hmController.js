@@ -197,7 +197,7 @@
                     });
                 };
 
-                $scope.applyMassAction = function() {
+                $scope.applyMassAction = function(chosenAction) {
                     var selectedItems = {};
                     var found = false;
                     var onFinish = function () {
@@ -210,20 +210,20 @@
                     };
 
                     angular.forEach(wsData.attempts, function (attempt) {
-                        if ((($scope.chosenMassAction === 'activate_all_inactive') && (attempt.status === 'created'))
-                        || (($scope.chosenMassAction === 'make_verified_all_submitted') && (attempt.status === 'submitted'))
-                        || (($scope.chosenMassAction === 'make_rejected_all_submitted') && (attempt.status === 'submitted'))) {
+                        if (((chosenAction === 'activate_all_inactive') && (attempt.status === 'created'))
+                        || ((chosenAction === 'make_verified_all_submitted') && (attempt.status === 'submitted'))
+                        || ((chosenAction === 'make_rejected_all_submitted') && (attempt.status === 'submitted'))) {
                             selectedItems[attempt.code] = attempt.status;
                             found = true;
                         }
                     });
 
                     if (found) {
-                        if ($scope.chosenMassAction === 'activate_all_inactive') {
+                        if (chosenAction === 'activate_all_inactive') {
                             applyBulkAction('activate', selectedItems, onFinish, onFinish, beforeStart);
-                        } else if ($scope.chosenMassAction === 'make_verified_all_submitted') {
+                        } else if (chosenAction === 'make_verified_all_submitted') {
                             applyBulkAction('set_passed', selectedItems, onFinish, onFinish, beforeStart);
-                        } else if ($scope.chosenMassAction === 'make_rejected_all_submitted') {
+                        } else if (chosenAction === 'make_rejected_all_submitted') {
                             applyBulkAction('set_not_passed', selectedItems, onFinish, onFinish, beforeStart);
                         }
                     }
