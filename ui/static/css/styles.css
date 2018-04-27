@@ -236,6 +236,14 @@ a.dropdown-item {
     float: left;
 }
 
+.create-session-label {
+    font-weight: bold;
+}
+
+.text-red {
+    color: red;
+}
+
 /* ----- Model Window ----- */
 
 .fade.in {

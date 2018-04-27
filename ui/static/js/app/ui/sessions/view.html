@@ -1,4 +1,4 @@
-<div class="container main-block">
+<div class="container main-block" ng-if="orgDetails.length > 0">
     <div class="row">
         <div class="col-lg-3"></div>
         <div class="col-lg-6">
@@ -8,30 +8,31 @@
             <h2>{[ i18n('NEW_SESSION') ]}</h2>
             <form class="mt-4 mb-4" name="sessionForm">
               <div class="form-group">
-                <label for="orgSelector">{[ i18n('ORG') ]}</label>
+                <label for="orgSelector" class="create-session-label">{[ i18n('ORG') ]}</label>
                 <select id="orgSelector" class="form-control" ng-model="chosenOrg"
                         ng-options="o as o.name for o in orgDetails track by o.key" ng-change="updateCourses()">
                 </select>
               </div>
               <div class="form-group">
-                <label for="courseSelector">{[ i18n('COURSE_NUM') ]}</label>
+                <label for="courseSelector" class="create-session-label">{[ i18n('COURSE_NUM') ]}</label>
                 <select id="courseSelector" class="form-control" ng-model="chosenCourse"
                         ng-options="c for c in courses" ng-change="updateRuns()"></select>
               </div>
               <div class="form-group">
-                <label for="runSelector">{[ i18n('RUN') ]}</label>
+                <label for="runSelector" class="create-session-label">{[ i18n('RUN') ]}</label>
                 <select id="runSelector" class="form-control" ng-model="chosenRun"
                         ng-options="r as r.run for r in runs track by r.id" ng-change="updateSessions()"></select>
               </div>
               <div class="form-group">
-                <label for="runSession">{[ i18n('EXAM_SESSION') ]}</label>
+                <label for="runSession" class="create-session-label">{[ i18n('EXAM_SESSION') ]}</label>
                 <select id="runSession" class="form-control" ng-model="chosenExam"
                         ng-options="e as e.exam_name for e in exams track by e.id"></select>
               </div>
               <div class="form-group">
-                <label for="testCenterName">{[ i18n('TESTING_CENTRE') ]}</label>
+                <label for="testCenterName" class="create-session-label">{[ i18n('TESTING_CENTRE') ]}</label>
                 <input type="text" class="form-control" id="testCenterName" aria-describedby="testCenterHelp"
                        ng-model="testingCentre" required>
+                <small class="form-text text-red" ng-if="!testingCentre">{[ i18n('REQUIRED_FIELD') ]}</small>
                 <small id="testCenterHelp" class="form-text text-muted">{[ i18n('SESSION_NOTES') ]}</small>
               </div>
               <button type="submit" class="btn btn-success btn-block mt-4"
@@ -94,4 +95,9 @@
         </div>
     </div>
     <session-create-error></session-create-error>
+</div>
+<div class="container main-block" ng-if="orgDetails.length == 0">
+    <div class="row">
+        <div class="alert alert-danger" role="alert">{[ i18n('YOU_HAVE_NO_RIGHTS') ]}</div>
+    </div>
 </div>

@@ -156,18 +156,20 @@ STATICFILES_DIRS = (
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 BOWER_INSTALLED_APPS = (
-    'angular#1.6.9',
-    'angular-route#1.6.9',
-    'angular-animate#1.6.9',
-    'angular-sanitize#1.6.9',
+    'angular#1.6.10',
+    'angular-translate#2.17.1',
+    'angular-route#1.6.10',
+    'angular-animate#1.6.10',
+    'angular-sanitize#1.6.10',
+    'angular-cookies#1.6.10',
     'jquery#3.1.1',
     'bootstrap#4.0.0',
     'moment#2.22.0',
-    'angular-data-grid#2aab407',
+    'git://github.com/dmitry-viskov/angular-data-grid.github.io.git#25561765d263669b8fd233155ad24c32ab0a68c3',
     'angular-bootstrap#2.5.0',
-    'angular-translate#2.17.0',
-    'angular-translate-storage-local#2.17.0',
-    'angular-translate-loader-static-files#2.17.0',
+    'angular-translate-storage-local#2.17.1',
+    'angular-translate-loader-static-files#2.17.1',
+    'angular-translate-storage-cookie#2.17.1',
     'sockjs-client#1.1.4',
     'components-font-awesome#5.0.6'
 )

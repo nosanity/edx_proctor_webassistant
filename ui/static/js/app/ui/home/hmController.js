@@ -10,15 +10,14 @@
                       $uibModal, TestSession, wsData, Polling, DateTimeService, students) {
 
                 var session = TestSession.getSession();
-                $scope.readOnlyMode = false;
+
+                $scope.readOnlyMode = (session.status === "archived");
                 $scope.courseInfo = session.course_id.split('+');
                 $scope.startDate = moment(session.start_date).format('DD.MM.YYYY HH:mm');
-                $scope.isFinished = !!session.end_date;
                 $scope.endSessionBtnDisabled = false;
                 $scope.endDate = '';
-                if ($scope.isFinished) {
+                if (session.end_date) {
                     $scope.endDate = moment(session.end_date).format('DD.MM.YYYY HH:mm');
-                    $scope.readOnlyMode = true;
                 }
                 $scope.chosenMassAction = 'activate_all_inactive';
                 $scope.massAction = {

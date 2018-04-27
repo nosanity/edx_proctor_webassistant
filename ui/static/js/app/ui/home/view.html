@@ -4,8 +4,8 @@
             <h2>{[ i18n('INFORMATION_ABOUT') ]} <span class="exam-info">"{[ test_center ]}"</span></h2>
             <div ng-if="readOnlyMode"><a href="/archive">{[ i18n('GO_BACK_TO_ARCHIVE') ]}</a></div>
             <div>{[ i18n('START_DATE') ]}: {[ startDate ]}</div>
-            <div ng-if="isFinished">{[ i18n('FINISH_DATE') ]}: {[ endDate ]}</div>
-            <div ng-if="!isFinished">{[ i18n('TIME_ELAPSED') ]}: {[ session_duration ]}</div>
+            <div ng-if="readOnlyMode">{[ i18n('FINISH_DATE') ]}: {[ endDate ]}</div>
+            <div ng-if="!readOnlyMode">{[ i18n('TIME_ELAPSED') ]}: {[ session_duration ]}</div>
             <div>{[ i18n('COURSE') ]}: {[ course_name ]} ( {[ courseInfo[1] ]} / {[ courseInfo[2] ]} )</div>
             <div>{[ i18n('EXAM_SESSION') ]}: {[ exam_name ]}</div>
         </div>

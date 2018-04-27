@@ -37,7 +37,9 @@
                 if (!item) {
                     self.attempts.push(angular.copy(attempt));
                     Polling.add_item(attempt.examCode);
+                    return true;
                 }
+                return false;
             };
 
             var recievedComments = function (msg) {
@@ -150,8 +152,10 @@
                     attempt.comments = [];
                 }
 
-                addAttempt(attempt);
-                self.updateCounters(attempt);
+                var added = addAttempt(attempt);
+                if (added) {
+                    self.updateCounters(attempt);
+                }
             };
 
             this.findAttempt = function(code) {

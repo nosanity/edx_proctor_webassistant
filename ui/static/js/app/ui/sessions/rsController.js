@@ -40,20 +40,22 @@
 
         $scope.updateCourses = function() {
             var courses = [];
-            angular.forEach(data.data.results, function (val) {
-                if ((val.org === $scope.chosenOrg.key) && (courses.indexOf(val.course) === -1)
-                    && checkProctoredExams(val)) {
-                    courses.push(val.course);
+            if ($scope.orgDetails.length > 0) {
+                angular.forEach(data.data.results, function (val) {
+                    if ((val.org === $scope.chosenOrg.key) && (courses.indexOf(val.course) === -1)
+                        && checkProctoredExams(val)) {
+                        courses.push(val.course);
+                    }
+                });
+                courses.sort();
+                $scope.courses = courses;
+
+                if ($scope.courses.length > 0) {
+                    $scope.chosenCourse = $scope.courses[0];
                 }
-            });
-            courses.sort();
-            $scope.courses = courses;
 
-            if ($scope.courses.length > 0) {
-                $scope.chosenCourse = $scope.courses[0];
+                $scope.updateRuns();
             }
-
-            $scope.updateRuns();
         };
 
         $scope.updateRuns = function() {
