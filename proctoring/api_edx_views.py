@@ -36,7 +36,6 @@ class APIRoot(APIView):
             "event_session": reverse('event-session-list', request=request),
             "archived_event_session": reverse('archived-event-session-list',
                                               request=request),
-            "archived_exam": reverse('archived-exam-list', request=request),
             "permission": reverse('permission-list', request=request),
             "comment": reverse('comment', request=request),
 

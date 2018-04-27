@@ -108,13 +108,15 @@
                     $scope.errorMsg = i18n.translate('SESSION_ERROR_1');
                     $scope.startSessionInProgress = false;
                 }).then(function (data) {
-                    $scope.startSessionInProgress = false;
                     if (data) {
                         if (data.created) {
                             $location.path('/session/' + data.exam.hash_key);
                         } else {
+                            $scope.startSessionInProgress = false;
                             $scope.showSessionCreateError(data.exam);
                         }
+                    } else {
+                        $scope.startSessionInProgress = false;
                     }
             }, function () {});
         };

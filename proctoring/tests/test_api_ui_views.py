@@ -637,8 +637,9 @@ class CommentViewSetTestCase(TestCase):
             "comment": """{
                 "comment": "comment text",
                 "event_status": "Suspicious",
-                "event_start": 1521843813866,
-                "event_finish": 1521843913866,
+                "event_type": "comment",
+                "event_start": 1521843813,
+                "event_finish": 1521843913,
                 "duration": 198
             }"""
         }
