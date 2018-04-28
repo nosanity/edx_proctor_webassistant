@@ -1,4 +1,4 @@
-<div class="container main-block" ng-if="orgDetails.length > 0">
+<div class="container main-block" ng-show="orgDetails.length > 0">
     <div class="row">
         <div class="col-lg-3"></div>
         <div class="col-lg-6">
@@ -96,7 +96,7 @@
     </div>
     <session-create-error></session-create-error>
 </div>
-<div class="container main-block" ng-if="orgDetails.length == 0">
+<div class="container main-block" ng-show="orgDetails.length == 0">
     <div class="row">
         <div class="alert alert-danger alert-block-100p" role="alert">{[ i18n('YOU_HAVE_NO_RIGHTS') ]}</div>
     </div>

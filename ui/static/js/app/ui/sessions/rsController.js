@@ -40,22 +40,21 @@
 
         $scope.updateCourses = function() {
             var courses = [];
-            if ($scope.orgDetails.length > 0) {
-                angular.forEach(data.data.results, function (val) {
-                    if ((val.org === $scope.chosenOrg.key) && (courses.indexOf(val.course) === -1)
-                        && checkProctoredExams(val)) {
-                        courses.push(val.course);
-                    }
-                });
-                courses.sort();
-                $scope.courses = courses;
 
-                if ($scope.courses.length > 0) {
-                    $scope.chosenCourse = $scope.courses[0];
+            angular.forEach(data.data.results, function (val) {
+                if ((val.org === $scope.chosenOrg.key) && (courses.indexOf(val.course) === -1)
+                    && checkProctoredExams(val)) {
+                    courses.push(val.course);
                 }
+            });
+            courses.sort();
+            $scope.courses = courses;
 
-                $scope.updateRuns();
+            if ($scope.courses.length > 0) {
+                $scope.chosenCourse = $scope.courses[0];
             }
+
+            $scope.updateRuns();
         };
 
         $scope.updateRuns = function() {
@@ -149,8 +148,8 @@
             $scope.orgDetails = orgDetails;
             if ($scope.orgDetails.length > 0) {
                 $scope.chosenOrg = $scope.orgDetails[0];
+                $scope.updateCourses();
             }
-            $scope.updateCourses();
         }
 
         if (data.data.current_active_sessions !== undefined && data.data.current_active_sessions.length) {
