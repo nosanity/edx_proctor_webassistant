@@ -174,7 +174,7 @@
                                         Api.stop_exam_attempt(item.examCode, item.orgExtra.userID).then(
                                             function (data) {
                                                 if (data.data.status = 'submitted') {
-                                                    addReviewComment(item, [item.examCode]);
+                                                    addReviewComment(item, [item.examCode], true);
                                                 }
                                             }, function () {
                                                 item.btnDisabled = false;
@@ -247,7 +247,8 @@
                                 },
                                 errorCallback: function() {},
                                 statuses: $scope.statuses,
-                                readOnlyMode: $scope.readOnlyMode
+                                readOnlyMode: $scope.readOnlyMode,
+                                cancelBtnText: i18n.translate('CANCEL')
                             }
                         }
                     });
@@ -255,7 +256,7 @@
 
                 $scope.showInfo = function(examCode) {
                     var exam = wsData.findAttempt(examCode);
-                    addReviewComment(exam, [examCode]);
+                    addReviewComment(exam, [examCode], false);
                 };
 
                 $scope.expand = function(examCode, expanded) {
@@ -322,7 +323,8 @@
                     return payload;
                 };
 
-                var addReviewComment = function (exam, attemptCodes) {
+                var addReviewComment = function (exam, attemptCodes, stopAttemptsAction) {
+                    stopAttemptsAction = stopAttemptsAction || false;
                     $uibModal.open({
                         animation: true,
                         templateUrl: 'reviewContent.html',
@@ -338,7 +340,8 @@
                                 },
                                 errorCallback: function() {},
                                 statuses: $scope.statuses,
-                                readOnlyMode: $scope.readOnlyMode
+                                readOnlyMode: $scope.readOnlyMode,
+                                cancelBtnText: stopAttemptsAction ? i18n.translate('WITHOUT_COMMENTS') : i18n.translate('CANCEL')
                             }
                         }
                     });
@@ -441,7 +444,7 @@
                                                 if (onSuccessCallback) {
                                                     onSuccessCallback();
                                                 }
-                                                addReviewComment(null, lstUpdate);
+                                                addReviewComment(null, lstUpdate, true);
                                             }, function () {
                                                 wsData.setDisabled(lstUpdate, false);
                                                 showServerError();
@@ -567,6 +570,7 @@
         $scope.requestInProgress = false;
         $scope.readOnlyMode = params.readOnlyMode;
         $scope.statuses = params.statuses;
+        $scope.cancelBtnText = params.cancelBtnText;
 
         $scope.available_statuses_dict = {
             comment: i18n.translate('COMMENT'),

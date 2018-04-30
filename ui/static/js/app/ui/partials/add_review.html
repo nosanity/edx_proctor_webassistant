@@ -50,6 +50,6 @@
         <button type="button" class="btn btn-primary"
                 ng-click="ok()" ng-if="!readOnlyMode" ng-disabled="requestInProgress || !review_form.$valid">{[ requestInProgress ? i18n('SAVING') : i18n('SAVE') ]}</button>
         <button type="button" class="btn btn-secondary"
-                ng-click="cancel()" ng-disabled="requestInProgress" data-dismiss="modal">{[ readOnlyMode ? i18n('CLOSE') : i18n('CANCEL') ]}</button>
+                ng-click="cancel()" ng-disabled="requestInProgress" data-dismiss="modal">{[ readOnlyMode ? i18n('CLOSE') : cancelBtnText ]}</button>
     </div>
 </script>

@@ -133,9 +133,7 @@ def has_permission_to_course(user, course_id, permissions=None, role=None):
             permissions = permissions.filter(role=role)
         for permission in permissions:
             if permission.object_id != "*":
-                if course_data.get(
-                    permission.object_type
-                ) == permission.prepare_object_id():
+                if course_data.get(permission.object_type, '').lower() == str(permission.prepare_object_id()).lower():
                     return True
             else:
                 return True
