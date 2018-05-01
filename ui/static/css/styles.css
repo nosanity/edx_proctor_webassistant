@@ -248,6 +248,12 @@ a.dropdown-item {
     width: 100%;
 }
 
+.btn-mass-action-apply {
+    padding: .375rem .5rem;
+    width: 100%;
+    font-size: 14px;
+}
+
 /* ----- Model Window ----- */
 
 .fade.in {

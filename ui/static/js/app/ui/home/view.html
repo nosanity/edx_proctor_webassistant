@@ -14,11 +14,25 @@
         </div>
     </div>
     <div class="row">
-        <div ng-class="readOnlyMode ? 'col-md-12 col-lg-12 mt-4' : 'col-md-12 col-lg-6 mt-4'">
+        <div ng-class="readOnlyMode ? 'col-md-12 col-lg-12 mt-4' : 'col-md-12 col-lg-4 mt-4'">
             <input class="form-control" type="text" placeholder="{[ i18n('SESSION_SEARCH') ]}"
-                   ng-change="gridActions.filter()" filter-type="text" ng-model="searchBar" filter-by="searchField">
+                   ng-change="removeSelections(); gridActions.filter()" filter-type="text" ng-model="searchBar" filter-by="searchField">
         </div>
-        <div ng-class="readOnlyMode ? '' : 'col-md-12 col-lg-6 mt-4'">
+        <div ng-class="readOnlyMode ? '' : 'col-md-12 col-lg-3 mt-4'">
+            <div class="form-row" ng-show="!readOnlyMode">
+                <div class="col-sm-12">
+                    <select class="form-control mb-1"
+                            filter-by="status"
+                            filter-type="select"
+                            ng-change="removeSelections(); gridActions.filter()"
+                            ng-model="chosenViewOption">
+                        <option value="">{[ i18n('DISPLAY_ALL') ]}</option>
+                        <option value="created">{[ i18n('DISPLAY_NEW_ONLY') ]}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div ng-class="readOnlyMode ? '' : 'col-md-12 col-lg-5 mt-4'">
             <div class="form-row" ng-if="!readOnlyMode">
                 <div class="col-sm-9">
                     <select class="form-control mb-1" ng-model="chosenMassAction"
@@ -26,7 +40,7 @@
                     </select>
                 </div>
                 <div class="col-sm-3">
-                    <button type="button" class="btn btn-primary float-right mb-1"
+                    <button type="button" class="btn btn-primary btn-block btn-mass-action-apply mb-1"
                             ng-click="applyMassAction(chosenMassAction)"
                             ng-disabled="massAction.btnDisabled || ((chosenMassAction === 'activate_all_inactive') && (statusesCounters.created === 0)) || ((chosenMassAction !== 'activate_all_inactive') && (statusesCounters.submitted === 0))">{[ massAction.inProgress ? i18n('APPLYING') : i18n('APPLY') ]}</button>
                 </div>

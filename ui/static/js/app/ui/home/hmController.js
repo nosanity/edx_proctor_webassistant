@@ -34,6 +34,7 @@
                         name: i18n.translate('MAKE_REJECTED_ALL_SUBMITTED')
                     }]
                 };
+                $scope.chosenViewOption = '';
                 $scope.statuses = {
                     created: {
                         title: i18n.translate('STATUS_CREATED'),
@@ -140,10 +141,12 @@
                 };
 
                 $scope.removeSelections = function() {
-                    $scope.checkedItems.number = 0;
-                    $scope.checkedItems.items = [];
-                    wsData.removeCheckedAll();
-                    initCheckedItems();
+                    if ($scope.checkedItems.number > 0) {
+                        $scope.checkedItems.number = 0;
+                        $scope.checkedItems.items = {};
+                        wsData.removeCheckedAll();
+                        initCheckedItems();
+                    }
                 };
 
                 $scope.applyAction = function(item, actionName) {
@@ -514,6 +517,7 @@
                             if (attempt.checked) {
                                 updateStatusForCheckedItems();
                             }
+                            $scope.gridActions.refresh();
                         },
                         function(wsCallback) {
                             // fallback function in case if SockJS connection is failed

@@ -156,5 +156,7 @@
   "GO_BACK_TO_ARCHIVE": "Перейти в архив сессий",
   "REQUIRED_FIELD": "Обязательно для заполнения",
   "YOU_HAVE_NO_RIGHTS": "У Вас недостаточно прав для создания сессии",
-  "WITHOUT_COMMENTS": "Не комментировать"
+  "WITHOUT_COMMENTS": "Не комментировать",
+  "DISPLAY_ALL": "Показывать всех",
+  "DISPLAY_NEW_ONLY": "Показывать только новых"
 }
