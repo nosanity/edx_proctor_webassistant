@@ -244,9 +244,7 @@
                                 review_type: 'session',
                                 okCallback: function() {
                                     $scope.endSessionBtnDisabled = true;
-                                    WS.disconnect();
-                                    wsData.clear();
-                                    $location.path('/');
+                                    wsData.endSession();
                                 },
                                 errorCallback: function() {},
                                 statuses: $scope.statuses,

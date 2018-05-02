@@ -80,9 +80,16 @@
             angular.forEach(data.data.results, function (val) {
                 if ((val.org === $scope.chosenOrg.key) && (val.course === $scope.chosenCourse) &&
                     (val.run === $scope.chosenRun.run) && (runs.indexOf(val.run) === -1) && checkProctoredExams(val)) {
-                    $scope.exams = val.proctored_exams;
+                    $scope.exams = [];
+                    angular.forEach(val.proctored_exams, function (proctored_exam) {
+                        $scope.exams.push({
+                            id: proctored_exam.id,
+                            exam_name: proctored_exam.exam_name,
+                            exam_name_short: (proctored_exam.exam_name.length > 60) ? (proctored_exam.exam_name.substr(0, 60) + '...') : proctored_exam.exam_name
+                        })
+                    });
                     $scope.exams.sort(sortExamsArr);
-                    $scope.chosenExam = val.proctored_exams[0];
+                    $scope.chosenExam = $scope.exams[0];
                 }
             });
             $scope.errorMsg = '';

@@ -1,6 +1,6 @@
 (function(){
     angular.module('proctor')
-        .service('wsData', function($route, TestSession, DateTimeService, WS, Polling) {
+        .service('wsData', function($location, TestSession, DateTimeService, WS, Polling) {
 
             var self = this;
 
@@ -88,10 +88,10 @@
             };
 
             var endSession = function () {
-                WS.disconnect();
+                self.clear();
                 Polling.clear();
                 TestSession.flush();
-                $route.reload();
+                $location.path('/');
             };
 
             this.updateCounters = function(attempt, prevStatus) {
@@ -186,7 +186,7 @@
                     }
                     if (msg.hasOwnProperty('end_session') && msg.hasOwnProperty('session_id')) {
                         var session = TestSession.getSession();
-                        if (session.id === parseInt(msg.session_id)) {
+                        if (parseInt(session.id) === parseInt(msg.session_id)) {
                             endSession();
                         }
                     }
@@ -194,6 +194,10 @@
                         addComment(msg.exam_code, msg);
                     }
                 }
+            };
+
+            this.endSession = function () {
+                endSession();
             };
 
             this.clear = function () {

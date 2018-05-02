@@ -19,14 +19,14 @@
                         ng-options="c for c in courses" ng-change="updateRuns()"></select>
               </div>
               <div class="form-group">
-                <label for="runSelector" class="create-session-label">{[ i18n('RUN') ]}</label>
+                <label for="runSelector" class="create-session-label">{[ i18n('COURSE_SESSION') ]}</label>
                 <select id="runSelector" class="form-control" ng-model="chosenRun"
                         ng-options="r as r.run for r in runs track by r.id" ng-change="updateSessions()"></select>
               </div>
               <div class="form-group">
                 <label for="runSession" class="create-session-label">{[ i18n('EXAM_SESSION') ]}</label>
                 <select id="runSession" class="form-control" ng-model="chosenExam"
-                        ng-options="e as e.exam_name for e in exams track by e.id"></select>
+                        ng-options="e as e.exam_name_short for e in exams track by e.id"></select>
               </div>
               <div class="form-group">
                 <label for="testCenterName" class="create-session-label">{[ i18n('TESTING_CENTRE') ]}</label>
