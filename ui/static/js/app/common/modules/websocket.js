@@ -12,7 +12,7 @@
         };
 
         var init = function (course_event_id, callback, reconnect, onAttemptStatusUpdateCallback,
-                             onErrorCloseCallback, startNew) {
+                             onErrorCloseCallback, onSessionClose, startNew) {
             startNew = startNew || false;
 
             if (!course_event_id) {
@@ -35,7 +35,7 @@
             };
             sock.onmessage = function (e) {
                 try {
-                    callback(e.data, onAttemptStatusUpdateCallback);
+                    callback(e.data, onAttemptStatusUpdateCallback, onSessionClose);
                 } catch (err) {
                     console.log("SockJS onmessage error", err);
                 }
@@ -51,10 +51,11 @@
                         if (onErrorCloseCallback) {
                             onErrorCloseCallback(function() {
                                 init(course_event_id, callback, reconnect,
-                                    onAttemptStatusUpdateCallback, onErrorCloseCallback);
+                                    onAttemptStatusUpdateCallback, onErrorCloseCallback, onSessionClose);
                             });
                         } else {
-                            init(course_event_id, callback, reconnect, onAttemptStatusUpdateCallback);
+                            init(course_event_id, callback, reconnect, onAttemptStatusUpdateCallback, null,
+                                onSessionClose);
                         }
 
                     }, 3000);

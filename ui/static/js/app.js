@@ -8,6 +8,7 @@
     var app = angular.module('proctor', [
         'ngRoute',
         'ngCookies',
+        'angular-loading-bar',
         'ngAnimate',
         'ngSanitize',
         'ui.bootstrap',
@@ -113,7 +114,7 @@
                                 TestSession
                                     .fetchSession($route.current.params.hash)
                                     .then(function() {
-                                        Api.restore_session().then(function(response) {
+                                        Api.restore_session(null, true).then(function(response) {
                                             deferred.resolve(response);
                                         }, function() {
                                             deferred.resolve();
@@ -246,6 +247,9 @@
         $scope.description = data.description;
 
         $scope.close = function () {
+            if (data.okFunc) {
+                data.okFunc();
+            }
             $uibModalInstance.close();
         };
 

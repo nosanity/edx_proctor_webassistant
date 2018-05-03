@@ -87,13 +87,6 @@
                 }
             };
 
-            var endSession = function () {
-                self.clear();
-                Polling.clear();
-                TestSession.flush();
-                $location.path('/');
-            };
-
             this.updateCounters = function(attempt, prevStatus) {
                 prevStatus = prevStatus || null;
                 if (attempt.status === 'created') {
@@ -170,7 +163,7 @@
                 }
             };
 
-            this.websocket_callback = function(msg, onAttemptStatusUpdateCallback) {
+            this.websocket_callback = function(msg, onAttemptStatusUpdateCallback, onSessionClose) {
                 if (msg) {
                     if (msg.examCode) {
                         self.addNewAttempt(msg);
@@ -187,7 +180,7 @@
                     if (msg.hasOwnProperty('end_session') && msg.hasOwnProperty('session_id')) {
                         var session = TestSession.getSession();
                         if (parseInt(session.id) === parseInt(msg.session_id)) {
-                            endSession();
+                            onSessionClose();
                         }
                     }
                     if (msg.hasOwnProperty('comment') && msg.exam_code) {
@@ -197,7 +190,10 @@
             };
 
             this.endSession = function () {
-                endSession();
+                self.clear();
+                Polling.clear();
+                TestSession.flush();
+                $location.path('/');
             };
 
             this.clear = function () {

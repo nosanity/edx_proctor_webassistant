@@ -159,5 +159,7 @@
   "YOU_HAVE_NO_RIGHTS": "У Вас недостаточно прав для создания сессии",
   "WITHOUT_COMMENTS": "Не комментировать",
   "DISPLAY_ALL": "Показывать всех",
-  "DISPLAY_NEW_ONLY": "Показывать только новых"
+  "DISPLAY_NEW_ONLY": "Показывать только новых",
+  "SESSION_CLOSED": "Сессия завершена",
+  "SESSION_CLOSED_BY_OTHER_PROCTOR": "Сессия завершена другим проктором"
 }

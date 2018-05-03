@@ -545,6 +545,26 @@
                             }, function() {
                                 wsCallback();
                             });
+                        }, function() {
+                            if ($scope.isOwner) {
+                                wsData.endSession();
+                            } else {
+                                $uibModal.open({
+                                    animation: true,
+                                    templateUrl: 'windowAlert.html',
+                                    controller: 'WindowAlertCtrl',
+                                    size: 'md',
+                                    resolve: {
+                                        data: {
+                                            title: i18n.translate('SESSION_CLOSED'),
+                                            description: i18n.translate('SESSION_CLOSED_BY_OTHER_PROCTOR'),
+                                            okFunc: function() {
+                                                wsData.endSession();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         }, true);
                 }
 

@@ -162,6 +162,7 @@ BOWER_INSTALLED_APPS = (
     'angular-animate#1.6.10',
     'angular-sanitize#1.6.10',
     'angular-cookies#1.6.10',
+    'angular-loading-bar#0.9.0',
     'jquery#3.1.1',
     'bootstrap#4.0.0',
     'moment#2.22.0',
@@ -189,6 +190,7 @@ PIPELINE_CSS = {
         'source_filenames': (
             'bootstrap/dist/css/bootstrap' + FILE_POSTFIX + '.css',
             'components-font-awesome/css/fontawesome-all' + FILE_POSTFIX + '.css',
+            'angular-loading-bar/build/loading-bar' + FILE_POSTFIX + '.css',
             'css/styles.css',
         ),
         'output_filename': 'css/bundle.css',
@@ -217,6 +219,7 @@ PIPELINE_JS = {
             'angular-translate-storage-local/angular-translate-storage-local' + FILE_POSTFIX + '.js',
             'angular-translate-storage-cookie/angular-translate-storage-cookie' + FILE_POSTFIX + '.js',
             'angular-translate-loader-static-files/angular-translate-loader-static-files' + FILE_POSTFIX + '.js',
+            'angular-loading-bar/build/loading-bar' + FILE_POSTFIX + '.js',
             'sockjs-client/dist/sockjs' + FILE_POSTFIX + '.js',
             'js/app.js',
             'js/lib/checklist-model.js',

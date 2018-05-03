@@ -8,6 +8,7 @@
                 return $http({
                     url: $rootScope.apiConf.apiServer + '/event_session/',
                     method: 'POST',
+                    ignoreLoadingBar: true,
                     headers: {Authorization: "Token " + Auth.get_token()},
                     data: JSON.stringify({
                         testing_center: testing_center,
@@ -38,6 +39,7 @@
                     return $http({
                         url: $rootScope.apiConf.apiServer + '/event_session/' + Session.id + '/',
                         method: 'PATCH',
+                        ignoreLoadingBar: true,
                         headers: {Authorization: "Token " + Auth.get_token()},
                         data: JSON.stringify({
                             status: 'archived',
@@ -54,6 +56,7 @@
                 return $http({
                     url: $rootScope.apiConf.apiServer + '/event_session/',
                     method: 'GET',
+                    ignoreLoadingBar: true,
                     headers: {Authorization: "Token " + Auth.get_token()},
                     params: {'session': hash_key}
                 }).then(function(data){

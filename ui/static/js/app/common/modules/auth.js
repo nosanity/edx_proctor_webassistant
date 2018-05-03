@@ -58,7 +58,8 @@
         var get = function(){
             return $http({
                 url: $rootScope.apiConf.apiServer + '/permission/',
-                method: 'GET'
+                method: 'GET',
+                ignoreLoadingBar: false
             });
         };
 
