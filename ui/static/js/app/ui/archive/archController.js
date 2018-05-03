@@ -16,5 +16,6 @@
         };
 
         $scope.archGridOptions.data = getArchGridData(sessions.data, i18n);
+        window.scrollTo(0, 0);
     });
 })();

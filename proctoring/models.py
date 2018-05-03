@@ -275,7 +275,7 @@ class EventSession(models.Model):
         (IN_PROGRESS, _("In progress")),
         (ARCHIVED, _("Archived")),
     }
-    testing_center = models.CharField(max_length=128)
+    testing_center = models.CharField(max_length=128, verbose_name='Session name')
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     course_event_id = models.CharField(max_length=128, blank=True, null=True)
     proctor = models.ForeignKey(User, on_delete=models.CASCADE)

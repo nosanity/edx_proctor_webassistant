@@ -35,11 +35,11 @@
                     </thead>
                     <tbody>
                         <tr grid-item>
-                            <td><a href="/session/{[ item.hash_key ]}">{[ item.testing_center ]}</a></td>
-                            <td>{[ item.course_name ]}</td>
-                            <td>{[ item.exam_name ]}</td>
+                            <td><div class="grid-text-block"><a href="/session/{[ item.hash_key ]}">{[ item.testing_center ]}</a></div></td>
+                            <td><div class="grid-text-block">{[ item.course_name ]}</div></td>
+                            <td><div class="grid-text-block">{[ item.exam_name ]}</div></td>
                             <td ng-bind-html="item.datetime"></td>
-                            <td><div class="session-comment-block">{[ item.comment ]}</div></td>
+                            <td><div class="grid-text-block">{[ item.comment ]}</div></td>
                         </tr>
                     </tbody>
                 </table>

@@ -571,6 +571,7 @@
                 $scope.studentsGridOptions.data = wsData.attempts;
                 $scope.statusesCounters = wsData.counters;
                 initCheckedItems();
+                window.scrollTo(0, 0);
             }]);
 
     angular.module('proctor').controller('ReviewCtrl', function ($scope, $uibModalInstance, i18n, TestSession, Api,
