@@ -111,7 +111,7 @@ class ExamSerializer(serializers.ModelSerializer):
                                           max_length=60, allow_blank=True)
     examPassword = serializers.CharField(source='exam_password', max_length=60)
     examSponsor = serializers.CharField(source='exam_sponsor', max_length=60)
-    examName = serializers.CharField(source='exam_name', max_length=60)
+    examName = serializers.CharField(source='exam_name')
     ssiProduct = serializers.CharField(source='ssi_product', max_length=60)
     actual_start_date = serializers.DateTimeField(read_only=True)
     actual_end_date = serializers.DateTimeField(read_only=True)

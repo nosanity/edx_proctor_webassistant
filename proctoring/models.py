@@ -194,7 +194,7 @@ class Exam(models.Model):
     reviewer_notes = models.CharField(max_length=60, blank=True, null=True)
     exam_password = models.CharField(max_length=60)
     exam_sponsor = models.CharField(max_length=60)
-    exam_name = models.CharField(max_length=60)
+    exam_name = models.TextField(blank=False, null=False)
     ssi_product = models.CharField(max_length=60)
     # org extra
     exam_start_date = models.DateTimeField(blank=True, null=True)
