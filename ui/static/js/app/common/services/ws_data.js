@@ -198,6 +198,12 @@
 
             this.clear = function () {
                 this.attempts = [];
+                this.counters = {
+                    created: 0,
+                    submitted: 0,
+                    final: 0,
+                    notFinal: 0
+                };
             };
 
             this.removeCheckedAll = function () {

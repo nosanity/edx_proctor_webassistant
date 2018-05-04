@@ -505,6 +505,7 @@
                         WS.disconnect();
                     }
                     wsData.clear();
+                    Polling.clear();
                     TestSession.flush();
                 });
 
