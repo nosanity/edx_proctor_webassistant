@@ -35,9 +35,9 @@ class Journaling(models.Model):
         (EDX_API_CALL, _("Call to edX API")),
         (API_REQUESTS, _("API Request from edX")),
     ]
-    journaling_type = models.IntegerField(choices=TYPE_CHOICES, db_index=True)
+    journaling_type = models.IntegerField(choices=TYPE_CHOICES, db_index=True, verbose_name='Type')
     event = models.ForeignKey("proctoring.EventSession", blank=True, null=True,
-                              db_index=True, on_delete=models.CASCADE)
+                              db_index=True, on_delete=models.CASCADE, verbose_name='Session')
     exam = models.ForeignKey("proctoring.Exam", blank=True, null=True, db_index=True, on_delete=models.CASCADE)
     proctor = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
     note = models.TextField(blank=True, null=True)
