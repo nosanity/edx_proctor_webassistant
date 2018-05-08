@@ -631,9 +631,13 @@
                             okCallback();
                         }
                     },
-                    function () {
+                    function (response) {
                         $scope.requestInProgress = false;
-                        $scope.errorMsg = i18n.translate('SOMETHING_WRONG');
+                        if (response && (response.status === 403)) {
+                            $scope.errorMsg = i18n.translate('ATTEMPTS_ARE_ACTIVE_ERROR');
+                        } else {
+                            $scope.errorMsg = i18n.translate('SOMETHING_WRONG');
+                        }
                         if (errorCallback) {
                             errorCallback();
                         }

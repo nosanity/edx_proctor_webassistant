@@ -1,6 +1,6 @@
 (function(){
     angular.module('proctor.session', ['proctor.i18n'])
-        .service('TestSession', function($rootScope, $http, Auth, i18n, DateTimeService){
+        .service('TestSession', function($rootScope, $http, Auth, i18n, DateTimeService, $q){
             var Session = null;
 
             this.registerSession = function(testing_center, course_id, exam_id,
@@ -45,10 +45,12 @@
                             status: 'archived',
                             comment: comment
                         })
-                    }).then(function(){
+                    }).then(function() {
                         Session = null;
                         $rootScope.sessionPageRunning = false;
-                    }, function(){});
+                    }, function(response) {
+                        return $q.reject(response);
+                    });
                 }
             };
 

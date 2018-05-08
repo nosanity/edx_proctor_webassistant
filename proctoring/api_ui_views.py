@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
 
+from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import redirect
 
 from edx_proctor_webassistant.web_soket_methods import send_notification
@@ -358,6 +360,16 @@ class EventSessionViewSet(mixins.ListModelMixin,
         change_end_date = instance.status == models.EventSession.IN_PROGRESS \
                           and data.get(
             'status') == models.EventSession.ARCHIVED
+
+        if change_end_date:
+            statuses = ['created']
+            statuses.extend(settings.FINAL_ATTEMPT_STATUSES)
+            exams = models.Exam.objects.by_user_perms(self.request.user).filter(
+                event=instance
+            ).exclude(Q(attempt_status__isnull=True) | Q(attempt_status__in=statuses))
+            if len(exams) > 0:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
         if str(instance.status) != data.get('status', ''):
             Journaling.objects.create(
                 journaling_type=Journaling.EVENT_SESSION_STATUS_CHANGE,
