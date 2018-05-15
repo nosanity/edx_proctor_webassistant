@@ -108,7 +108,7 @@
                     self.counters.final++;
                 }
 
-                self.counters.notFinal = self.attempts.length - self.counters.created - self.counters.final;
+                self.counters.notFinal = self.attempts.length - self.counters.final;
             };
 
             this.addNewAttempt = function (attempt) {
