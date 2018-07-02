@@ -254,6 +254,15 @@ a.dropdown-item {
     font-size: 14px;
 }
 
+.user-sessions-block {
+    border: 1px solid;
+    padding: 10px;
+}
+
+.sessions-warning-icon {
+    padding-right: 3px;
+}
+
 /* ----- Model Window ----- */
 
 .fade.in {

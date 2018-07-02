@@ -172,7 +172,8 @@ BOWER_INSTALLED_APPS = (
     'angular-translate-loader-static-files#2.17.1',
     'angular-translate-storage-cookie#2.17.1',
     'sockjs-client#1.1.4',
-    'components-font-awesome#5.0.6'
+    'components-font-awesome#5.0.6',
+    'jgrowl#1.4.6'
 )
 
 # Pipeline
@@ -191,6 +192,7 @@ PIPELINE_CSS = {
             'bootstrap/dist/css/bootstrap' + FILE_POSTFIX + '.css',
             'components-font-awesome/css/fontawesome-all' + FILE_POSTFIX + '.css',
             'angular-loading-bar/build/loading-bar' + FILE_POSTFIX + '.css',
+            'jGrowl/jquery.jgrowl' + FILE_POSTFIX + '.css',
             'css/styles.css',
         ),
         'output_filename': 'css/bundle.css',
@@ -203,6 +205,7 @@ PIPELINE_JS = {
     'js': {
         'source_filenames': (
             'jquery/dist/jquery' + FILE_POSTFIX + '.js',
+            'jGrowl/jquery.jgrowl' + FILE_POSTFIX + '.js',
             'moment/min/moment.min.js',
             'bootstrap/dist/js/bootstrap' + FILE_POSTFIX + '.js',
             'angular/angular' + FILE_POSTFIX + '.js',
@@ -303,6 +306,7 @@ INSTRUCTOR_IS_PROCTOR = True
 
 PROJECT_NAME = 'Web Assistant'
 LOGO_NAME = 'img/epw-logo.png'  # may be URL
+SUSPICIOUS_ATTEMPT_SOUND = 'sound/warning.mp3'  # may be URL
 
 
 try:

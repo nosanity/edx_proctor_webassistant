@@ -385,7 +385,7 @@ class EventSessionViewSet(mixins.ListModelMixin,
                 'session_id': event_session.id,
                 'end_session': change_end_date
             }
-            send_notification(ws_data, channel=instance.course_event_id)
+            send_notification(ws_data, channel=instance.course_event_id, action='session_closed')
         return Response(serializer.data)
 
 
@@ -690,7 +690,7 @@ class Comment(APIView):
             except ValidationError as e:
                 return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            send_notification(serializer.data, channel=exam.event.course_event_id)
+            send_notification(serializer.data, channel=exam.event.course_event_id, action='new_comment')
 
             # comment journaling
             Journaling.objects.create(

@@ -28,6 +28,7 @@
                             ng-model="chosenViewOption">
                         <option value="">{[ i18n('DISPLAY_ALL') ]}</option>
                         <option value="created">{[ i18n('DISPLAY_NEW_ONLY') ]}</option>
+                        <option value="suspicious">{[ i18n('DISPLAY_SUSPICIOUS_ONLY') ]}</option>
                     </select>
                 </div>
             </div>
@@ -82,7 +83,7 @@
                                        ng-model="item.checked" ng-change="changeCheckbox(item)"
                                        name="examCode" ng-if="!readOnlyMode" ng-disabled="item.btnDisabled">
                             </td>
-                            <td><a href="javascript: void(0);" ng-click="showInfo(item.examCode)">{[ item.studentName ]}</a></td>
+                            <td><a href="javascript: void(0);" ng-click="showInfo(item.examCode)"><i class="fa fa-exclamation-triangle sessions-warning-icon" ng-if="item.suspicious" aria-hidden="true"></i>{[ item.studentName ]}</a></td>
                             <td>{[ item.studentEmail ]}</td>
                             <td>{[ item.started_at ]}</td>
                             <td>{[ item.finished_at ]}</td>

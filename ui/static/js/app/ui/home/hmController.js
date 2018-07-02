@@ -114,6 +114,23 @@
                     sort: {
                         predicate: 'id',
                         direction: 'asc'
+                    },
+                    customFilters: {
+                        chosenViewOption: function (items, value, predicate) {
+                            if (!value) {
+                                return items.filter(function (item) {
+                                    return true;
+                                });
+                            } else if (value === 'created') {
+                                return items.filter(function (item) {
+                                    return item[predicate] ? item[predicate] === value : true;
+                                });
+                            } else if (value === 'suspicious') {
+                                return items.filter(function (item) {
+                                    return item['suspicious'] !== undefined ? item['suspicious'] : true;
+                                });
+                            }
+                        }
                     }
                 };
 
@@ -530,6 +547,11 @@
                                         && (item.comments.length < attempt.comments.length)) {
                                         item.comments = attempt.comments.slice();
                                     }
+                                    if (item && item.hasOwnProperty('user_sessions') && attempt.user_sessions
+                                        && (item.user_sessions.length < attempt.user_sessions.length)) {
+                                        item.user_sessions = attempt.user_sessions.slice();
+                                        wsData.updateSuspiciousInfo(item);
+                                    }
                                 });
                                 if (Polling.get_attempts().length > 0) {
                                     Polling.fetch_statuses(true).then(function(response) {
@@ -582,6 +604,13 @@
         var errorCallback = params.errorCallback;
 
         $scope.exam = params.exam;
+        $scope.displaySessions = false;
+        $scope.suspicious = $scope.exam.suspicious;
+        $scope.sessionsDisplayAction = i18n.translate('DISPLAY_USER_SESSIONS');
+        if ($scope.suspicious) {
+            $scope.displaySessions = true;
+            $scope.sessionsDisplayAction = i18n.translate('HIDE_USER_SESSIONS');
+        }
 
         $scope.courseInfo = session.course_id.split('+');
         $scope.startDate = moment(session.start_date).format('DD.MM.YYYY HH:mm');
@@ -614,6 +643,16 @@
         $scope.comment = {
             type: $scope.available_statuses[0].type,
             message: ""
+        };
+
+        $scope.displaySessionsBox = function() {
+            if ($scope.displaySessions) {
+                $scope.displaySessions = false;
+                $scope.sessionsDisplayAction = i18n.translate('DISPLAY_USER_SESSIONS');
+            } else {
+                $scope.displaySessions = true;
+                $scope.sessionsDisplayAction = i18n.translate('HIDE_USER_SESSIONS');
+            }
         };
 
         $scope.ok = function () {
