@@ -1,6 +1,6 @@
 (function(){
     angular.module('proctor')
-        .service('wsData', function($location, TestSession, DateTimeService, WS, Polling) {
+        .service('wsData', function($location, TestSession, DateTimeService, WS, Polling, i18n) {
 
             var self = this;
 
@@ -32,6 +32,9 @@
                 if (!attempt.hasOwnProperty('comments')) {
                     attempt.comments = [];
                 }
+                if (!attempt.hasOwnProperty('user_sessions')) {
+                    attempt.user_sessions = [];
+                }
                 var item = self.attempts.filterBy({code: attempt.examCode});
                 item = item.length ? item[0] : null;
                 if (!item) {
@@ -40,6 +43,19 @@
                     return true;
                 }
                 return false;
+            };
+
+            var recievedUserSession = function (msg) {
+                var item = self.attempts.filterBy({code: msg.code});
+                item = item.length ? item[0] : null;
+                if (item) {
+                    var found = item.user_sessions.filterBy({timestamp: msg.data.timestamp});
+                    if (!found.length) {
+                        msg.data.datetime = moment.unix(msg.data.timestamp).format('DD.MM.YYYY HH:mm');
+                        item.user_sessions.push(msg.data);
+                        self.updateSuspiciousInfo(item);
+                    }
+                }
             };
 
             var recievedComments = function (msg) {
@@ -123,6 +139,7 @@
                     finished_at = moment(attempt.actual_end_date).format('HH:mm');
                 }
 
+                attempt.suspicious = false;
                 attempt.started_at = started_at;
                 attempt.finished_at = finished_at;
                 attempt.status_updated = attempt.attempt_status_updated ? attempt.attempt_status_updated : null;
@@ -144,6 +161,16 @@
                 if (attempt.comments == undefined) {
                     attempt.comments = [];
                 }
+                if (attempt.user_sessions == undefined) {
+                    attempt.user_sessions = [];
+                } else {
+                    angular.forEach(attempt.user_sessions, function (us, n) {
+                        attempt.user_sessions[n].datetime = moment.unix(us.timestamp).format('DD.MM.YYYY HH:mm');
+                    });
+                }
+                if (attempt.user_sessions.length > 1) {
+                    attempt.suspicious = true;
+                }
 
                 var added = addAttempt(attempt);
                 if (added) {
@@ -157,7 +184,13 @@
             };
 
             this.updateAttemptStatus = function (code, status, updated) {
-                updateStatus(code, status, updated);
+                var item = self.attempts.filterBy({code: code});
+                item = item.length ? item[0] : null;
+                var prevStatus = item ? item.status : null;
+                var upd = updateStatus(code, status, updated);
+                if (upd) {
+                    self.updateCounters(item, prevStatus);
+                }
                 if (['verified', 'error', 'rejected', 'deleted_in_edx'].in_array(status)) {
                     Polling.stop(code);
                 }
@@ -167,6 +200,10 @@
                 if (msg) {
                     if (msg.examCode) {
                         self.addNewAttempt(msg);
+                        return;
+                    }
+                    if (msg.code && msg.hasOwnProperty('action') && (msg.action === 'new_user_session')) {
+                        recievedUserSession(msg);
                         return;
                     }
                     if (msg.code && msg.hasOwnProperty('comments')) {
@@ -237,6 +274,39 @@
                         at.comments.unshift(comment);
                     }
                 });
+            };
+
+            this.updateSuspiciousInfo = function (attempt) {
+                if (attempt.user_sessions.length > 1) {
+                    attempt.suspicious = true;
+                    self.displaySuspiciousAttemptPopup(attempt);
+                }
+            };
+
+            this.displaySuspiciousAttemptPopup = function (attempt) {
+                var closeAllMsg = '<div>[ ' + i18n.translate('CLOSE_ALL') + ' ]</div>';
+                var msg = i18n.translate('SUSPICIOUS_ATTEMPT_DETECTED') + ': '
+                    + attempt.studentName + ' (' + attempt.studentEmail + ')<br /><br />';
+
+                angular.forEach(attempt.user_sessions, function (us, n) {
+                    var num = n + 1;
+                    msg += i18n.translate('SESSION_ATTEMPT') + ' ' + num + ':<br />'
+                        + us.datetime + ', ' + us.os + ', ' + us.browser
+                        + ' (IP: ' + us.ip_address + ')<br /><br />';
+                });
+                if ((Audio !== undefined) && window.app.sounds.suspiciousAttempt) {
+                    var audio = new Audio(window.app.sounds.suspiciousAttempt);
+                    audio.play();
+                }
+
+                if (closeAllMsg != $.jGrowl.defaults.closerTemplate) {
+                    $.jGrowl.defaults.closerTemplate = closeAllMsg;
+                }
+                $.jGrowl(msg, {
+                    sticky: true,
+                    position: 'bottom-right'
+                });
+
             }
         });
 })();

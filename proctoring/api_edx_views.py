@@ -83,7 +83,7 @@ class ExamViewSet(mixins.ListModelMixin,
     authentication_classes = (CsrfExemptSessionAuthentication,
                               BasicAuthentication)
     serializer_class = ExamSerializer
-    queryset = Exam.objects.all().prefetch_related('comment_set')
+    queryset = Exam.objects.all().prefetch_related('comment_set').prefetch_related('usersession_set')
 
     def get_queryset(self):
         """
@@ -98,9 +98,9 @@ class ExamViewSet(mixins.ListModelMixin,
                 )
                 return Exam.objects.by_user_perms(self.request.user).filter(
                     event=event
-                ).prefetch_related('comment_set')
+                ).prefetch_related('comment_set').prefetch_related('usersession_set')
             except EventSession.DoesNotExist:
-                return Exam.objects.filter(pk__lt=0).prefetch_related('comment_set')
+                return Exam.objects.filter(pk__lt=0).prefetch_related('comment_set').prefetch_related('usersession_set')
         else:
             return []
 
@@ -132,9 +132,10 @@ class ExamViewSet(mixins.ListModelMixin,
         data['status'] = 'created'
         data['code'] = data['examCode']
         data['comments'] = []
+        data['sessions'] = []
         ws_data = data.copy()
         ws_data.pop('examPassword', None)
-        send_notification(ws_data, channel=event.course_event_id)
+        send_notification(ws_data, channel=event.course_event_id, action='new_attempt')
         headers = self.get_success_headers(serializer.data)
         serializer.instance.event = event
         serializer.instance.save()

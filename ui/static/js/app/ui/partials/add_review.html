@@ -14,6 +14,14 @@
             <div>{[ i18n('FINISH') ]}: {[ exam.finished_at ]}</div>
             <div>{[ i18n('UNIQUE_EXAM_CODE') ]}: {[ exam.examCode ]}</div>
         </div>
+        <div ng-if="exam !== null">
+            <a href="javascript:void(0)" ng-click="displaySessionsBox()"><i class="fa fa-exclamation-triangle sessions-warning-icon" ng-if="suspicious" aria-hidden="true"></i>{[ sessionsDisplayAction ]}</a><br />
+            <div ng-show="displaySessions" class="user-sessions-block">
+                <div ng-repeat="us in exam.user_sessions">
+                   {[ i18n('SESSION_ATTEMPT') ]}&nbsp;{[ $index+1 ]}: {[ us.datetime ]}, {[ us.os ]}, {[ us.browser ]} (IP: {[ us.ip_address ]})
+                </div>
+            </div>
+        </div>
         <div ng-if="(exam === null) && (review_type === 'session')">
             <div>{[ i18n('TESTING_CENTRE') ]}: {[ test_center ]}</div>
             <div>{[ i18n('START_DATE') ]}: {[ startDate ]}</div>

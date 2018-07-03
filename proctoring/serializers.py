@@ -11,7 +11,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
-from proctoring.models import (Exam, ArchivedEventSession, Comment,
+from proctoring.models import (Exam, ArchivedEventSession, Comment, UserSession,
                                InProgressEventSession, Course,
                                has_permission_to_course)
 from person.models import Student
@@ -27,6 +27,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
+
+
+class UserSessionSerializer(serializers.ModelSerializer):
+    """
+    UserSession serializer
+    """
+    class Meta:
+        model = UserSession
         fields = '__all__'
 
 
@@ -101,8 +110,8 @@ class ExamSerializer(serializers.ModelSerializer):
         model = Exam
         fields = ('id', 'examCode', 'organization', 'duration', 'reviewedExam',
                   'reviewerNotes', 'examPassword', 'examSponsor',
-                  'examName', 'ssiProduct', 'orgExtra', 'comments', 'attempt_status', 'attempt_status_updated',
-                  'hash', 'actual_start_date', 'actual_end_date')
+                  'examName', 'ssiProduct', 'orgExtra', 'comments', 'user_sessions',
+                  'attempt_status', 'attempt_status_updated', 'hash', 'actual_start_date', 'actual_end_date')
 
     id = serializers.IntegerField(read_only=True)
     examCode = serializers.CharField(source='exam_code', max_length=60)
@@ -120,6 +129,7 @@ class ExamSerializer(serializers.ModelSerializer):
     hash = serializers.SerializerMethodField()
 
     comments = CommentSerializer(source='comment_set', many=True, read_only=True)
+    user_sessions = UserSessionSerializer(source='usersession_set', many=True, read_only=True)
     orgExtra = JSONSerializerField(
         style={'base_template': 'textarea.html'},
     )
@@ -198,6 +208,7 @@ class ArchivedExamSerializer(ExamSerializer):
     """
     course_id = serializers.CharField(source='course.display_name')
     comments = CommentSerializer(source='comment_set', many=True)
+    user_sessions = UserSessionSerializer(source='usersession_set', many=True)
     actual_start_date = None
     actual_end_date = None
 

@@ -27,6 +27,9 @@
             langs: {
                 en: "{% static 'js/app/i18n/en.json' %}"
             },
+            sounds: {
+                suspiciousAttempt: "{% if suspicious_attempt_sound_is_url %}{{ suspicious_attempt_sound }}{% else %}{% static suspicious_attempt_sound %}{% endif %}"
+            },
             templates: {
                 backdrop: "{% static 'js/app/ui/partials/modal/backdrop.html' %}",
                 window: "{% static 'js/app/ui/partials/modal/window.html' %}",

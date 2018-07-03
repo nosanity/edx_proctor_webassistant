@@ -178,7 +178,7 @@ class InProgressEventSessionAdmin(EventSessionAdmin):
             event_session.end_date = datetime.now()
             event_session.comment = _('Closed forcibly from the admin panel')
             event_session.save()
-            send_notification({'end_session': True}, channel=event_session.course_event_id)
+            send_notification({'end_session': True}, channel=event_session.course_event_id, action='session_closed')
             messages.add_message(request, messages.INFO, event_session.exam_name + ': ' + str(_('Session was closed')))
         return HttpResponseRedirect(redirect_url)
 

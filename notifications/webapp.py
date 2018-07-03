@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import logging
+import time
 import tornado.web
 import tormysql
 import pymysql
@@ -44,7 +45,7 @@ class NotificationWebApp(tornado.web.Application):
         initiator = message.get('initiator')
         if initiator:
             if initiator == 'edx.proctoring':
-                self._update_attempt_status(message)
+                self._process_edx_message(message)
             else:
                 self._notify_participants(message)
 
@@ -56,15 +57,16 @@ class NotificationWebApp(tornado.web.Application):
             self.notifications_router.notify_participants(course_event_id, message)
 
     @gen.coroutine
-    def _update_attempt_status(self, message):
+    def _process_edx_message(self, message):
         course_id = message.get('course_id')
         course_event_id = message.get('course_event_id')
         exam_code = message.get('code')
         new_status = message.get('status')
-        tm = message.get('created')
+        action = message.get('action')
+        tm = message.get('created', time.time())
         dt = datetime.fromtimestamp(tm) if tm else None
 
-        if not course_id or not exam_code or not new_status or not course_event_id:
+        if not course_id or not exam_code or not course_event_id:
             return
 
         with (yield self.db_pool.Connection()) as conn:
@@ -82,7 +84,9 @@ class NotificationWebApp(tornado.web.Application):
                 proctoring_exam = cursor.fetchone()
                 if proctoring_exam:
                     notify_participants = True
-                    if proctoring_exam['attempt_status'] != new_status and dt\
+
+                    if action == 'change_status' and new_status\
+                            and proctoring_exam['attempt_status'] != new_status and dt\
                             and (not proctoring_exam['attempt_status_updated']
                                  or dt > proctoring_exam['attempt_status_updated']):
                         data_to_update = OrderedDict()
@@ -111,6 +115,43 @@ class NotificationWebApp(tornado.web.Application):
                                         proctoring_exam['id'], proctoring_exam['attempt_status'],
                                         str(proctoring_exam['attempt_status_updated']), new_status,
                                         data_to_update['attempt_status_updated'])
+                            yield conn.commit()
+                    elif action == 'new_user_session':
+                        try:
+                            message_data = message.get('data', None)
+                            if not message_data:
+                                return
+
+                            message['data']['timestamp'] = tm
+
+                            sess_data_session_id = message_data.get('session_id', '')
+                            sess_data_user_agent = message_data.get('user_agent', '')
+                            sess_data_browser = message_data.get('browser', '')
+                            sess_data_os = message_data.get('os', '')
+                            sess_data_ip_address = message_data.get('ip_address', '')
+
+                            data_to_insert = OrderedDict([
+                                ('session_id', sess_data_session_id),
+                                ('user_agent', sess_data_user_agent),
+                                ('browser', sess_data_browser),
+                                ('os', sess_data_os),
+                                ('ip_address', sess_data_ip_address),
+                                ('timestamp', tm),
+                                ('exam_id', proctoring_exam['id']),
+                            ])
+                            sql = "INSERT INTO proctoring_usersession(session_id, user_agent, browser, os, " \
+                                  "ip_address, timestamp, exam_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                            yield cursor.execute(sql, tuple(data_to_insert.values()))
+                        except Exception as e:
+                            notify_participants = False
+                            logger.warning("Can't insert user session [exam id=%s]: %s",
+                                           proctoring_exam['id'], str(e))
+                            yield conn.rollback()
+                        else:
+                            logger.info("User session was added: session id: %s, browser: %s, os: %s,"
+                                        " IP: %s, timestamp: %s, exam_id: %s",
+                                        sess_data_session_id, sess_data_browser, sess_data_os, sess_data_ip_address,
+                                        str(tm), str(proctoring_exam['id']))
                             yield conn.commit()
 
                     if notify_participants:

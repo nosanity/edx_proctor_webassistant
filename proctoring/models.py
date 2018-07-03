@@ -407,6 +407,22 @@ class Comment(models.Model):
         ordering = ['-event_start']
 
 
+class UserSession(models.Model):
+    """
+    UserSession model
+    """
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    session_id = models.CharField(max_length=255, db_index=True)
+    user_agent = models.TextField()
+    browser = models.CharField(max_length=255)
+    os = models.CharField(max_length=255)
+    ip_address = models.CharField(max_length=255)
+    timestamp = models.IntegerField()
+
+    class Meta:
+        ordering = ['timestamp']
+
+
 class OrgDescription(models.Model):
     slug = models.CharField(max_length=255, db_index=True, verbose_name=_('slug'))
     description = models.CharField(max_length=1024, verbose_name=_('Description'))

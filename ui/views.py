@@ -51,6 +51,9 @@ class Index(View):
                 'notifications_url': settings.NOTIFICATIONS['WEB_URL'],
                 'profile_url': NpoedBackend.PROFILE_URL,
                 'spa_config': json.dumps(settings.SPA_CONFIG),
+                'suspicious_attempt_sound': settings.SUSPICIOUS_ATTEMPT_SOUND,
+                'suspicious_attempt_sound_is_url': settings.SUSPICIOUS_ATTEMPT_SOUND.startswith('http')
+                    if settings.SUSPICIOUS_ATTEMPT_SOUND else False,
             },
         )
 
