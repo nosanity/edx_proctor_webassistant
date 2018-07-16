@@ -248,8 +248,10 @@ class PollStatus(APIView):
                             if not result_in_response:
                                 send_notification(data, channel=exam.event.course_event_id)
                         if result_in_response:
+                            dt_updated = exam.attempt_status_updated.timestamp() if exam.attempt_status_updated\
+                                else None
                             result.append({'code': attempt_code, 'status': exam.attempt_status,
-                                           'updated': exam.attempt_status_updated.timestamp()})
+                                           'updated': dt_updated})
             return Response(data=result, status=status.HTTP_200_OK) if result_in_response\
                 else Response(status=status.HTTP_200_OK)
         else:

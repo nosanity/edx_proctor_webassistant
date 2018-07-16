@@ -263,6 +263,7 @@
         $scope.title = data.title;
         $scope.description = data.description;
         $scope.btnDisabled = false;
+        $scope.okBtnTitle = data.okBtnTitle ? data.okBtnTitle : i18n.translate('CONFIRM');
 
         $scope.ok = function () {
             $scope.btnDisabled = true;

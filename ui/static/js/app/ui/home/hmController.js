@@ -189,6 +189,7 @@
                                 data: {
                                     title: i18n.translate('WARNING'),
                                     description: i18n.translate('STOP_ATTEMPT'),
+                                    okBtnTitle: i18n.translate('STOP'),
                                     okFunc: function() {
                                         item.btnDisabled = true;
                                         Api.stop_exam_attempt(item.examCode, item.orgExtra.userID).then(
@@ -452,6 +453,7 @@
                                 data: {
                                     title: i18n.translate('WARNING'),
                                     description: i18n.translate('STOP_ATTEMPTS'),
+                                    okBtnTitle: i18n.translate('STOP'),
                                     okFunc: function() {
                                         if (beforeStartFunc) {
                                             beforeStartFunc();
