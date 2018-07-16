@@ -607,7 +607,7 @@
 
         $scope.exam = params.exam;
         $scope.displaySessions = false;
-        $scope.suspicious = $scope.exam.suspicious;
+        $scope.suspicious = $scope.exam ? $scope.exam.suspicious : false;
         $scope.sessionsDisplayAction = i18n.translate('DISPLAY_USER_SESSIONS');
         if ($scope.suspicious) {
             $scope.displaySessions = true;
