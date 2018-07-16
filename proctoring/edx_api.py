@@ -37,7 +37,7 @@ def stop_exam_request(_id, action, user_id):
     return _journaling_request(
         'put',
         "api/edx_proctoring/v1/proctored_exam/attempt/" + _id,
-        json.dumps({'action': action, 'user_id': user_id}),
+        json.dumps({'action': action, 'user_id': user_id, 'initiator': 'proctor'}),
         {'Content-Type': 'application/json'}
     )
 
