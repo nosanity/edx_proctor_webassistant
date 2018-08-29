@@ -34,6 +34,7 @@ class NotificationWebApp(tornado.web.Application):
             idle_seconds=7200,   # conntion idle timeout time, 0 is not timeout
             wait_connection_timeout=3,  # wait connection timeout
             host=settings['HOST'],
+            port=int(settings['PORT']),
             user=settings['USER'],
             passwd=settings['PASSWORD'],
             db=settings['NAME'],
