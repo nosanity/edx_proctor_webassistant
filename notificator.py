@@ -18,7 +18,8 @@ def main():
         raise Exception('Please set \'NOTIFICATIONS\' dict in the settings.py')
 
     logger.info('Start notifications server (Tornado Version {tornado_version})'.format(tornado_version=tornado.version))
-    server = NotificationServer(NOTIFICATIONS['SERVER_PORT'], daemon_id=NOTIFICATIONS['DAEMON_ID'],
+    server = NotificationServer(NOTIFICATIONS['BROKER_TYPE'], NOTIFICATIONS['SERVER_PORT'],
+                                daemon_id=NOTIFICATIONS['DAEMON_ID'],
                                 web_url=NOTIFICATIONS['WEB_URL'], broker_url=NOTIFICATIONS['BROKER_URL'],
                                 db_settings=DATABASES['default'], raven_dsn=RAVEN_CONFIG.get('dsn'))
     try:

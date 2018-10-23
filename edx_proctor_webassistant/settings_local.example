@@ -43,7 +43,19 @@ DATABASES = {
 
 NOTIFICATIONS = {
     "SERVER_PORT": 9090,
+    "BROKER_TYPE": "amqp",
     "BROKER_URL": "amqp://user:pass@127.0.0.1:5672/",
-    "DAEMON_ID": "1",
+#    # for redis broker
+#    "BROKER_TYPE": "redis",
+#    "BROKER_URL": "redis://127.0.0.1:16379,
+    "DAEMON_ID": 1,  # available values: 1, 2 .. 10.
+                     # Please use 1 by default.
+                     # 2, 3 and etc should be user for the second, third and etc daemons
+                     # IMPORTANT! In case of redis broker if you decide that some daemon is not needed anymore
+                     # you should remove all data from redis manually:
+                     #   >> HDEL edx.proctoring.event.daemons d_N
+                     #   >> DEL edx.proctoring.event.N
+                     # where N is DAEMON_ID
+
     "WEB_URL": "/notifications"
 }

@@ -24,6 +24,7 @@ class AMQPConsumer(object):
         URL used to connect to RabbitMQ.
 
         :param tornado.web.Application application
+        :param int daemon_id
         :param str broker_url: The AMQP url to connect with
 
         """
@@ -43,7 +44,7 @@ class AMQPConsumer(object):
         :rtype: pika.SelectConnection
 
         """
-        logger.info('Connecting to %s', self._url)
+        logger.info('Connecting to AMQP: %s', self._url)
         return adapters.TornadoConnection(pika.URLParameters(self._url),
                                           self.on_connection_open,
                                           stop_ioloop_on_close=True)
@@ -241,12 +242,14 @@ class AMQPConsumer(object):
 
         try:
             json_body = json.loads(body.decode('utf-8'))
-            if json_body:
-                if not isinstance(json_body, dict):
-                    raise ValueError('Message is not dictionary: %s' % type(json_body))
-            self._application.notify(json_body)
+            if json_body and not isinstance(json_body, dict):
+                raise ValueError('Message is not dictionary: %s' % type(json_body))
         except (ValueError, TypeError, AttributeError, KeyError):
+            json_body = None
             logger.exception("Message from AMQP isn't valid JSON or not dictionary: ", body)
+        if json_body:
+            self._application.notify(json_body)
+
 
     def on_cancelok(self, unused_frame):
         """This method is invoked by pika when RabbitMQ acknowledges the
@@ -325,7 +328,7 @@ class AMQPConsumer(object):
         connection.
 
         """
-        logger.info('Stopping')
+        logger.info('Stopping AMQP consumer')
         self._closing = True
         self.stop_consuming()
-        logger.info('Stopped')
+        logger.info('AMQP consumer is stopped')

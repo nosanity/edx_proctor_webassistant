@@ -1,10 +1,13 @@
 import logging
+import json
+import redis
 import time
 
 from celery import Celery
 from kombu import Exchange
 
 from edx_proctor_webassistant.settings import NOTIFICATIONS
+from .broker_type import BrokerType
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +15,8 @@ log = logging.getLogger(__name__)
 class ProctorNotificator(object):
     _celery_app = None
     _exchange = None
+    _redis_connection = None
+    _redis_default_queue_id = 1
 
     _exchange_name = 'edx.proctoring.event'
     _routing_key = 'edx.proctoring.event'
@@ -23,6 +28,17 @@ class ProctorNotificator(object):
 
         log.info('Publish notification: %s' % str(msg))
 
+        broker_type = NOTIFICATIONS.get('BROKER_TYPE')
+
+        if broker_type == BrokerType.AMQP:
+            cls._send_to_amqp(msg)
+        elif broker_type == BrokerType.REDIS:
+            cls._send_to_redis(msg)
+        else:
+            raise Exception('Unknown broker type: %s' % str(broker_type))
+
+    @classmethod
+    def _send_to_amqp(cls, msg):
         celery_app = cls._get_celery_app()
         with celery_app.producer_or_acquire() as producer:
             producer.publish(msg,
@@ -52,3 +68,46 @@ class ProctorNotificator(object):
         if cls._exchange is None:
             cls._exchange = Exchange(cls._exchange_name, type='fanout', durable=True)
         return cls._exchange
+
+    @classmethod
+    def _get_redis_client(cls):
+        if cls._redis_connection is None:
+            cls._redis_connection = redis.from_url(NOTIFICATIONS.get('BROKER_URL'))
+        return cls._redis_connection
+
+    @classmethod
+    def _get_redis_queues(cls):
+        queues_key = '%s.daemons' % cls._exchange_name
+        redis_conn = cls._get_redis_client()
+        queues_dict = redis_conn.hgetall(queues_key)
+        log.info('Queues in redis [key %s]: %s' % (queues_key, str(queues_dict)))
+        res = []
+        if queues_dict:
+            res = [int(v) for k, v in queues_dict.items()]
+        if cls._redis_default_queue_id not in res:
+            # always send message at least to the default queue
+            # additional check to avoid loss some messages
+            # in case if LMS is already started but notification daemon not yet
+            res.insert(0, cls._redis_default_queue_id)
+        return sorted(res)
+
+    @classmethod
+    def _send_to_redis(cls, msg):
+        max_retries = 5
+        current_attempt = 1
+
+        while True:
+            try:
+                redis_conn = cls._get_redis_client()
+                redis_queues = ['%s.%d' % (cls._exchange_name, int(queue_id))
+                                for queue_id in cls._get_redis_queues()]
+                log.info('Try to push message to the queues: %s' % str(redis_queues))
+                for queue_name in redis_queues:
+                    redis_conn.lpush(queue_name, json.dumps(msg))
+                return
+            except redis.ConnectionError:
+                if current_attempt > max_retries:
+                    raise
+                else:
+                    time.sleep(current_attempt * 2)
+                    current_attempt += 1

@@ -160,10 +160,10 @@ class NotificationWebApp(tornado.web.Application):
 
     def on_broker_connected(self):
         self.broker_connected = True
-        logger.info('AMQP borker connected')
+        logger.info('Broker connected')
 
     def on_broker_closed(self):
-        logger.info('AMQP borker closed')
+        logger.info('Broker closed')
         self.broker_connected = False
 
 

@@ -23,11 +23,16 @@ Get source from GitHub:
 git clone https://github.com/miptliot/edx_proctor_webassistant
 ```
 
-Be sure that edX RabbitMQ is available for the webassistant application:
+For the ginkgo edX version be sure that edX RabbitMQ is available for the webassistant application:
 ```
 import pika
 from pika import adapters
 adapters.TornadoConnection(pika.URLParameters('amqp://user:pass@127.0.0.1:5673/'))
+```
+
+For the hawthorn edX version be sure that edX redis server is available for the webassistant application:
+```
+telnet 127.0.0.1 16379
 ```
 
 If you are using edX through Vagrant image you may add the settings below to your `Vagrantfile`:
@@ -36,6 +41,7 @@ if not ENV['VAGRANT_NO_PORTS']
   ...
   config.vm.network :forwarded_port, guest: 15672, host: 15673    # rabbitmq web panel
   config.vm.network :forwarded_port, guest: 5672, host: 5673      # rabbitmq server
+  config.vm.network :forwarded_port, guest: 6379, host: 16379     # redis
 end
 ```
 
