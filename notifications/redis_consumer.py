@@ -38,7 +38,7 @@ class RedisConsumer(object):
     async def run(self):
         try:
             logger.info('Connecting to Redis: %s', self._url)
-            self._pool = await aioredis.create_redis_pool(self._url)
+            self._pool = await aioredis.create_redis_pool(self._url, timeout=5)
             # heartbeat is a process that check existence of queue_id in the special auxiliary variable in redis
             # in case if this variable will be removed somehow (may be manually)
             # it will be re-created by this heartbeat process
