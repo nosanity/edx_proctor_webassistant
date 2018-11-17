@@ -2,6 +2,7 @@
 
 import json
 import logging
+import tornado
 import pika
 from pika import adapters
 
@@ -46,6 +47,7 @@ class AMQPConsumer(object):
         logger.info('Connecting to %s', self._url)
         return adapters.TornadoConnection(pika.URLParameters(self._url),
                                           self.on_connection_open,
+                                          self.on_open_error_callback,
                                           stop_ioloop_on_close=True)
 
     def close_connection(self):
@@ -92,6 +94,12 @@ class AMQPConsumer(object):
         self._connection.stop_ioloop_on_close = False
         self.add_on_connection_close_callback()
         self.open_channel()
+
+    def on_open_error_callback(self, _connection_unused, error_message=None):
+        logger.info("Can't open connection. Stop daemon. Error message: " + str(error_message))
+        self._closing = True
+        self._application.on_broker_closed()
+        tornado.ioloop.IOLoop.instance().stop()
 
     def reconnect(self):
         """Will be invoked by the IOLoop timer if the connection is

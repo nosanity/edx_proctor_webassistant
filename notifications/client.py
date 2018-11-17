@@ -1,6 +1,8 @@
 import logging
 import time
 
+from amqp.exceptions import NotFound
+
 from celery import Celery
 from kombu import Exchange
 
@@ -25,17 +27,23 @@ class ProctorNotificator(object):
 
         celery_app = cls._get_celery_app()
         with celery_app.producer_or_acquire() as producer:
-            producer.publish(msg,
-                             serializer='json',
-                             exchange=cls._get_exchange(),
-                             routing_key=cls._routing_key,
-                             retry=True,
-                             retry_policy={
-                                 'interval_start': 0,  # First retry immediately,
-                                 'interval_step': 2,  # then increase by 2s for every retry.
-                                 'interval_max': 5,  # but don't exceed 5s between retries.
-                                 'max_retries': 10
-                             })
+            with celery_app.connection_or_acquire() as conn:
+                outgoing = conn.channel()
+                try:
+                    outgoing.exchange_declare(cls._exchange_name, "", passive=True)
+                    producer.publish(msg,
+                                     serializer='json',
+                                     exchange=cls._get_exchange(),
+                                     routing_key=cls._routing_key,
+                                     retry=True,
+                                     retry_policy={
+                                         'interval_start': 0,  # First retry immediately,
+                                         'interval_step': 2,  # then increase by 2s for every retry.
+                                         'interval_max': 5,  # but don't exceed 5s between retries.
+                                         'max_retries': 10
+                                     })
+                except NotFound:
+                    log.error("Can't publish message. Exchange '%s' does not exist!" % cls._exchange_name)
 
     @classmethod
     def _get_celery_app(cls):
