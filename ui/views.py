@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View
 
-from sso_auth.social_auth_backends import NpoedBackend
+from sso_auth.social_auth_backends import TpBackend
 
 
 class Index(View):
@@ -33,7 +33,7 @@ class Index(View):
         user_has_access = request.user and request.user.is_authenticated \
             and request.user.permission_set.exists()
         login_url = reverse('social:begin', args=(
-            'sso_npoed-oauth2',)) if settings.SSO_ENABLED else reverse('login')
+            'sso_tp-oauth2',)) if settings.SSO_ENABLED else reverse('login')
         if not request.user.is_authenticated and settings.SSO_ENABLED:
             return HttpResponseRedirect(login_url)
         return render(
@@ -43,13 +43,13 @@ class Index(View):
                 'user_has_access': user_has_access,
                 'sso_enabled': settings.SSO_ENABLED,
                 'project_name': settings.PROJECT_NAME,
-                'my_profile_url': settings.SSO_NPOED_URL + '/profile' if settings.SSO_ENABLED else '',
-                'my_courses_url': settings.PLP_NPOED_URL + '/my' if settings.PLP_NPOED_URL else '',
+                'my_profile_url': settings.SSO_TP_URL + '/profile' if settings.SSO_ENABLED else '',
+                'my_courses_url': settings.PLP_TP_URL + '/my' if settings.PLP_TP_URL else '',
                 'logo': settings.LOGO_NAME,
                 'logo_is_url': settings.LOGO_NAME.startswith('http') if settings.LOGO_NAME else False,
                 'login_url': login_url,
                 'notifications_url': settings.NOTIFICATIONS['WEB_URL'],
-                'profile_url': NpoedBackend.PROFILE_URL,
+                'profile_url': TpBackend.PROFILE_URL,
                 'spa_config': json.dumps(settings.SPA_CONFIG),
                 'suspicious_attempt_sound': settings.SUSPICIOUS_ATTEMPT_SOUND,
                 'suspicious_attempt_sound_is_url': settings.SUSPICIOUS_ATTEMPT_SOUND.startswith('http')
@@ -107,7 +107,7 @@ def logout(request, next_page=None,
 
     lgt(request)
 
-    response = redirect('%s?%s=%s' % (settings.SSO_NPOED_URL + "/logout",
+    response = redirect('%s?%s=%s' % (settings.SSO_TP_URL + "/logout",
                                       redirect_field_name, next_page))
     response.set_cookie('authenticated', False, domain=domain)
     response.set_cookie('authenticated_user', 'Anonymous', domain=domain)

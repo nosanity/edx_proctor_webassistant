@@ -6,7 +6,7 @@ SECRET_KEY = '<SECRET_KEY>'
 BOWER_PATH = '/usr/local/bin/bower'
 
 # Credatials for authorization using SSO
-SSO_NPOED_URL = "http://sso.example.com"
+SSO_TP_URL = "http://sso.example.com"
 SSO_PWA_URL = "http://sso.example.com"
 SOCIAL_AUTH_SSO_PWA_OAUTH2_KEY = '<OAUTH_KEY>'
 SOCIAL_AUTH_SSO_PWA_OAUTH2_SECRET = '<OAUTH_SECRET>'

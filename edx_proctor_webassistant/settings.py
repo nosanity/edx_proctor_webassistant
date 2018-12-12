@@ -119,11 +119,11 @@ LOCALE_PATHS = (
 LOGIN_URL = LOGIN_REDIRECT_URL = LOGOUT_REDIRECT_URL = "/"
 
 # Auth settings with/without sso
-AUTH_BACKEND_NAME = 'sso_npoed-oauth2'
+AUTH_BACKEND_NAME = 'sso_tp-oauth2'
 SSO_ENABLED = True
 
-SSO_NPOED_URL = ''
-PLP_NPOED_URL = ''
+SSO_TP_URL = ''
+PLP_TP_URL = ''
 
 if SSO_ENABLED:
     TEMPLATES[0]['OPTIONS']['context_processors'] += [

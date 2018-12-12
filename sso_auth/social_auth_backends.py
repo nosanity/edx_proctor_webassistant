@@ -11,16 +11,16 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
-class NpoedBackend(BaseOAuth2):
+class TpBackend(BaseOAuth2):
     """
     Backend for authentication usin OAuth2
     """
     name = settings.AUTH_BACKEND_NAME
     ID_KEY = 'username'
-    AUTHORIZATION_URL = '{}/oauth2/authorize'.format(settings.SSO_NPOED_URL)
-    ACCESS_TOKEN_URL = '{}/oauth2/access_token'.format(settings.SSO_NPOED_URL)
+    AUTHORIZATION_URL = '{}/oauth2/authorize'.format(settings.SSO_TP_URL)
+    ACCESS_TOKEN_URL = '{}/oauth2/access_token'.format(settings.SSO_TP_URL)
     USER_DATA_URL = '{url}/oauth2/access_token/{access_token}/'
-    PROFILE_URL = '{}/users/me'.format(settings.SSO_NPOED_URL)
+    PROFILE_URL = '{}/users/me'.format(settings.SSO_TP_URL)
     DEFAULT_SCOPE = []
     REDIRECT_STATE = False
     ACCESS_TOKEN_METHOD = 'POST'
@@ -33,7 +33,7 @@ class NpoedBackend(BaseOAuth2):
         or register form on sso-provider.
         """
         return '{}&auth_entry={}'.format(
-            super(NpoedBackend, self).auth_url(),
+            super(TpBackend, self).auth_url(),
             self.data.get('auth_entry', 'login')
         )
 
@@ -44,7 +44,7 @@ class NpoedBackend(BaseOAuth2):
                                          self.data.get('state'))
         next_url = getattr(settings, 'SOCIAL_NEXT_URL', '/home')
         self.strategy.session.setdefault('next', next_url)
-        return super(NpoedBackend, self).auth_complete(*args, **kwargs)
+        return super(TpBackend, self).auth_complete(*args, **kwargs)
 
     def get_user_details(self, response):
         """ Return user details from SSO account. """
