@@ -1,0 +1,34 @@
+{
+  "name": "components",
+  "homepage": "https://github.com/miptliot/edx_proctor_webassistant",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "1.6.10",
+    "angular-translate": "2.17.1",
+    "angular-route": "1.6.10",
+    "angular-animate": "1.6.10",
+    "angular-sanitize": "1.6.10",
+    "angular-cookies": "1.6.10",
+    "angular-loading-bar": "0.9.0",
+    "jquery": "3.1.1",
+    "bootstrap": "4.0.0",
+    "moment": "2.22.0",
+    "angular-bootstrap": "2.5.0",
+    "angular-translate-storage-local": "2.17.1",
+    "angular-translate-loader-static-files": "2.17.1",
+    "angular-translate-storage-cookie": "2.17.1",
+    "sockjs-client": "1.1.4",
+    "components-font-awesome": "5.0.6",
+    "jGrowl": "jgrowl#1.4.6",
+    "angular-data-grid": "git://github.com/dmitry-viskov/angular-data-grid.github.io.git#25561765d263669b8fd233155ad24c32ab0a68c3"
+  }
+}
