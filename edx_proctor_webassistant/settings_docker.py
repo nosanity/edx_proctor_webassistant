@@ -68,3 +68,7 @@ if RAVEN_DSN:
         RAVEN_CLIENT = Client(**RAVEN_CONFIG)
     except ImportError:
         print("Couldn't enable Raven. Exception will not be sent to Sentry")
+
+SUPERUSER_USERNAME = os.getenv('SUPERUSER_USERNAME', 'admin')
+SUPERUSER_EMAIL = os.getenv('SUPERUSER_EMAIL', 'admin@{}'.format(AUTH_SESSION_COOKIE_DOMAIN.strip('.')))
+SUPERUSER_PASSWORD = os.getenv('SUPERUSER_PASSWORD')
