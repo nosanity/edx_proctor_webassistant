@@ -63,7 +63,6 @@ if RAVEN_DSN:
         RAVEN_CONFIG = {
             'dsn': RAVEN_DSN,
             'transport': RequestsHTTPTransport,
-
         }
         RAVEN_CLIENT = Client(**RAVEN_CONFIG)
     except ImportError:

@@ -312,8 +312,10 @@ SUSPICIOUS_ATTEMPT_SOUND = 'sound/warning.mp3'  # may be URL
 try:
     from .settings_local import *
 except ImportError:
-    print("CRITICAL: You must specify settings_local.py")
-    exit()
+    print("You use DOCKER_ENV (because settings_local.py not specify")
+    from .settings_docker import *    
+#    exit()
+
 
 INSTALLED_APPS = INSTALLED_APPS + (
     'raven.contrib.django.raven_compat',

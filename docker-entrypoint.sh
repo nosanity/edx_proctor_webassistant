@@ -16,6 +16,7 @@ if $MIGRATION ; then
     echo "start  Build static and localization"
     ./manage.py migrate
     ./manage.py collectstatic
+    ./manage.py create_admin_user
 fi
 
 exec "$@"
