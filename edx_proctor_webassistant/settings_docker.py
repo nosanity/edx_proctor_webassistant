@@ -8,23 +8,26 @@ import os
 DEBUG = str(os.getenv('DEBUG', False))
 PIPELINE_ENABLED = False
 
-SECRET_KEY = os.getenv('SECRET_KEY', '__DEFINE_ME__')
+if os.getenv('SECRET_KEY'):
+    SECRET_KEY = os.getenv('SECRET_KEY', '__DEFINE_ME__')
 
 BOWER_PATH = '/usr/lib/node_modules/bower/bin/bower'
 PIPELINE_YUGLIFY_BINARY = '/edx/app/epw/node_modules/.bin/yuglify'
 
 STATIC_ROOT = os.getenv('STATIC_ROOT', '/opt/static')
 
-SSO_TP_URL = os.getenv( 'SSO_TP_URL', '__DEFINE_ME__')
+PLATFORM_BASE_DOMAIN = os.getenv('PLATFORM_BASE_DOMAIN', 'example.com')
+PLATFORM_SCHEME = os.getenv('PLATFORM_SCHEME', 'https')
+SSO_TP_URL = os.getenv( 'SSO_TP_URL', '{}://{}.{}'.format(PLATFORM_SCHEME, os.getenv('SUB_DOMAIN_SSO', 'sso'), PLATFORM_BASE_DOMAIN))
 SSO_PWA_URL = SSO_TP_URL
 SOCIAL_AUTH_SSO_TP_OAUTH2_KEY = os.getenv('SOCIAL_AUTH_SSO_TP_OAUTH2_KEY', '__DEFINE_ME__')
 SOCIAL_AUTH_SSO_TP_OAUTH2_SECRET = os.getenv('SOCIAL_AUTH_SSO_TP_OAUTH2_SECRET', '__DEFINE_ME__')
 REDIRECT_IS_HTTPS = str(os.getenv('REDIRECT_IS_HTTPS', False))
 
-EDX_URL = os.getenv('EDX_URL', '__DEFINE_ME__')
+EDX_URL = os.getenv('EDX_URL', '{}://{}.{}'.format(PLATFORM_SCHEME, os.getenv('SUB_DOMAIN_LMS', 'courses'), PLATFORM_BASE_DOMAIN))
 EDX_API_KEY = os.getenv('EDX_API_KEY', '__DEFINE_ME__')
 
-AUTH_SESSION_COOKIE_DOMAIN = os.getenv('AUTH_SESSION_COOKIE_DOMAIN', '__DEFINE_ME__')
+AUTH_SESSION_COOKIE_DOMAIN = os.getenv('AUTH_SESSION_COOKIE_DOMAIN', '.{}'.format(PLATFORM_BASE_DOMAIN))
 
 GRAPPELLI_ADMIN_TITLE = os.getenv('GRAPPELLI_ADMIN_TITLE', 'Webassistant')
 
@@ -43,7 +46,7 @@ DATABASES = {
 
 NOTIFICATIONS = {
     "SERVER_PORT": int(os.getenv("SERVER_PORT", 8137)),
-    "BROKER_URL": os.getenv('BROKER_URL', 'amqp://epw:epw@rabbitmq:5672/'),
+    "BROKER_URL": os.getenv('BROKER_URL', 'amqp://epw:{}@rabbitmq:5672/'.format(os.getenv('EPW_BROKER_PASSWORD', 'epw'))),
     "DAEMON_ID": "1",
     "WEB_URL": "/notifications"
 }
@@ -71,3 +74,4 @@ if RAVEN_DSN:
 SUPERUSER_USERNAME = os.getenv('SUPERUSER_USERNAME', 'admin')
 SUPERUSER_EMAIL = os.getenv('SUPERUSER_EMAIL', 'admin@{}'.format(AUTH_SESSION_COOKIE_DOMAIN.strip('.')))
 SUPERUSER_PASSWORD = os.getenv('SUPERUSER_PASSWORD')
+
